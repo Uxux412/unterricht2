@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Risiko-Begleiter</title>
+<meta name="description" content="Würfeln, Truppen- und Kartenrechner und alle Regeln für das Brettspiel Risiko.">
+<meta name="theme-color" content="#ece6d8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1b1916" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Risiko">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: oben Titel und vier Reiter (Würfeln, Truppen, Karten, Regeln), darunter jeweils ein einzelner Rechner */
+:root{
+  --bg:#ece6d8;--panel:#f8f4ea;--sunk:#e2dac6;--fg:#2a2620;--muted:#6b6354;--line:#d3c9b3;
+  --att:#b3261e;--att-soft:#f3d9d6;--def:#1f4e8c;--def-soft:#d8e3f2;
+  --die:#fffdf7;--pip:#2a2620;--ok:#2e6b34;--warn:#a63d12;--ring:rgba(42,38,32,.25);
+  --display:"Alfa Slab One",Rockwell,"Roboto Slab",Georgia,serif;
+  --body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1b1916;--panel:#26231f;--sunk:#322d27;--fg:#efe9dc;--muted:#a59c8a;--line:#3c372f;
+  --att:#e5675e;--att-soft:#3d2422;--def:#6e9de0;--def-soft:#1f2b3d;
+  --die:#f4efe3;--pip:#1b1916;--ok:#7cc285;--warn:#f0925f;--ring:rgba(0,0,0,.5);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1b1916;--panel:#26231f;--sunk:#322d27;--fg:#efe9dc;--muted:#a59c8a;--line:#3c372f;
+  --att:#e5675e;--att-soft:#3d2422;--def:#6e9de0;--def-soft:#1f2b3d;
+  --die:#f4efe3;--pip:#1b1916;--ok:#7cc285;--warn:#f0925f;--ring:rgba(0,0,0,.5);color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.4;-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button{font:inherit;color:inherit}
+button:disabled{opacity:.4;cursor:not-allowed}
+p{margin:0}
+.in{max-width:540px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{padding-block:12px 10px;display:flex;flex-direction:column;gap:10px}
+h1{font-family:var(--display);font-weight:400;font-size:1.45rem;margin:0;line-height:1.1}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;background:var(--sunk);padding:4px;border-radius:12px}
+.tabs button{font-weight:700;font-size:.95rem;padding:10px 2px;border:0;border-radius:9px;background:transparent;color:var(--muted);cursor:pointer;min-width:0}
+.tabs button[aria-selected="true"]{background:var(--panel);color:var(--fg);box-shadow:0 1px 3px var(--ring)}
+main.in{padding-block:16px 48px}
+.panel{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px}
+h2{font-family:var(--display);font-weight:400;font-size:1.25rem;margin:0;text-wrap:balance}
+h3{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px}
+.row{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap}
+.step{display:flex;align-items:center;gap:6px}
+.step button{width:46px;height:46px;border-radius:10px;border:1px solid var(--line);background:var(--sunk);font-size:1.5rem;font-weight:700;cursor:pointer;line-height:1}
+.step input,.step output{width:64px;height:46px;text-align:center;font-family:inherit;font-size:1.4rem;font-weight:700;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg);font-variant-numeric:tabular-nums;display:flex;align-items:center;justify-content:center}
+.note{color:var(--muted);font-size:.93rem}
+.warn{color:var(--warn);font-weight:600}
+.okt{color:var(--ok);font-weight:700}
+.big{font-weight:700;font-size:1.08rem}
+.total{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;border-top:1px dashed var(--line);padding-top:14px}
+.total .num{font-family:var(--display);font-size:3rem;line-height:1;font-variant-numeric:tabular-nums}
+.toggles{display:flex;flex-wrap:wrap;gap:6px}
+.tg{font-size:.95rem;padding:9px 12px;border-radius:9px;border:1px solid var(--line);background:var(--bg);cursor:pointer;text-align:left}
+.tg small{color:var(--muted);margin-left:6px}
+.tg[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.tg[aria-pressed="true"] small{color:inherit;opacity:.7}
+.primary{font-weight:700;font-size:1.1rem;padding:14px;border-radius:12px;border:0;background:var(--fg);color:var(--bg);cursor:pointer;width:100%}
+.go{font-family:var(--display);font-weight:400;font-size:1.5rem;padding:16px}
+.secondary{font-weight:600;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);cursor:pointer}
+.btns{display:flex;flex-direction:column;gap:8px}
+.btns>button{width:100%}
+/* Würfeln */
+.side{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;border-left:6px solid var(--c)}
+.side.att{--c:var(--att);--soft:var(--att-soft)}
+.side.def{--c:var(--def);--soft:var(--def-soft)}
+.head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.lbl{font-family:var(--display);color:var(--c);font-size:1.15rem}
+.hint{color:var(--muted);font-size:.9rem}
+.side .step button{background:var(--soft);color:var(--c)}
+.pickwrap{display:flex;align-items:center;gap:8px}
+.pickwrap>span{font-weight:600;color:var(--muted)}
+.pick{display:flex;gap:6px}
+.pick button{min-width:40px;height:38px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-weight:700;cursor:pointer}
+.pick button.sel{background:var(--c);color:var(--panel);border-color:var(--c)}
+.dice{display:flex;gap:10px;flex-wrap:wrap}
+.dice:empty{display:none}
+.die{width:54px;height:54px;border-radius:11px;background:var(--die);border:2px solid var(--c);display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:7px}
+.die i{width:10px;height:10px;border-radius:50%;background:var(--pip);place-self:center;visibility:hidden}
+.die i.on{visibility:visible}
+.die.lost{opacity:.35}
+.die.unused{opacity:.35;border-style:dashed}
+.die.roll{animation:r .35s ease-out}
+@keyframes r{from{transform:rotate(-25deg) scale(.7)}to{transform:none}}
+.res{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.res ul{margin:0;padding-left:20px}
+.mv{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:12px}
+.mv .step button{background:var(--att-soft);color:var(--att)}
+/* Karten */
+.ladder{display:flex;flex-wrap:wrap;gap:5px;font-variant-numeric:tabular-nums}
+.ladder span{min-width:40px;text-align:center;padding:5px 7px;border-radius:8px;border:1px solid var(--line);font-weight:700}
+.ladder .past{opacity:.4;text-decoration:line-through}
+.ladder .next{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.rl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.rules h3{margin:4px 0 6px}
+.rules section{display:flex;flex-direction:column}
+:focus-visible{outline:3px solid var(--def);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.die.roll{animation:none}}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="in">
+  <h1>Risiko-Begleiter</h1>
+  <nav class="tabs" role="tablist" aria-label="Rechner">
+    <button role="tab" id="t-wuerfeln" data-tab="wuerfeln" aria-controls="p-wuerfeln" aria-selected="true">Würfeln</button>
+    <button role="tab" id="t-truppen" data-tab="truppen" aria-controls="p-truppen" aria-selected="false">Truppen</button>
+    <button role="tab" id="t-karten" data-tab="karten" aria-controls="p-karten" aria-selected="false">Karten</button>
+    <button role="tab" id="t-regeln" data-tab="regeln" aria-controls="p-regeln" aria-selected="false">Regeln</button>
+  </nav>
+</div></header>
+
+<main class="in">
+
+<!-- Würfeln -->
+<section class="panel" id="p-wuerfeln" role="tabpanel" aria-labelledby="t-wuerfeln">
+  <div class="side att">
+    <div class="head"><span class="lbl">Angreifer</span><span class="hint">Armeen im Land</span></div>
+    <div class="row">
+      <div class="step"><button data-t="a" data-d="-1" aria-label="Angreifer weniger">−</button><input id="a" type="number" min="1" step="1" inputmode="numeric" placeholder="?" aria-label="Armeen Angreifer"><button data-t="a" data-d="1" aria-label="Angreifer mehr">+</button></div>
+      <div class="pickwrap"><span>Würfel</span><div class="pick" id="pa"></div></div>
+    </div>
+    <div class="dice" id="da"></div>
+  </div>
+  <div class="side def">
+    <div class="head"><span class="lbl">Verteidiger</span><span class="hint">Armeen im Land</span></div>
+    <div class="row">
+      <div class="step"><button data-t="d" data-d="-1" aria-label="Verteidiger weniger">−</button><input id="d" type="number" min="0" step="1" inputmode="numeric" placeholder="?" aria-label="Armeen Verteidiger"><button data-t="d" data-d="1" aria-label="Verteidiger mehr">+</button></div>
+      <div class="pickwrap"><span>Würfel</span><div class="pick" id="pd"></div></div>
+    </div>
+    <div class="dice" id="dd"></div>
+  </div>
+  <button class="primary go" id="go">Würfeln</button>
+  <p class="warn" id="why" hidden></p>
+  <div class="res" id="res" aria-live="polite"></div>
+  <button class="secondary" id="clr">Felder leeren</button>
+</section>
+
+<!-- Truppen -->
+<section class="panel" id="p-truppen" role="tabpanel" aria-labelledby="t-truppen" hidden>
+  <div class="card">
+    <h2>Wie viele Armeen bekomme ich?</h2>
+    <div><h3>Deine Länder</h3>
+      <div class="row"><div class="step"><button data-t="l" data-d="-1" aria-label="Weniger Länder">−</button><input id="l" type="number" min="0" step="1" inputmode="numeric" value="14" aria-label="Anzahl deiner Länder"><button data-t="l" data-d="1" aria-label="Mehr Länder">+</button></div><span class="note" id="ldiv"></span></div>
+    </div>
+    <div><h3>Ganze Kontinente</h3><div class="toggles" id="conts"></div><p class="note" style="margin-top:8px">Nur antippen, wenn dir der Kontinent komplett gehört. Den Bonus gibt es jeden Zug neu, solange er dir gehört.</p></div>
+    <div class="total"><span class="num" id="ttot">4</span><span class="big">Armeen</span></div>
+    <p class="note" id="tbr"></p>
+    <p class="note">Tauschst du Karten ein, kommen die Armeen aus „Karten“ noch dazu.</p>
+  </div>
+</section>
+
+<!-- Karten -->
+<section class="panel" id="p-karten" role="tabpanel" aria-labelledby="t-karten" hidden>
+  <div class="card">
+    <h2>Was bringt das nächste Set?</h2>
+    <div><h3>Sets im Spiel schon getauscht · alle zusammen</h3>
+      <div class="row"><div class="step"><button data-t="s" data-d="-1" aria-label="Ein Set weniger">−</button><output id="s">0</output><button data-t="s" data-d="1" aria-label="Ein Set mehr">+</button></div></div>
+    </div>
+    <div class="total"><span class="num" id="nx">4</span><span class="big">Armeen</span></div>
+    <div class="ladder" id="ladder" aria-label="Kartenleiter"></div>
+    <button class="primary" id="trade">Set getauscht</button>
+    <p class="okt" id="tmsg" hidden></p>
+  </div>
+  <div class="card">
+    <h2>Karten ziehen und tauschen</h2>
+    <ul class="rl">
+      <li><b>Ziehen:</b> Hast du in deinem Zug mindestens 1 Land erobert, ziehst du am Ende 1 Karte. Nie mehr als 1 pro Zug.</li>
+      <li><b>Passend</b> sind 3 gleiche Bilder, 3 verschiedene oder 2 Karten + Joker.</li>
+      <li><b>Tauschen</b> nur zu Beginn deines Zugs. Die 3 Karten kommen unter den Stapel, die Armeen aus der Schachtel.</li>
+      <li><b>Pflicht:</b> Wer zu Beginn seines Zugs 5 Karten hat, muss tauschen. Bei 5 Karten passt immer ein Set.</li>
+      <li><b>+2:</b> Zeigt eine getauschte Karte ein Land, das dir gehört, kommen 2 Armeen genau dorthin.</li>
+      <li><b>Rauswurf:</b> Wirfst du jemanden raus, bekommst du seine Karten. Hast du dann 6 oder mehr, tauschst du sofort, bis du höchstens 4 hast.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- Regeln -->
+<section class="panel rules" id="p-regeln" role="tabpanel" aria-labelledby="t-regeln" hidden>
+  <div class="card"><section><h3>Ziel</h3><ul class="rl">
+    <li>Erfülle deinen geheimen Auftrag. Dann zeigst du die Karte und hast gewonnen.</li>
+    <li>Steht „Vernichte Farbe X“ drauf und spielt X nicht mit, bist du selbst X oder wirft jemand anderes X raus: Dann musst du stattdessen <b>24 Länder</b> erobern.</li>
+  </ul></section></div>
+  <div class="card"><section><h3>1 · Verstärken</h3><ul class="rl">
+    <li>Länder ÷ 3, abgerundet. Mindestens 3 Armeen.</li>
+    <li>Ganzer Kontinent: Asien +7, Europa +5, Nordamerika +5, Afrika +3, Südamerika +2, Australien +2.</li>
+    <li>Den Kontinent-Bonus gibt es zu Beginn <b>jedes</b> Zugs neu, solange dir der Kontinent komplett gehört. Karten gibt es dafür keine.</li>
+    <li>Karten tauschen geht nur jetzt.</li>
+    <li>Neue Armeen darfst du auf jedes eigene Land stellen.</li>
+  </ul></section></div>
+  <div class="card"><section><h3>2 · Angreifen</h3><ul class="rl">
+    <li>Nur Nachbarländer. Linien über das Meer zählen mit.</li>
+    <li>Im Land müssen mindestens 2 Armeen stehen. 1 bleibt immer zurück.</li>
+    <li>Angreifer: 2 Armeen → 1 Würfel, 3 Armeen → 2 Würfel, ab 4 Armeen → 3 Würfel.</li>
+    <li>Verteidiger: 1 Armee → 1 Würfel, ab 2 Armeen → 2 Würfel. Weniger Würfel darf jeder nehmen.</li>
+    <li>Höchster gegen höchsten, zweithöchster gegen zweithöchsten. Wer niedriger liegt, verliert 1 Armee. <b>Gleichstand: Der Verteidiger gewinnt.</b></li>
+    <li>Verlorene Armeen kommen zurück in die Schachtel.</li>
+    <li>Land leer: erobert. Zieh mindestens so viele Armeen hinein, wie du zuletzt Würfel hattest.</li>
+    <li>Angreifen, so oft du willst.</li>
+  </ul></section></div>
+  <div class="card"><section><h3>3 · Verschieben</h3><ul class="rl">
+    <li>Einmal pro Zug von einem eigenen Land in ein angrenzendes eigenes Land.</li>
+    <li>Beispiel: Siam → Indonesien geht. Siam → Neuguinea geht nicht.</li>
+    <li>1 Armee bleibt immer stehen.</li>
+  </ul></section></div>
+  <div class="card"><section><h3>4 · Karte</h3><ul class="rl">
+    <li>Mindestens 1 Land erobert: 1 Karte ziehen. Alles Weitere unter „Karten“.</li>
+  </ul></section></div>
+  <div class="card"><section><h3>Figuren</h3><ul class="rl">
+    <li>Dreieck = 1, Viereck = 5, Fünfeck = 10 Armeen. Das sind die üblichen Werte, im Zweifel in der Schachtel nachsehen.</li>
+  </ul></section></div>
+</section>
+
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+const CONT=[{k:'as',n:'Asien',b:7,l:12},{k:'na',n:'Nordamerika',b:5,l:9},{k:'eu',n:'Europa',b:5,l:7},{k:'af',n:'Afrika',b:3,l:6},{k:'sa',n:'Südamerika',b:2,l:4},{k:'au',n:'Australien',b:2,l:4}];
+const KEY='risiko-begleiter-v2';
+const arm=n=>n===1?'1 Armee':n+' Armeen';
+const setVal=k=>k<6?[4,6,8,10,12,15][k]:15+5*(k-5);
+const num=id=>{const v=parseInt($(id).value,10);return isNaN(v)?null:v};
+
+/* Speichern (nur Reiter und Kartenzähler) */
+let store={tab:'wuerfeln',sets:0};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&typeof s==='object')store=Object.assign(store,s)}catch(_){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(_){}};
+
+/* Reiter */
+function showTab(t){
+  document.querySelectorAll('[data-tab]').forEach(b=>{const on=b.dataset.tab===t;b.setAttribute('aria-selected',on);$('p-'+b.dataset.tab).hidden=!on});
+  store.tab=t;save();
+}
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+
+/* ---------- Würfeln ---------- */
+let nA=null,nD=null,mv=null;
+const maxA=()=>{const a=num('a');return a===null?0:Math.min(3,Math.max(0,a-1))};
+const maxD=()=>{const d=num('d');return d===null?0:Math.min(2,Math.max(0,d))};
+const useA=()=>nA&&nA<=maxA()?nA:maxA();
+const useD=()=>nD&&nD<=maxD()?nD:maxD();
+const START='<div class="big">Armeen eingeben, dann würfeln.</div><p class="note">Die Würfelzahl wird automatisch auf das Maximum gesetzt. Weniger Würfel kannst du vor dem Wurf antippen.</p>';
+function why(){
+  const a=num('a'),d=num('d');
+  if(mv)return 'Erst Armeen ins eroberte Land ziehen (unten).';
+  if(a===null||d===null)return 'Gib beide Armeezahlen ein.';
+  if(a<2)return 'Angriff braucht mindestens 2 Armeen im Land, 1 bleibt immer stehen.';
+  if(d<1)return 'Im Zielland stehen keine Armeen.';
+  return '';
+}
+function picker(el,max,lim,cur,side){
+  el.innerHTML='';
+  for(let i=1;i<=lim;i++){
+    const b=document.createElement('button'),sel=max>0&&i===cur;
+    b.textContent=i;b.disabled=i>max;if(sel)b.className='sel';
+    b.setAttribute('aria-label',i+' Würfel');b.setAttribute('aria-pressed',sel);
+    b.onclick=()=>{if(side==='a')nA=i;else nD=i;renderDice()};
+    el.appendChild(b);
+  }
+}
+function renderDice(){
+  picker($('pa'),maxA(),3,useA(),'a');picker($('pd'),maxD(),2,useD(),'d');
+  const w=why();$('go').disabled=!!w;$('why').textContent=w;$('why').hidden=!w;
+}
+function die(v,cls){
+  const e=document.createElement('div');e.className='die roll '+(cls||'');
+  e.setAttribute('role','img');e.setAttribute('aria-label',v+(cls==='lost'?', verloren':cls==='unused'?', zählt nicht':''));
+  for(let i=0;i<9;i++){const p=document.createElement('i');if(PIPS[v].includes(i))p.className='on';e.appendChild(p)}
+  return e;
+}
+function show(el,vals,flags){el.innerHTML='';vals.forEach((v,i)=>el.appendChild(die(v,flags[i])))}
+function resetDice(msg){
+  $('da').innerHTML='';$('dd').innerHTML='';mv=null;nA=nD=null;
+  $('res').innerHTML=msg||START;renderDice();
+}
+$('go').onclick=()=>{
+  if(why())return;
+  const ka=useA(),kd=useD();
+  const r=n=>Array.from({length:n},()=>1+Math.floor(Math.random()*6)).sort((x,y)=>y-x);
+  const A=r(ka),D=r(kd),fa=[],fd=[],lines=[];let la=0,ld=0;
+  for(let i=0;i<Math.min(ka,kd);i++){
+    if(A[i]>D[i]){ld++;fd[i]='lost';lines.push(`${A[i]} gegen ${D[i]}: Verteidiger verliert 1`)}
+    else{la++;fa[i]='lost';lines.push(`${A[i]} gegen ${D[i]}: ${A[i]===D[i]?'gleich, ':''}Angreifer verliert 1`)}
+  }
+  for(let i=kd;i<ka;i++)fa[i]='unused';
+  for(let i=ka;i<kd;i++)fd[i]='unused';
+  show($('da'),A,fa);show($('dd'),D,fd);
+  const na=num('a')-la,nd=num('d')-ld;
+  $('a').value=na;$('d').value=nd;nA=nD=null;
+  let h=`<div class="big">Angreifer −${la} · Verteidiger −${ld}</div><ul>${lines.map(l=>`<li>${l}</li>`).join('')}</ul>`;
+  if(ka>kd)h+='<p class="note">Übrige Würfel des Angreifers zählen nicht (gestrichelt).</p>';
+  if(kd>ka)h+='<p class="note">Übrige Würfel des Verteidigers zählen nicht (gestrichelt).</p>';
+  h+=`<p class="note">Jetzt: Angreifer <b>${na}</b>, Verteidiger <b>${nd}</b>. Verlorene Armeen zurück in die Schachtel.</p>`;
+  if(nd===0){
+    mv={min:ka,tot:na,v:na-1};
+    h+=`<div class="mv"><p class="okt">Land erobert! Zieh mindestens ${arm(ka)} hinein. 1 Armee bleibt im alten Land.</p>
+      <div class="row"><span class="big">Ins neue Land</span><div class="step"><button id="mm" aria-label="Weniger hineinziehen">−</button><output id="mvo"></output><button id="mp" aria-label="Mehr hineinziehen">+</button></div></div>
+      <p class="note" id="mvr"></p>
+      <div class="btns"><button class="primary" id="fromNew">Vom neuen Land weiter angreifen</button><button class="secondary" id="fromOld">Vom alten Land weiter angreifen</button><button class="secondary" id="mvDone">Gezogen, anderes Ziel</button></div></div>`;
+  }else if(na<2){
+    h+='<p class="warn">Aus diesem Land geht kein Angriff mehr: Die letzte Armee muss stehen bleiben.</p>';
+  }
+  $('res').innerHTML=h;
+  if(mv)bindMover();
+  renderDice();
+};
+function bindMover(){
+  const upd=()=>{$('mvo').textContent=mv.v;$('mvr').innerHTML=`Neues Land: <b>${mv.v}</b> · altes Land: <b>${mv.tot-mv.v}</b>`;$('fromOld').disabled=mv.tot-mv.v<2};
+  $('mm').onclick=()=>{mv.v=Math.max(mv.min,mv.v-1);upd()};
+  $('mp').onclick=()=>{mv.v=Math.min(mv.tot-1,mv.v+1);upd()};
+  $('fromNew').onclick=()=>{const m=mv;$('a').value=m.v;$('d').value='';resetDice(`<div class="big">Du greifst jetzt aus dem neuen Land an (${arm(m.v)}).</div><p class="note">Im alten Land: ${arm(m.tot-m.v)}. Gib die Armeen des nächsten Ziellands ein.</p>`);$('d').focus()};
+  $('fromOld').onclick=()=>{const m=mv;$('a').value=m.tot-m.v;$('d').value='';resetDice(`<div class="big">Du greifst weiter aus dem alten Land an (${arm(m.tot-m.v)}).</div><p class="note">Im neuen Land: ${arm(m.v)}. Gib die Armeen des nächsten Ziellands ein.</p>`);$('d').focus()};
+  $('mvDone').onclick=()=>{const m=mv;$('a').value='';$('d').value='';resetDice(`<div class="big">Neues Land: ${arm(m.v)} · altes Land: ${arm(m.tot-m.v)}</div><p class="note">Für den nächsten Angriff beide Armeezahlen eingeben.</p>`);$('a').focus()};
+  upd();
+}
+$('clr').onclick=()=>{$('a').value='';$('d').value='';resetDice();$('a').focus()};
+
+/* ---------- Truppen ---------- */
+const on=new Set();
+$('conts').innerHTML=CONT.map(c=>`<button class="tg" data-c="${c.k}" aria-pressed="false">${c.n} +${c.b}<small>${c.l} Länder</small></button>`).join('');
+$('conts').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{const k=b.dataset.c;on.has(k)?on.delete(k):on.add(k);b.setAttribute('aria-pressed',on.has(k));renderTroops()});
+function renderTroops(){
+  const l=Math.max(0,num('l')??0),q=Math.floor(l/3),base=Math.max(3,q);
+  const cb=CONT.filter(c=>on.has(c.k)).reduce((s,c)=>s+c.b,0);
+  $('ldiv').textContent=`${l} ÷ 3 = ${q}${q<3?', mindestens aber 3':''}`;
+  $('ttot').textContent=base+cb;
+  $('tbr').textContent=cb?`Länder ${base} + Kontinente ${cb}`:`Nur Länder: ${base}`;
+}
+
+/* ---------- Karten ---------- */
+function renderCards(){
+  const s=store.sets;
+  $('s').textContent=s;$('nx').textContent=setVal(s);
+  const n=Math.max(7,s+3);
+  $('ladder').innerHTML=Array.from({length:n},(_,k)=>`<span class="${k<s?'past':k===s?'next':''}">${setVal(k)}</span>`).join('');
+}
+$('trade').onclick=()=>{
+  const v=setVal(store.sets);store.sets++;save();renderCards();
+  const m=$('tmsg');m.hidden=false;
+  m.innerHTML=`Getauscht: +${v} Armeen. Zeigt eine Karte ein eigenes Land, kommen +2 genau dorthin.<br>Das nächste Set bringt +${setVal(store.sets)}.`;
+};
+
+/* ---------- Stepper und Eingaben ---------- */
+const MIN={a:1,d:0,l:0};
+document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{
+  const t=b.dataset.t,d=+b.dataset.d;
+  if(t==='s'){store.sets=Math.max(0,store.sets+d);save();renderCards();$('tmsg').hidden=true;return}
+  const cur=num(t);$(t).value=Math.max(MIN[t],(cur??MIN[t])+d);
+  if(t==='l')renderTroops();else renderDice();
+});
+['a','d'].forEach(id=>{
+  $(id).addEventListener('input',renderDice);
+  $(id).addEventListener('change',()=>{const v=num(id);if(v!==null&&v<MIN[id])$(id).value=MIN[id]});
+});
+$('l').addEventListener('input',renderTroops);
+$('l').addEventListener('change',()=>{const v=num('l');if(v!==null&&v<0)$('l').value=0});
+
+/* Bildschirm während des Spiels anlassen, wenn das Gerät es erlaubt */
+let wl=null;
+async function wake(){try{if(!wl&&navigator.wakeLock&&document.visibilityState==='visible'){wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>{wl=null})}}catch(_){wl=null}}
+document.addEventListener('pointerdown',wake,{passive:true});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')wake()});
+
+resetDice();renderTroops();renderCards();
+showTab(['wuerfeln','truppen','karten','regeln'].includes(store.tab)?store.tab:'wuerfeln');
+</script>
+</body>
+</html>
