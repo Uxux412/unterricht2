@@ -237,7 +237,7 @@
     /* Tab 1: Interactive Image + Info Sidepanel */
     .explorer-grid {
       display: grid;
-      grid-template-columns: 1.45fr 1fr;
+      grid-template-columns: 2.3fr 1fr;
       gap: 1.5rem;
       align-items: start;
     }
@@ -256,9 +256,58 @@
       border: 1px solid var(--border);
     }
 
+    .image-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.6rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .image-toolbar .btn {
+      border: 1px solid var(--border);
+      padding: 0.35rem 0.7rem;
+    }
+
+    .zoom-label {
+      min-width: 3.5rem;
+      text-align: center;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .image-viewport {
+      overflow: auto;
+      max-height: 85vh;
+      border-radius: 6px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .image-viewport.zoomed {
+      cursor: grab;
+    }
+
+    .image-viewport.dragging {
+      cursor: grabbing;
+    }
+
+    .image-card:fullscreen {
+      display: flex;
+      flex-direction: column;
+      border-radius: 0;
+      padding: 0.75rem;
+    }
+
+    .image-card:fullscreen .image-viewport {
+      flex: 1;
+      max-height: none;
+    }
+
     .image-wrapper {
       position: relative;
-      width: 100%;
+      width: calc(var(--zoom, 1) * 100%);
       border-radius: 6px;
       overflow: hidden;
       background-color: #d8c8b0;
@@ -377,6 +426,9 @@
     @media (max-width: 1080px) {
       .info-panel {
         position: static;
+      }
+      .back-to-image {
+        display: inline-flex !important;
       }
     }
 
@@ -644,7 +696,7 @@
       </div>
       <input type="text" id="qrUrlInput" class="qr-url-input" oninput="updateQrCode(this.value)" title="Link bei Bedarf anpassen">
       <div style="font-size: 0.78rem; color: var(--muted);">
-        Tipp für die Lehrkraft: Der Link passt sich automatisch an die Webadresse an (Standard: <code>raw.githack.com/Uxux412/unterricht2/main/rundgemaelde/index.html</code>).
+        Tipp für die Lehrkraft: Der Link passt sich automatisch an die Webadresse an (Standard: <code>uxux412.github.io/unterricht2/rundgemaelde</code>).
       </div>
     </div>
   </div>
@@ -660,12 +712,21 @@
     <section id="tab-explore" class="tab-content active">
       <div class="explorer-grid">
         <div class="image-card">
+          <div class="image-toolbar">
+            <button class="btn" onclick="changeZoom(-0.5)" title="Verkleinern">➖</button>
+            <span class="zoom-label" id="zoomLabel">100 %</span>
+            <button class="btn" onclick="changeZoom(0.5)" title="Vergrößern">➕</button>
+            <button class="btn" onclick="toggleFullscreen()" id="fullscreenBtn">⛶ Vollbild</button>
+            <span>Vergrößern, dann mit dem Finger oder der Maus verschieben.</span>
+          </div>
+          <div class="image-viewport" id="imageViewport">
           <div class="image-wrapper" id="mapContainer">
             <img id="mainImage"
                  src="https://upload.wikimedia.org/wikipedia/commons/e/e3/Rundgem%C3%A4lde_von_Europa_im_August_MDCCCXLIX.jpg"
                  alt="Rundgemälde von Europa im August 1849"
                  onerror="this.onerror=null; this.removeAttribute('src'); this.alt='Bitte lade oben über den Button „Eigenes Bild“ deine Bilddatei hoch.'">
             <!-- Hotspots werden per JS eingefügt -->
+          </div>
           </div>
           <div class="image-footer">
             <span>💡 <strong>Tipp:</strong> Klicke auf die farbigen Markierungen im Bild, um die historischen Hintergründe (D1–D7) aufzurufen.</span>
@@ -674,6 +735,7 @@
         </div>
 
         <div class="info-panel">
+          <button class="btn back-to-image" style="display: none; margin-bottom: 0.8rem; border: 1px solid var(--border);" onclick="document.querySelector('.image-card').scrollIntoView({ behavior: 'smooth' })">⬆️ Zurück zum Bild</button>
           <div class="station-nav" id="stationNav"></div>
           <div id="infoContent">
             <!-- Dynamischer Inhalt D1-D7 -->
@@ -755,7 +817,7 @@
   </main>
 
   <script>
-    const DEFAULT_GITHUB_URL = 'https://raw.githack.com/Uxux412/unterricht2/main/rundgemaelde/index.html';
+    const DEFAULT_GITHUB_URL = 'https://uxux412.github.io/unterricht2/rundgemaelde/';
     const STORAGE_KEY = 'rundgemaelde1849_v1';
 
     const stations = [
@@ -1038,7 +1100,13 @@
         btn.style.backgroundColor = st.color;
         btn.title = st.title;
         btn.innerText = st.id;
-        btn.onclick = () => selectStation(st.id);
+        btn.onclick = () => {
+          selectStation(st.id);
+          // Auf schmalen Bildschirmen steht der Text unter dem Bild
+          if (window.matchMedia('(max-width: 1080px)').matches && !document.fullscreenElement) {
+            document.querySelector('.info-panel').scrollIntoView({ behavior: 'smooth' });
+          }
+        };
         container.appendChild(btn);
       });
     }
@@ -1136,7 +1204,67 @@
       document.getElementById('togglePinsBtn').innerText = pinsVisible ? '👁️ Pins ausblenden' : '👁️ Pins einblenden';
     }
 
+    // ---------- Zoom, Verschieben, Vollbild ----------
+
+    let zoomLevel = 1;
+
+    function setZoom(level) {
+      const viewport = document.getElementById('imageViewport');
+      const oldLevel = zoomLevel;
+      zoomLevel = Math.min(4, Math.max(1, level));
+      // Bildmitte beim Zoomen beibehalten
+      const cx = (viewport.scrollLeft + viewport.clientWidth / 2) / oldLevel;
+      const cy = (viewport.scrollTop + viewport.clientHeight / 2) / oldLevel;
+      document.getElementById('mapContainer').style.setProperty('--zoom', zoomLevel);
+      viewport.scrollLeft = cx * zoomLevel - viewport.clientWidth / 2;
+      viewport.scrollTop = cy * zoomLevel - viewport.clientHeight / 2;
+      viewport.classList.toggle('zoomed', zoomLevel > 1);
+      document.getElementById('zoomLabel').innerText = `${Math.round(zoomLevel * 100)} %`;
+    }
+
+    function changeZoom(delta) {
+      setZoom(zoomLevel + delta);
+    }
+
+    function toggleFullscreen() {
+      const card = document.querySelector('.image-card');
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else if (card.requestFullscreen) {
+        card.requestFullscreen();
+      } else if (card.webkitRequestFullscreen) {
+        card.webkitRequestFullscreen();
+      }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+      document.getElementById('fullscreenBtn').innerText =
+        document.fullscreenElement ? '✕ Vollbild beenden' : '⛶ Vollbild';
+    });
+
+    (function enableDragPan() {
+      const viewport = document.getElementById('imageViewport');
+      let start = null;
+      viewport.addEventListener('mousedown', e => {
+        if (zoomLevel <= 1 || e.target.closest('.hotspot')) return;
+        start = { x: e.clientX, y: e.clientY, left: viewport.scrollLeft, top: viewport.scrollTop };
+        viewport.classList.add('dragging');
+        e.preventDefault();
+      });
+      window.addEventListener('mousemove', e => {
+        if (!start) return;
+        viewport.scrollLeft = start.left - (e.clientX - start.x);
+        viewport.scrollTop = start.top - (e.clientY - start.y);
+      });
+      window.addEventListener('mouseup', () => {
+        start = null;
+        viewport.classList.remove('dragging');
+      });
+    })();
+
     init();
+    // Auf dem Handy direkt vergrößert starten
+    if (window.matchMedia('(max-width: 700px)').matches) setZoom(2);
   </script>
 </body>
 </html>
