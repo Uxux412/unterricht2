@@ -722,7 +722,7 @@
           <div class="image-viewport" id="imageViewport">
           <div class="image-wrapper" id="mapContainer">
             <img id="mainImage"
-                 src="https://upload.wikimedia.org/wikipedia/commons/e/e3/Rundgem%C3%A4lde_von_Europa_im_August_MDCCCXLIX.jpg"
+                 src="https://upload.wikimedia.org/wikipedia/commons/7/79/Rundgem%C3%A4lde_Europa_1849.jpg"
                  alt="Rundgemälde von Europa im August 1849"
                  onerror="this.onerror=null; this.removeAttribute('src'); this.alt='Bitte lade oben über den Button „Eigenes Bild“ deine Bilddatei hoch.'">
             <!-- Hotspots werden per JS eingefügt -->
@@ -1262,7 +1262,45 @@
       });
     })();
 
+    // ---------- Lehrkraft: Pins verschieben (Seite mit ?pins aufrufen) ----------
+
+    function enablePinEditor() {
+      const container = document.getElementById('mapContainer');
+      const box = document.createElement('div');
+      box.style.cssText = 'margin-top:0.75rem;padding:0.75rem;border:2px dashed var(--accent);border-radius:6px;font-size:0.85rem;line-height:1.4;';
+      box.innerHTML = '<strong>Pins verschieben:</strong> Ziehe die Punkte an die richtige Stelle. Danach den Text unten markieren, kopieren und an Claude schicken.<textarea id="pinOutput" rows="3" readonly style="margin-top:0.5rem;font-family:monospace;font-size:0.8rem;"></textarea>';
+      document.querySelector('.image-card').appendChild(box);
+
+      const showPositions = () => {
+        document.getElementById('pinOutput').value = stations
+          .map(st => `${st.id}: x ${st.x.toFixed(1)}, y ${st.y.toFixed(1)}`).join(' | ');
+      };
+      showPositions();
+
+      let dragged = null;
+      container.addEventListener('pointerdown', e => {
+        const pin = e.target.closest('.hotspot');
+        if (!pin) return;
+        dragged = stations.find(st => `pin-${st.id}` === pin.id);
+        pin.setPointerCapture(e.pointerId);
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      container.addEventListener('pointermove', e => {
+        if (!dragged) return;
+        const rect = container.getBoundingClientRect();
+        dragged.x = Math.min(100, Math.max(0, (e.clientX - rect.left) / rect.width * 100));
+        dragged.y = Math.min(100, Math.max(0, (e.clientY - rect.top) / rect.height * 100));
+        const pin = document.getElementById(`pin-${dragged.id}`);
+        pin.style.left = `${dragged.x}%`;
+        pin.style.top = `${dragged.y}%`;
+        showPositions();
+      });
+      container.addEventListener('pointerup', () => { dragged = null; });
+    }
+
     init();
+    if (new URLSearchParams(window.location.search).has('pins')) enablePinEditor();
     // Auf dem Handy direkt vergrößert starten
     if (window.matchMedia('(max-width: 700px)').matches) setZoom(2);
   </script>
