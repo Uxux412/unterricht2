@@ -8,13 +8,14 @@ Statische Seite über GitHub Pages (Branch `main`), ohne Build-Schritt.
 
 ```
 index.html              Startseite (Fächer + zuletzt veröffentlicht + Suche)
-geschichte/ religion/ gemeinschaftskunde/
+geschichte/ religion/ gemeinschaftskunde/ spiele/
                         Fachseiten, nach Themenbereichen gegliedert
 data/inhalte.js         ⚑ zentrale Liste: Fächer, Themenbereiche, Materialien
 assets/site.css         gemeinsames Aussehen
 assets/site.js          baut Kopfzeile, Navigation, Brotkrumen, Kacheln, QR-Fenster
 rundgemaelde/           Material: Rundgemälde von Europa 1849
 besatzung.html          Material: Strukturlegen Deutschland 1945–1949
+risiko/                 Spiel: Risiko-Begleiter (Würfeln, Rechner, Regeln)
 ```
 
 ## Neues Material

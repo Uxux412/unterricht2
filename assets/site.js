@@ -7,6 +7,7 @@
     saeule: '<path d="M3 21h18"/><path d="M4 7h16"/><path d="M12 3 4 7"/><path d="m12 3 8 4"/><path d="M6 7v11"/><path d="M10 7v11"/><path d="M14 7v11"/><path d="M18 7v11"/><path d="M4 18h16"/>',
     kerze: '<path d="M9 10h6v11H9z"/><path d="M12 7c-1.5-1.5-1-3 0-4 1 1 1.5 2.5 0 4z"/><path d="M12 7v3"/>',
     waage: '<path d="M12 3v18"/><path d="M7 21h10"/><path d="M5 7h14"/><path d="m5 7-3 6a3 3 0 0 0 6 0z"/><path d="m19 7-3 6a3 3 0 0 0 6 0z"/>',
+    wuerfel: '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 8h.01"/><path d="M16 8h.01"/><path d="M12 12h.01"/><path d="M8 16h.01"/><path d="M16 16h.01"/>',
     ordner: '<path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
     seite: '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6"/><path d="M9 16h6"/>'
   };

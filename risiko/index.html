@@ -44,7 +44,9 @@ p{margin:0}
 .in{max-width:540px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
 header.top .in{padding-block:12px 10px;display:flex;flex-direction:column;gap:10px}
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:12px}
 h1{font-family:var(--display);font-weight:400;font-size:1.45rem;margin:0;line-height:1.1}
+.home{flex:none;font-weight:600;font-size:.9rem;padding:7px 11px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--fg);text-decoration:none}
 .tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;background:var(--sunk);padding:4px;border-radius:12px}
 .tabs button{font-weight:700;font-size:.95rem;padding:10px 2px;border:0;border-radius:9px;background:transparent;color:var(--muted);cursor:pointer;min-width:0}
 .tabs button[aria-selected="true"]{background:var(--panel);color:var(--fg);box-shadow:0 1px 3px var(--ring)}
@@ -114,7 +116,7 @@ h3{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08e
 <body>
 
 <header class="top"><div class="in">
-  <h1>Risiko-Begleiter</h1>
+  <div class="toprow"><h1>Risiko-Begleiter</h1><a class="home" href="../index.html">🏠 Übersicht</a></div>
   <nav class="tabs" role="tablist" aria-label="Rechner">
     <button role="tab" id="t-wuerfeln" data-tab="wuerfeln" aria-controls="p-wuerfeln" aria-selected="true">Würfeln</button>
     <button role="tab" id="t-truppen" data-tab="truppen" aria-controls="p-truppen" aria-selected="false">Truppen</button>
