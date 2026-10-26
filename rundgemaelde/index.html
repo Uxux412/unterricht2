@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interaktives Bild: Rundgemälde von Europa im August 1849</title>
+  <style>
+    :root {
+      --bg-color: #f4f1ea;
+      --card-bg: #ffffff;
+      --primary: #2c3e50;
+      --accent: #8b2635;
+      --text: #222222;
+      --muted: #666666;
+      --border: #dcd6cc;
+      --success: #2e7d32;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Header & Navigation */
+    header {
+      background-color: var(--primary);
+      color: #fff;
+      padding: 1rem 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .title-group h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .title-group p {
+      font-size: 0.85rem;
+      color: #cbd5e1;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .progress-badge {
+      background: rgba(255,255,255,0.15);
+      padding: 0.4rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .btn {
+      background-color: #ffffff;
+      color: var(--primary);
+      border: none;
+      padding: 0.45rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn:hover {
+      background-color: #e2e8f0;
+    }
+
+    .btn-qr {
+      background-color: #2e7d32;
+      color: #fff;
+    }
+
+    .btn-qr:hover {
+      background-color: #1b5e20;
+    }
+
+    .btn-accent {
+      background-color: var(--accent);
+      color: #fff;
+    }
+
+    .btn-accent:hover {
+      background-color: #a32c3e;
+    }
+
+    /* QR Code Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 14px;
+      max-width: 480px;
+      width: 100%;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 1.6rem;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .modal-box h2 {
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-box p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .qr-image-container {
+      background: #f8fafc;
+      padding: 1rem;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+
+    .qr-image-container img {
+      width: 260px;
+      height: 260px;
+      max-width: 100%;
+      display: block;
+    }
+
+    .qr-url-input {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      text-align: center;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background-color: #e6e1d6;
+      padding: 0 1.5rem;
+      border-bottom: 1px solid var(--border);
+      gap: 0.5rem;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 0.85rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--primary);
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      background-color: var(--bg-color);
+    }
+
+    /* Main Content Container */
+    main {
+      flex: 1;
+      padding: 1.5rem;
+      max-width: 1600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Tab 1: Interactive Image + Info Sidepanel */
+    .explorer-grid {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 1080px) {
+      .explorer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .image-card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 1px solid var(--border);
+    }
+
+    .image-wrapper {
+      position: relative;
+      width: 100%;
+      border-radius: 6px;
+      overflow: hidden;
+      background-color: #d8c8b0;
+      line-height: 0;
+    }
+
+    .image-wrapper img {
+      width: 100%;
+      height: auto;
+      display: block;
+      user-select: none;
+    }
+
+    .image-wrapper.pins-hidden .hotspot {
+      display: none;
+    }
+
+    /* Hotspots */
+    .hotspot {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      line-height: 1;
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.45);
+      transition: transform 0.2s, box-shadow 0.2s;
+      z-index: 10;
+    }
+
+    .hotspot::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: inherit;
+      border: 2px solid #fff;
+      animation: pulse 2s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    .hotspot:hover, .hotspot.selected {
+      transform: translate(-50%, -50%) scale(1.2);
+      z-index: 20;
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.8), 0 5px 15px rgba(0,0,0,0.6);
+    }
+
+    .hotspot.visited::before {
+      content: '✓';
+      position: absolute;
+      top: -7px;
+      right: -7px;
+      background: var(--success);
+      color: white;
+      width: 18px;
+      height: 18px;
+      font-size: 11px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #fff;
+    }
+
+    .hotspot-square {
+      border-radius: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .hotspot {
+        width: 28px;
+        height: 28px;
+        font-size: 0.7rem;
+        border-width: 2px;
+      }
+      main {
+        padding: 1rem;
+      }
+    }
+
+    .image-footer {
+      margin-top: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      line-height: 1.4;
+      color: var(--muted);
+    }
+
+    /* Info Side Panel */
+    .info-panel {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 1px solid var(--border);
+      position: sticky;
+      top: 1.5rem;
+    }
+
+    @media (max-width: 1080px) {
+      .info-panel {
+        position: static;
+      }
+    }
+
+    .station-nav {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .station-pill {
+      padding: 0.35rem 0.7rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #f8f6f2;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .station-pill.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .station-pill.visited:not(.active) {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .info-header {
+      margin-bottom: 1rem;
+    }
+
+    .info-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+
+    .info-header h2 {
+      font-size: 1.35rem;
+      color: var(--primary);
+    }
+
+    .info-body p {
+      margin-bottom: 0.9rem;
+      text-align: justify;
+      hyphens: auto;
+      font-size: 0.96rem;
+    }
+
+    .quick-notes {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 2px dashed var(--border);
+    }
+
+    .quick-notes h3 {
+      font-size: 0.95rem;
+      margin-bottom: 0.6rem;
+      color: var(--primary);
+    }
+
+    .note-group {
+      margin-bottom: 0.75rem;
+    }
+
+    .note-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: var(--muted);
+    }
+
+    textarea {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      resize: vertical;
+      background-color: #fcfbf9;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background-color: #fff;
+    }
+
+    /* Tab 2: Worksheet M1 Table */
+    .worksheet-card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 1px solid var(--border);
+    }
+
+    .worksheet-card h2 {
+      font-size: 1.25rem;
+      color: var(--primary);
+      margin-bottom: 0.4rem;
+    }
+
+    .worksheet-card .subtitle {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    table.m1-table {
+      width: 100%;
+      min-width: 640px;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+    }
+
+    table.m1-table th, table.m1-table td {
+      border: 1px solid var(--border);
+      padding: 0.85rem;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    table.m1-table th {
+      background-color: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    table.m1-table td.region-cell {
+      width: 20%;
+      font-weight: 700;
+      background-color: #f9f7f3;
+      color: var(--primary);
+    }
+
+    table.m1-table td textarea {
+      min-height: 90px;
+      border: 1px solid #e0dcd3;
+    }
+
+    .worksheet-actions {
+      margin-top: 1.25rem;
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .worksheet-actions .btn {
+      border: 1px solid var(--border);
+    }
+
+    /* Tab 3: D8 Historian Judgment */
+    .d8-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 960px) {
+      .d8-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .source-box {
+      background-color: #fcfaf5;
+      border-left: 4px solid var(--accent);
+      padding: 1.25rem;
+      border-radius: 4px;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+
+    .source-box p {
+      margin-bottom: 0.8rem;
+      text-align: justify;
+      hyphens: auto;
+    }
+
+    .source-citation {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-top: 0.75rem;
+      overflow-wrap: anywhere;
+    }
+
+    .source-citation a {
+      color: var(--accent);
+    }
+
+    /* Print Styles */
+    @media print {
+      header, .tabs, .image-footer, .station-nav, .modal-overlay, .worksheet-actions {
+        display: none !important;
+      }
+      body {
+        background: #fff;
+      }
+      .tab-content {
+        display: block !important;
+        margin-bottom: 2rem;
+      }
+      #tab-explore {
+        display: none !important;
+      }
+      .worksheet-card {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+      }
+      textarea {
+        border: none;
+        resize: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title-group">
+      <h1>Rundgemälde von Europa im August 1849</h1>
+      <p>Interaktive Bildanalyse nach Ferdinand Schröder (Düsseldorfer Monatshefte, 1849)</p>
+    </div>
+    <div class="header-controls">
+      <div class="progress-badge" id="progressText">Entdeckt: 0 / 7 Stationen</div>
+      <button class="btn btn-qr" onclick="openQrModal()">📱 QR-Code für Schüler</button>
+      <label class="btn" title="Lokale Bilddatei auswählen, falls offline">
+        🖼️ Eigenes Bild
+        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+      </label>
+      <button class="btn" onclick="toggleHotspots()" id="togglePinsBtn">👁️ Pins ausblenden</button>
+      <button class="btn btn-accent" onclick="window.print()">🖨️ Drucken / PDF</button>
+    </div>
+  </header>
+
+  <!-- QR-CODE POP-UP FÜR BEAMER / SMARTBOARD -->
+  <div class="modal-overlay" id="qrModal" onclick="if(event.target===this) closeQrModal()">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeQrModal()">×</button>
+      <h2>📱 Jetzt mit Tablet / Handy scannen</h2>
+      <p>Scanne den QR-Code, um das interaktive Rundgemälde direkt auf deinem Gerät zu öffnen:</p>
+      <div class="qr-image-container">
+        <img id="qrImage" src="" alt="QR-Code wird geladen...">
+      </div>
+      <input type="text" id="qrUrlInput" class="qr-url-input" oninput="updateQrCode(this.value)" title="Link bei Bedarf anpassen">
+      <div style="font-size: 0.78rem; color: var(--muted);">
+        Tipp für die Lehrkraft: Der Link passt sich automatisch an die Webadresse an (Standard: <code>raw.githack.com/Uxux412/unterricht2/main/rundgemaelde/index.html</code>).
+      </div>
+    </div>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="explore" onclick="switchTab('explore', this)">🔍 1. Interaktives Gemälde (D1–D7)</button>
+    <button class="tab-btn" data-tab="worksheet" onclick="switchTab('worksheet', this)">📝 2. Arbeitsblatt M1 (Tabelle)</button>
+    <button class="tab-btn" data-tab="historian" onclick="switchTab('historian', this)">🎓 3. Historikerurteil (D8)</button>
+  </nav>
+
+  <main>
+    <!-- TAB 1: INTERAKTIVE KARTE -->
+    <section id="tab-explore" class="tab-content active">
+      <div class="explorer-grid">
+        <div class="image-card">
+          <div class="image-wrapper" id="mapContainer">
+            <img id="mainImage"
+                 src="https://upload.wikimedia.org/wikipedia/commons/e/e3/Rundgem%C3%A4lde_von_Europa_im_August_MDCCCXLIX.jpg"
+                 alt="Rundgemälde von Europa im August 1849"
+                 onerror="this.onerror=null; this.removeAttribute('src'); this.alt='Bitte lade oben über den Button „Eigenes Bild“ deine Bilddatei hoch.'">
+            <!-- Hotspots werden per JS eingefügt -->
+          </div>
+          <div class="image-footer">
+            <span>💡 <strong>Tipp:</strong> Klicke auf die farbigen Markierungen im Bild, um die historischen Hintergründe (D1–D7) aufzurufen.</span>
+            <span>Quelle: Ferdinand Schröder, Düsseldorfer Monatshefte (1849) | Texte: Ulrich Schnakenberg</span>
+          </div>
+        </div>
+
+        <div class="info-panel">
+          <div class="station-nav" id="stationNav"></div>
+          <div id="infoContent">
+            <!-- Dynamischer Inhalt D1-D7 -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: ARBEITSBLATT M1 -->
+    <section id="tab-worksheet" class="tab-content">
+      <div class="worksheet-card">
+        <h2>M1 Einzelelemente und Gesamtaussage des „Rundgemäldes von Europa im August 1849“</h2>
+        <p class="subtitle">Ferdinand Schröder, erschienen in: Düsseldorfer Monatshefte, 1849. Alle Notizen aus der Kartenansicht werden automatisch hier synchronisiert und auf diesem Gerät gespeichert.</p>
+
+        <div class="table-scroll">
+          <table class="m1-table">
+            <thead>
+              <tr>
+                <th>Region / Staat</th>
+                <th>Knappe Beschreibung (Bildelemente)</th>
+                <th>Interpretation im historischen Kontext</th>
+              </tr>
+            </thead>
+            <tbody id="m1TableBody">
+              <!-- Wird dynamisch generiert -->
+            </tbody>
+          </table>
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+          <label for="overallConclusion" style="font-weight: 700; display: block; margin-bottom: 0.4rem; color: var(--primary);">
+            Gesamtaussage der Karikatur (Fazit zum „Rundgemälde“ im August 1849):
+          </label>
+          <textarea id="overallConclusion" rows="4" placeholder="Fasse hier die Gesamtaussage des Künstlers Ferdinand Schröder zusammen..." oninput="saveOverall(this.value)"></textarea>
+        </div>
+
+        <div class="worksheet-actions">
+          <button class="btn" onclick="downloadAnswers()">💾 Antworten als Textdatei speichern</button>
+          <button class="btn" onclick="resetAll()">🗑️ Alle Eingaben löschen</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: HISTORIKERURTEIL D8 -->
+    <section id="tab-historian" class="tab-content">
+      <div class="worksheet-card">
+        <h2>D8 Historikerurteil zur Revolution von 1848</h2>
+        <p class="subtitle">Der Historiker Arnd Bauerkämper schrieb 2006 zur europäischen Dimension der Revolution und Reaktion Folgendes:</p>
+
+        <div class="d8-container">
+          <div>
+            <div class="source-box">
+              <p>„Gemessen an den Zielen ihrer Träger, scheiterten die Revolutionen von 1848 trotz Teilerfolgen überall in Europa. Jedoch war damit keineswegs die Hoffnung auf politische Reformen und einen nachhaltigen gesellschaftlichen Aufbruch erloschen, der in der Revolution bereits in ganz Europa erlebt worden war. 1848 hatten Bürger in unterschiedlichen europäischen Staaten und Regionen gegen die Herrschenden mehr politische Partizipation, gesellschaftliche Gleichstellung und die Sicherung ihrer Rechte durchgesetzt. Zudem war mit der grenzüberschreitenden Erhebung ein europäischer Kommunikationsraum entstanden. Dieser Prozess der Europäisierung brach mit dem Scheitern der Revolution keineswegs vollständig ab […].</p>
+              <p>Inwiefern aber war die Unterdrückung der Revolution in Europa miteinander verflochten? Wie wirkte die Reaktion in einzelnen europäischen Staaten und Regionen auf die Akteure in anderen Gebieten Europas zurück? Inwieweit trug auch die Gegenrevolution zur Europäisierung bei? Auf diese Fragen zur Vergleichs- und Verflechtungsgeschichte der europäischen Gegenrevolution, die von der historischen Forschung bislang kaum erörtert worden sind, verweist das ‚Rundgemälde von Europa im August 1849‘. Hier wird ein nahezu gesamteuropäisches Panorama der Reaktion und ihrer Protagonisten entfaltet. […] Die größten Figuren kennzeichneten in dem Rundgemälde jeweils die gegenrevolutionären Kräfte, deren enge Zusammenarbeit angedeutet wird.“</p>
+              <div class="source-citation">
+                aus: Bauerkämper, Arnd: Die Revolution von 1848/49. Gemeinsames Erleben und Scheitern in Europa?, in: Themenportal Europäische Geschichte, 2006, <a href="https://www.europa.clio-online.de/essay/id/fdae-1313" target="_blank" rel="noopener">www.europa.clio-online.de/essay/id/fdae-1313</a>.
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="note-group" style="margin-bottom: 1.25rem;">
+              <label for="d8Task1" style="font-size: 0.95rem; color: var(--primary);">
+                <strong>Aufgabe 1:</strong> Fasse die Kritik Bauerkämpers an der bisher üblichen Darstellung der Revolutionsjahre 1848/49 zusammen.
+              </label>
+              <textarea id="d8Task1" rows="6" placeholder="Deine Antwort zu Aufgabe 1..." oninput="saveD8()"></textarea>
+            </div>
+
+            <div class="note-group">
+              <label for="d8Task2" style="font-size: 0.95rem; color: var(--primary);">
+                <strong>Aufgabe 2:</strong> Erläutere, wie es Ferdinand Schröder gelingt, in seinem „Rundgemälde“ eine überzeugende „Vergleichs- und Verflechtungsgeschichte“ der europäischen Revolution bzw. Gegenrevolution zu zeichnen.
+              </label>
+              <textarea id="d8Task2" rows="7" placeholder="Deine Antwort zu Aufgabe 2..." oninput="saveD8()"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const DEFAULT_GITHUB_URL = 'https://raw.githack.com/Uxux412/unterricht2/main/rundgemaelde/index.html';
+    const STORAGE_KEY = 'rundgemaelde1849_v1';
+
+    const stations = [
+      {
+        id: 'D1',
+        shortTitle: '„Deutscher Bund“',
+        title: 'D1 „Deutscher Bund“',
+        x: 60.5,
+        y: 24.5,
+        color: '#d9534f',
+        shape: 'circle',
+        paragraphs: [
+          'Im Zentrum der Abbildung kehrt Preußen, das im Bild durch König Friedrich Wilhelm IV. (mit Pickelhaube und Kreuz um den Hals) personifiziert wird, die Revolutionäre und demokratischen Abgeordneten (vgl. die Deutschlandfahne und die „Heckerhüte“) zusammen. Er säubert vor allem das liberale Baden: dorthin hatten sich die Republikaner nach der Auflösung des Paulskirchenparlaments zurückgezogen. Die preußische Armee belagerte vom 30. Juni bis zum 23. Juli 1849 die Festung Rastatt, in der sich etwa 5.500 Demokraten verschanzt hatten. Nach dem Fall Rastatts wurden zahlreiche Todesurteile an den Revolutionären vollstreckt (vgl. den Galgen an der deutsch-französischen Grenze).',
+          'Die norddeutschen Fürsten (vgl. die winzigen Kronen) und der sächsische König suchen den Schutz Preußens, während König Max II. von Bayern (karikiert als Bierkrug) und König Wilhelm von Württemberg (dargestellt als Kasperlefigur) desinteressiert bzw. erschreckt wirken. In Frankfurt hängt die zerfetzte schwarz-rot-goldene Fahne an einer Vogelscheuche.'
+        ]
+      },
+      {
+        id: 'D2',
+        shortTitle: 'Kaiserreich Österreich',
+        title: 'D2 Kaiserreich Österreich',
+        x: 79.8,
+        y: 55.5,
+        color: '#e6a100',
+        shape: 'circle',
+        paragraphs: [
+          'Das Kaiserreich Österreich, hier dargestellt als Soldat mit einem Doppeladler auf der Pickelhaube, war ein Vielvölkerstaat. 1848 kam es in Ungarn zu einer Revolution gegen die österreichische Vorherrschaft. Der Reichstag verhängte daraufhin im Oktober das Kriegsrecht über Ungarn. Auf Bitte des österreichischen Kaisers Franz Joseph (der österreichische Soldat wirkt im Bild ungeschickt und überfordert) drangen im Mai 1849 rund 200.000 russische Soldaten über die Pässe der Karpaten nach Ungarn vor.',
+          'Die Intervention russischer Truppen (vgl. den russischen Befehlshaber mit der Fellmütze), entschied schließlich den Kampf (vgl. den wehrlosen Ungar, der deutlich kleiner als die ihn bedrohenden Vormächte gezeichnet ist, sowie den Österreicher, der den Daumen senkt). Ungarn kapitulierte am 11. August.'
+        ]
+      },
+      {
+        id: 'D3',
+        shortTitle: 'Frankreich',
+        title: 'D3 Frankreich',
+        x: 28.5,
+        y: 61.0,
+        color: '#17a2b8',
+        shape: 'circle',
+        paragraphs: [
+          'Mit der „Februarrevolution“ in Frankreich begann das Revolutionsjahr in Europa. Die „Funken der Freiheit“ breiteten sich von dort auf die Nachbarländer aus. Nach dem Rücktritt von König Louis Philippe bildete sich in Paris bereits im Februar 1848 eine provisorische Regierung, deren Anhänger in der später gewählten Nationalversammlung die Mehrheit hatten.',
+          'Im Juni 1848 kam es allerdings zu einem erneuten Aufstand von Arbeitern, Handwerkern und Ladenbesitzern. Die Regierung schlug diesen nieder und mehr als 4.000 Aufständische wurden verbannt (Louis Napoleon weist mit dem Finger auf die Männer, die unter Aufsicht von Soldaten auf Schiffen in die Verbannung gebracht werden).',
+          'Am 8. November 1848 verabschiedete das Parlament eine neue republikanische Verfassung. Die anschließenden Präsidentschaftswahlen am 10. Dezember 1848 gewann Louis Napoleon Bonaparte, der Neffe des früheren Kaisers (vgl. den Napoleon-Hut). Er sticht, wie die anderen beiden Schlüsselfiguren des „Rundgemäldes“, der preußische König und der österreichische Soldat, durch seine Größe heraus.',
+          'Auch Louis Napoleon hält einen Besen in der Hand, mit dem er die Opposition vertrieben hat. Der Besen steht direkt an der Grenze zur Schweiz; dorthin sind einige Revolutionäre geflohen. 1852 ließ er sich als Napoleon III. zum Kaiser ausrufen; damit endete die zweite Französische Republik.'
+        ]
+      },
+      {
+        id: 'D4',
+        shortTitle: '„Polen“',
+        title: 'D4 Das polnische Gebiet',
+        x: 92.5,
+        y: 26.0,
+        color: '#4f5bd5',
+        shape: 'circle',
+        paragraphs: [
+          'Polen wurde im 18. Jahrhundert in drei Teilungen von Russland, Preußen und Österreich aufgeteilt und verlor dadurch seine staatliche Existenz. Aber die Polen kämpften weiter für ihre Nation. Nachdem sie sich in zwei (gescheiterten) Aufständen 1830 und 1831 gegen die russische Zarenherrschaft erhoben hatten, galten die polnischen Aufständischen in Europa als Helden; in Deutschland kam es unter Liberalen und Demokraten zu einer regelrechten „Polenbegeisterung“.',
+          'Im Februar 1846 scheiterte ein erneuter Aufstandsversuch der polnischen Nationalbewegung, diesmal an Preußen und Österreich. Die erloschene Kerze symbolisiert das Scheitern der Freiheitsbewegung und die enttäuschte Hoffnung auf einen neuen polnischen Nationalstaat. Auch in Polen hatte das „Licht der Freiheit“ nur kurz gestrahlt.'
+        ]
+      },
+      {
+        id: 'D5',
+        shortTitle: 'Dänemark',
+        title: 'D5 Dänemark',
+        x: 65.0,
+        y: 7.5,
+        color: '#6c757d',
+        shape: 'circle',
+        paragraphs: [
+          'In Dänemark wurde bereits im Januar 1848 eine neue Verfassung verkündet, die den Absolutismus abschaffte. Nach einer Protestdemonstration in Kopenhagen erklärte sich König Friedrich VII. im März 1848 zum konstitutionellen Monarchen (vgl. den freudig hüpfenden König; dargestellt als General mit Dreispitz). Allerdings geriet das Königreich schnell in den Strudel der Revolution, die sich in den Staaten des Deutschen Bundes abspielte.',
+          'Der Streit um den Status der Herzogtümer Schleswig und Holstein hatte auch erhebliche Auswirkungen auf das Frankfurter Paulskirchenparlament: Der dänische König betonte Anfang 1848 seine Entschlossenheit, Schleswig in seinen Staat einzugliedern. Die Mehrheit der Paulskirchenversammlung lehnte die Annexion Schleswigs jedoch strikt ab. Die preußische Regierung setzte sich über den Willen der Nationalversammlung hinweg und traf am 26. August 1848 in Malmö mit Dänemark eine Vereinbarung. Die deutschen Patrioten waren empört, aber die Nationalversammlung war machtlos, da sie über keine Regierung und keine eigene Armee verfügte. Die Schwäche der Paulskirche wurde so offenbar.',
+          'Im Friedensvertrag vom 2. Juli 1850 erhielt Dänemark schließlich offiziell die Herrschaft über Schleswig und Holstein zurück – in der Karikatur Schröders macht der dänische König der Paulskirche eine lange Nase.'
+        ]
+      },
+      {
+        id: 'D6',
+        shortTitle: 'Großbritannien (und Irland)',
+        title: 'D6 Großbritannien (und Irland)',
+        x: 37.5,
+        y: 4.5,
+        color: '#e85d75',
+        shape: 'circle',
+        paragraphs: [
+          'Großbritannien blieb von den Revolutionen auf dem Kontinent weitgehend unberührt: In der Karikatur beobachtet Königin Victoria die revolutionären Ereignisse aus der Ferne. Ihr von Merkur gelenkter Wagen wird von einem Löwen (Symbol britischer Herrschaft) und einem Einhorn gezogen. Der Löwe streckt dem europäischen Kontinent die Zunge heraus. Der Kutscher trägt in der Hand als Peitsche den Merkurstab – ein Symbol für Warenhandel – und auf seinem Kopf einen Flügelhut (Symbol für den eilenden Götterboten, der sich schneller als das Licht bewegen kann). Damit symbolisiert Schröder Englands Vorreiterrolle in der Industrialisierung, seine wirtschaftliche Dominanz sowie die 1846 durchgesetzte Freihandelspolitik.',
+          'Die Königin, die liebevoll ein Kind in den Armen hält, wendet sich von den bettelnden Iren links im Bild ab, die von einer schweren Missernte mit anschließender Hungersnot betroffen waren. Die drei dünnen Iren halten ihre Hüte vergeblich der Königin entgegen, um Hilfe und Almosen zu erbitten.',
+          'Irland wurde damals von Großbritannien beherrscht; irische Bauern mussten auf den Gütern englischer Landbesitzer arbeiten. 1848 ließ die britische Regierung einen irischen Aufstand brutal niederschlagen. Seine Unabhängigkeit erlangte Irland erst nach Ende des Ersten Weltkriegs.'
+        ]
+      },
+      {
+        id: 'D7',
+        shortTitle: 'Schweiz',
+        title: 'D7 Schweizerische Eidgenossenschaft',
+        x: 46.5,
+        y: 83.5,
+        color: '#ff4da6',
+        shape: 'square',
+        paragraphs: [
+          'In Schröders „Rundgemälde“ suchen die aus Deutschland flüchtenden Demokraten auf schweizerischem Gebiet Schutz unter einer großen Jakobinermütze, einem Symbol für die Französische Revolution von 1789. Schröder kennzeichnete die freiheitliche politische Ordnung der Schweiz darüber hinaus durch zwei gekreuzte Liktorenbündel – ein Symbol der antiken römischen Republik – sowie durch eine weitere, kleinere Jakobinermütze.',
+          'Die Schweiz (lateinisch „Helvetia“) war insofern ein sicheres Exil, als dort nach einem Bürgerkrieg zwischen liberalen und konservativen Kräften im Jahr 1848 eine liberale Verfassung verabschiedet wurde. Diese garantierte den Bürgern wichtige Grundrechte wie beispielsweise die Pressefreiheit, Gewerbefreiheit und das Vereinsrecht. In den Parlamentswahlen Ende des Jahres errangen Liberale und Radikale einen überwältigenden Sieg. Dies löste bei den großen konservativen Monarchien in Frankreich, Österreich und Preußen erhebliche Sorgen aus: Die Monarchen fürchteten, dass das Schweizer Beispiel Schule machen könnte.'
+        ]
+      }
+    ];
+
+    let currentStationId = 'D1';
+    let visitedStations = new Set();
+    let studentNotes = {};
+    let overallText = '';
+    let d8Answers = { task1: '', task2: '' };
+    let pinsVisible = true;
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function init() {
+      loadSavedData();
+      renderHotspots();
+      renderStationNav();
+      renderM1Table();
+      document.getElementById('overallConclusion').value = overallText;
+      document.getElementById('d8Task1').value = d8Answers.task1;
+      document.getElementById('d8Task2').value = d8Answers.task2;
+      selectStation(currentStationId);
+
+      // QR-Code: aktuelle Webadresse oder der GitHub-Pages-Standardlink
+      const currentUrl = window.location.protocol.startsWith('http')
+        ? window.location.href.split('#')[0]
+        : DEFAULT_GITHUB_URL;
+      document.getElementById('qrUrlInput').value = currentUrl;
+      updateQrCode(currentUrl);
+
+      document.getElementById('imageUpload').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          document.getElementById('mainImage').src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeQrModal();
+      });
+    }
+
+    // ---------- Speichern (lokal im Browser des Geräts) ----------
+
+    function loadSavedData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        studentNotes = data.notes || {};
+        visitedStations = new Set(data.visited || []);
+        overallText = data.overall || '';
+        d8Answers = Object.assign({ task1: '', task2: '' }, data.d8 || {});
+        if (data.current && stations.some(s => s.id === data.current)) {
+          currentStationId = data.current;
+        }
+      } catch (e) {
+        // Speicher nicht verfügbar (z. B. privater Modus) – Seite läuft trotzdem
+      }
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          notes: studentNotes,
+          visited: [...visitedStations],
+          overall: overallText,
+          d8: d8Answers,
+          current: currentStationId
+        }));
+      } catch (e) {
+        // ignorieren
+      }
+    }
+
+    function updateNote(id, field, value) {
+      if (!studentNotes[id]) studentNotes[id] = { desc: '', interp: '' };
+      studentNotes[id][field] = value;
+      saveData();
+
+      // Gegenstück synchron halten (Kartenansicht <-> Tabelle M1)
+      const tableField = document.getElementById(`m1-${id}-${field}`);
+      if (tableField && tableField !== document.activeElement) tableField.value = value;
+      const panelField = document.getElementById(`panel-${field}`);
+      if (panelField && currentStationId === id && panelField !== document.activeElement) {
+        panelField.value = value;
+      }
+    }
+
+    function saveOverall(value) {
+      overallText = value;
+      saveData();
+    }
+
+    function saveD8() {
+      d8Answers.task1 = document.getElementById('d8Task1').value;
+      d8Answers.task2 = document.getElementById('d8Task2').value;
+      saveData();
+    }
+
+    function resetAll() {
+      if (!confirm('Wirklich alle Eingaben auf diesem Gerät löschen?')) return;
+      studentNotes = {};
+      visitedStations = new Set();
+      overallText = '';
+      d8Answers = { task1: '', task2: '' };
+      currentStationId = 'D1';
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      renderM1Table();
+      document.getElementById('overallConclusion').value = '';
+      document.getElementById('d8Task1').value = '';
+      document.getElementById('d8Task2').value = '';
+      selectStation('D1');
+    }
+
+    function downloadAnswers() {
+      const lines = [];
+      lines.push('Rundgemälde von Europa im August 1849 – meine Antworten');
+      lines.push('Name: ______________________   Datum: ' + new Date().toLocaleDateString('de-DE'));
+      lines.push('');
+      lines.push('=== M1 Einzelelemente ===');
+      stations.forEach(st => {
+        const n = studentNotes[st.id] || {};
+        lines.push('');
+        lines.push(st.title);
+        lines.push('  Beschreibung: ' + (n.desc || '–'));
+        lines.push('  Interpretation: ' + (n.interp || '–'));
+      });
+      lines.push('');
+      lines.push('Gesamtaussage: ' + (overallText || '–'));
+      lines.push('');
+      lines.push('=== D8 Historikerurteil ===');
+      lines.push('Aufgabe 1: ' + (d8Answers.task1 || '–'));
+      lines.push('');
+      lines.push('Aufgabe 2: ' + (d8Answers.task2 || '–'));
+
+      const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Rundgemaelde_1849_Antworten.txt';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+
+    // ---------- QR-Code ----------
+
+    function openQrModal() {
+      document.getElementById('qrModal').classList.add('open');
+    }
+
+    function closeQrModal() {
+      document.getElementById('qrModal').classList.remove('open');
+    }
+
+    function updateQrCode(url) {
+      const cleanUrl = url.trim() || DEFAULT_GITHUB_URL;
+      const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(cleanUrl)}`;
+      document.getElementById('qrImage').src = qrApi;
+    }
+
+    // ---------- Darstellung ----------
+
+    function renderHotspots() {
+      const container = document.getElementById('mapContainer');
+      container.querySelectorAll('.hotspot').forEach(el => el.remove());
+
+      stations.forEach(st => {
+        const btn = document.createElement('button');
+        btn.className = `hotspot ${st.shape === 'square' ? 'hotspot-square' : ''}`;
+        btn.id = `pin-${st.id}`;
+        btn.style.left = `${st.x}%`;
+        btn.style.top = `${st.y}%`;
+        btn.style.backgroundColor = st.color;
+        btn.title = st.title;
+        btn.innerText = st.id;
+        btn.onclick = () => selectStation(st.id);
+        container.appendChild(btn);
+      });
+    }
+
+    function renderStationNav() {
+      const nav = document.getElementById('stationNav');
+      nav.innerHTML = '';
+      stations.forEach(st => {
+        const pill = document.createElement('button');
+        pill.className = 'station-pill';
+        pill.id = `pill-${st.id}`;
+        pill.innerText = `${st.id}: ${st.shortTitle}`;
+        pill.onclick = () => selectStation(st.id);
+        nav.appendChild(pill);
+      });
+    }
+
+    function renderM1Table() {
+      const tbody = document.getElementById('m1TableBody');
+      tbody.innerHTML = stations.map(st => {
+        const n = studentNotes[st.id] || {};
+        return `
+          <tr>
+            <td class="region-cell">${st.title}</td>
+            <td><textarea id="m1-${st.id}-desc" rows="4" placeholder="Figuren, Symbole, Gegenstände..." oninput="updateNote('${st.id}', 'desc', this.value)">${escapeHtml(n.desc || '')}</textarea></td>
+            <td><textarea id="m1-${st.id}-interp" rows="4" placeholder="Historische Einordnung..." oninput="updateNote('${st.id}', 'interp', this.value)">${escapeHtml(n.interp || '')}</textarea></td>
+          </tr>`;
+      }).join('');
+    }
+
+    function updateProgress() {
+      document.getElementById('progressText').innerText =
+        `Entdeckt: ${visitedStations.size} / ${stations.length} Stationen`;
+    }
+
+    function selectStation(id) {
+      const st = stations.find(s => s.id === id);
+      if (!st) return;
+
+      currentStationId = id;
+      visitedStations.add(id);
+      updateProgress();
+      saveData();
+
+      stations.forEach(s => {
+        const pin = document.getElementById(`pin-${s.id}`);
+        const pill = document.getElementById(`pill-${s.id}`);
+        if (pin) {
+          pin.classList.toggle('selected', s.id === id);
+          pin.classList.toggle('visited', visitedStations.has(s.id));
+        }
+        if (pill) {
+          pill.classList.toggle('active', s.id === id);
+          pill.classList.toggle('visited', visitedStations.has(s.id));
+        }
+      });
+
+      const savedDesc = (studentNotes[id] && studentNotes[id].desc) || '';
+      const savedInterp = (studentNotes[id] && studentNotes[id].interp) || '';
+
+      const contentDiv = document.getElementById('infoContent');
+      contentDiv.innerHTML = `
+        <div class="info-header">
+          <span class="info-badge" style="background-color: ${st.color}">${st.id}</span>
+          <h2>${st.title}</h2>
+        </div>
+        <div class="info-body">
+          ${st.paragraphs.map(p => `<p>${p}</p>`).join('')}
+        </div>
+        <div class="quick-notes">
+          <h3>✍️ Direkt-Notizen für Arbeitsblatt M1 (${st.shortTitle})</h3>
+          <div class="note-group">
+            <label for="panel-desc">Knappe Beschreibung (Was ist im Bildausschnitt zu sehen?):</label>
+            <textarea id="panel-desc" rows="3" placeholder="Beschreibe kurz die Figuren und Symbole..." oninput="updateNote('${st.id}', 'desc', this.value)">${escapeHtml(savedDesc)}</textarea>
+          </div>
+          <div class="note-group">
+            <label for="panel-interp">Interpretation im historischen Kontext (Was bedeutet das historisch?):</label>
+            <textarea id="panel-interp" rows="3" placeholder="Ordne die Darstellung in die Ereignisse von 1848/49 ein..." oninput="updateNote('${st.id}', 'interp', this.value)">${escapeHtml(savedInterp)}</textarea>
+          </div>
+        </div>
+      `;
+    }
+
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(`tab-${tab}`).classList.add('active');
+      (btn || document.querySelector(`.tab-btn[data-tab="${tab}"]`)).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleHotspots() {
+      pinsVisible = !pinsVisible;
+      document.getElementById('mapContainer').classList.toggle('pins-hidden', !pinsVisible);
+      document.getElementById('togglePinsBtn').innerText = pinsVisible ? '👁️ Pins ausblenden' : '👁️ Pins einblenden';
+    }
+
+    init();
+  </script>
+</body>
+</html>
