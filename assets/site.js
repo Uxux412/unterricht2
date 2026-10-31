@@ -83,7 +83,7 @@
       <p class="kurz">${esc(m.kurz)}</p>
       ${m.merkmale ? `<div class="merkmale">${m.merkmale.map(x => `<span>${esc(x)}</span>`).join('')}</div>` : ''}
       <div class="aktionen">${geplant ? '<span class="unterzeile">in Vorbereitung</span>' : `
-        <a class="oeffnen" href="${wurzel}${m.pfad}">Öffnen →</a>
+        <a class="oeffnen" href="${/^https?:/.test(m.pfad) ? m.pfad : wurzel + m.pfad}">Öffnen →</a>
         <button class="qr" onclick="Seite.qr('${m.id}')">📱 QR-Code</button>`}
       </div>
     </li>`;
@@ -151,7 +151,7 @@
 
     qr(id) {
       const m = D.materialien.find(x => x.id === id);
-      const url = new URL(wurzel + m.pfad, window.location.href).href;
+      const url = new URL(/^https?:/.test(m.pfad) ? m.pfad : wurzel + m.pfad, window.location.href).href;
       document.getElementById('qrTitel').innerText = m.name;
       document.getElementById('qrBild').src =
         `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=10&data=${encodeURIComponent(url)}`;
