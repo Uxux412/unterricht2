@@ -665,6 +665,7 @@
       }
     }
   </style>
+<script src="qr.js"></script>
 </head>
 <body>
 
@@ -1082,8 +1083,7 @@
 
     function updateQrCode(url) {
       const cleanUrl = url.trim() || DEFAULT_GITHUB_URL;
-      const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(cleanUrl)}`;
-      document.getElementById('qrImage').src = qrApi;
+      document.getElementById('qrImage').src = QR.dataUrl(cleanUrl, 8);
     }
 
     // ---------- Darstellung ----------
