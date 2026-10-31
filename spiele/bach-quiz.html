@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1, 2 oder 3 · Johann Sebastian Bach</title>
+<style>
+  :root{ --ink:#262626; --grey:#6e6e6e; --bg:#ffffff; --linie:#e2e2e2;
+         --rot:#c00000; --gruen:#1b7f3b; --blau:#15509e; }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --ink:#f2f2f2; --grey:#a8a8a8; --bg:#141414; --linie:#333;
+      --rot:#ff6b6b; --gruen:#4cc47a; --blau:#6fa8f5; } }
+  :root[data-theme="dark"]{ --ink:#f2f2f2; --grey:#a8a8a8; --bg:#141414; --linie:#333;
+      --rot:#ff6b6b; --gruen:#4cc47a; --blau:#6fa8f5; }
+  *{box-sizing:border-box}
+  html{scroll-snap-type:y mandatory; scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink);
+       font-family:"Poppins","Calibri","Segoe UI",system-ui,sans-serif}
+  header.top{position:fixed; top:0; left:0; right:0; z-index:5;
+       display:flex; justify-content:space-between; align-items:baseline; gap:16px; flex-wrap:wrap;
+       padding:12px 16px; background:var(--bg); border-bottom:1px solid var(--linie);
+       font-size:clamp(13px,1.3vw,18px)}
+  .ecken span{font-weight:700}
+  .ecken .c1{color:var(--rot)} .ecken .c2{color:var(--gruen)} .ecken .c3{color:var(--blau)}
+  section.f{min-height:100vh; scroll-snap-align:start; display:flex; flex-direction:column;
+       justify-content:center; padding:104px 16px 56px; max-width:1200px; margin:0 auto}
+  .nr{color:var(--grey); font-size:clamp(14px,1.5vw,22px); margin:0 0 14px; letter-spacing:.04em}
+  h2{font-size:clamp(26px,3.6vw,54px); line-height:1.22; margin:0 0 clamp(22px,3vh,46px); font-weight:700}
+  ol{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:clamp(14px,2.2vh,30px)}
+  li{display:flex; align-items:baseline; gap:clamp(16px,2vw,34px); transition:opacity .18s ease}
+  .z{font-weight:700; font-size:clamp(34px,4.6vw,76px); line-height:1; min-width:1.2em;
+     font-variant-numeric:tabular-nums}
+  .e1 .z{color:var(--rot)} .e2 .z{color:var(--gruen)} .e3 .z{color:var(--blau)}
+  .t{font-size:clamp(22px,2.9vw,46px); line-height:1.25}
+  .haken{font-size:clamp(26px,3.2vw,52px); font-weight:700; opacity:0; margin-left:.2em}
+  .e1 .haken{color:var(--rot)} .e2 .haken{color:var(--gruen)} .e3 .haken{color:var(--blau)}
+  .note{margin:clamp(24px,3.4vh,44px) 0 0; color:var(--grey); font-style:italic;
+        font-size:clamp(15px,1.6vw,24px); line-height:1.4; opacity:0; transition:opacity .18s ease}
+  .loesen{margin-top:clamp(20px,3vh,38px); align-self:flex-start; font:inherit;
+        font-size:clamp(14px,1.4vw,20px); color:var(--grey); background:none;
+        border:1px solid var(--linie); border-radius:999px; padding:8px 20px; cursor:pointer}
+  .loesen:hover{color:var(--ink); border-color:var(--grey)}
+  section.f.auf li:not(.ok){opacity:.26}
+  section.f.auf .ok .t{font-weight:700}
+  section.f.auf .ok .haken{opacity:1}
+  section.f.auf .note{opacity:1}
+  section.f.auf .loesen{visibility:hidden}
+  @media print{
+    html{scroll-snap-type:none}
+    header.top{position:static}
+    section.f{min-height:auto; page-break-after:always; padding:20px 0}
+    .note,.haken{opacity:1}
+    li:not(.ok){opacity:1}
+    .ok .t{font-weight:700}
+    .loesen{display:none}
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <b>1, 2 oder 3 · Johann Sebastian Bach</b>
+  <span class="ecken"><span class="c1">1 rote Ecke</span> &middot; <span class="c2">2 grüne Ecke</span> &middot; <span class="c3">3 blaue Ecke</span></span>
+</header>
+
+  <section class="f" tabindex="0">
+    <p class="nr">Frage 1 von 10</p>
+    <h2>In welchem Jahr wurde Johann Sebastian Bach geboren?</h2>
+    <ol>
+      <li class="e1"><span class="z">1</span><span class="t">1585</span><span class="haken">&#10003;</span></li>
+      <li class="e2 ok"><span class="z">2</span><span class="t">1685</span><span class="haken">&#10003;</span></li>
+      <li class="e3"><span class="z">3</span><span class="t">1785</span><span class="haken">&#10003;</span></li>
+    </ol>
+    <p class="note">Am 21. März 1685. Das ist über 340 Jahre her.</p>
+    <button class="loesen" type="button">Auflösen</button>
+  </section>
+
+  <section class="f" tabindex="0">
+    <p class="nr">Frage 2 von 10</p>
+    <h2>Welche berühmten Werke hat Bach geschrieben?</h2>
+    <ol>
+      <li class="e1"><span class="z">1</span><span class="t">Die Zauberflöte und Für Elise</span><span class="haken">&#10003;</span></li>
+      <li class="e2"><span class="z">2</span><span class="t">Die vier Jahreszeiten und die Mondscheinsonate</span><span class="haken">&#10003;</span></li>
+      <li class="e3 ok"><span class="z">3</span><span class="t">Das Weihnachtsoratorium und die Brandenburgischen Konzerte</span><span class="haken">&#10003;</span></li>
+    </ol>
+    <p class="note">Das Weihnachtsoratorium wird bis heute jedes Jahr an Weihnachten gespielt.</p>
+    <button class="loesen" type="button">Auflösen</button>
+  </section>
+
+  <section class="f" tabindex="0">
+    <p class="nr">Frage 3 von 10</p>
+    <h2>Welche Instrumente spielte Bach selbst?</h2>
+    <ol>
+      <li class="e1 ok"><span class="z">1</span><span class="t">Orgel, Cembalo und Geige</span><span class="haken">&#10003;</span></li>
+      <li class="e2"><span class="z">2</span><span class="t">Trompete und Schlagzeug</span><span class="haken">&#10003;</span></li>
+      <li class="e3"><span class="z">3</span><span class="t">Klarinette und Harfe</span><span class="haken">&#10003;</span></li>
+    </ol>
+    <p class="note">Vor allem die Orgel. Damit verdiente er sein Geld – er war in mehreren Städten Organist.</p>
+    <button class="loesen" type="button">Auflösen</button>
+  </section>
+
+  <section class="f" tabindex="0">
+    <p class="nr">Frage 4 von 10</p>
+    <h2>Wo wurde Johann Sebastian Bach geboren?</h2>
+    <ol>
+      <li class="e1"><span class="z">1</span><span class="t">In Wien</span><span class="haken">&#10003;</span></li>
+      <li class="e2"><span class="z">2</span><span class="t">In Leipzig</span><span class="haken">&#10003;</span></li>
+      <li class="e3 ok"><span class="z">3</span><span class="t">In Eisenach</span><span class="haken">&#10003;</span></li>
+    </ol>
+    <p class="note">In Eisenach in Thüringen. Sein Geburtshaus kann man dort heute besichtigen.</p>
+    <button class="loesen" type="button">Auflösen</button>
+  </section>
+
+  <section class="f" tabindex="0">
+    <p class="nr">Frage 5 von 10</p>
+    <h2>Wie hieß Bachs erste Frau?</h2>
+    <ol>
+      <li class="e1 ok"><span class="z">1</span><span class="t">Maria Barbara</span><span class="haken">&#10003;</span></li>
+      <li class="e2"><span class="z">2</span><span class="t">Anna Magdalena</span><span class="haken">&#10003;</span></li>
+      <li class="e3"><span class="z">3</span><span class="t">Elisabeth</span><span class="haken">&#10003;</span></li>
+    </ol>
+    <p class="note">Maria Barbara war sogar mit ihm verwandt. Anna Magdalena war seine zweite Frau.</p>
+    <button class="loesen" type="button">Auflösen</button>
+  </section>
+
+  <section class="f" tabindex="0">
+    <p class="nr">Frage 6 von 10</p>
+    <h2>Wie viele Kinder hatte Bach insgesamt?</h2>
+    <ol>
+      <li class="e1"><span class="z">1</span><span class="t">8 Kinder</span><span class="haken">&#10003;</span></li>
+      <li class="e2 ok"><span class="z">2</span><span class="t">20 Kinder</span><span class="haken">&#10003;</span></li>
+      <li class="e3"><span class="z">3</span><span class="t">12 Kinder</span><span class="haken">&#10003;</span></li>
+    </ol>
+    <p class="note">Sieben mit seiner ersten Frau, dreizehn mit seiner zweiten. Nur etwa die Hälfte wurde erwachsen – damals starben viele Kinder sehr früh.</p>
+    <button class="loesen" type="button">Auflösen</button>
+  </section>
+
+  <section class="f" tabindex="0">
+    <p class="nr">Frage 7 von 10</p>
+    <h2>In welcher Kirche arbeitete Bach als Kantor?</h2>
+    <ol>
+      <li class="e1"><span class="z">1</span><span class="t">In der Frauenkirche in Dresden</span><span class="haken">&#10003;</span></li>
+      <li class="e2"><span class="z">2</span><span class="t">In der Nikolaikirche in Berlin</span><span class="haken">&#10003;</span></li>
+      <li class="e3 ok"><span class="z">3</span><span class="t">In der Thomaskirche in Leipzig</span><span class="haken">&#10003;</span></li>
+    </ol>
+    <p class="note">Ab 1723, und das 27 Jahre lang bis zu seinem Tod. Er leitete dort den Thomanerchor.</p>
+    <button class="loesen" type="button">Auflösen</button>
+  </section>
+
+  <section class="f" tabindex="0">
+    <p class="nr">Frage 8 von 10</p>
+    <h2>In welchem Jahr starb Johann Sebastian Bach?</h2>
+    <ol>
+      <li class="e1"><span class="z">1</span><span class="t">1700</span><span class="haken">&#10003;</span></li>
+      <li class="e2 ok"><span class="z">2</span><span class="t">1750</span><span class="haken">&#10003;</span></li>
+      <li class="e3"><span class="z">3</span><span class="t">1800</span><span class="haken">&#10003;</span></li>
+    </ol>
+    <p class="note">Am 28. Juli 1750, mit 65 Jahren.</p>
+    <button class="loesen" type="button">Auflösen</button>
+  </section>
+
+  <section class="f" tabindex="0">
+    <p class="nr">Frage 9 von 10</p>
+    <h2>Wo befindet sich Bachs Grab heute?</h2>
+    <ol>
+      <li class="e1 ok"><span class="z">1</span><span class="t">In der Thomaskirche in Leipzig</span><span class="haken">&#10003;</span></li>
+      <li class="e2"><span class="z">2</span><span class="t">In Eisenach, wo er geboren wurde</span><span class="haken">&#10003;</span></li>
+      <li class="e3"><span class="z">3</span><span class="t">Auf einem Friedhof in Wien</span><span class="haken">&#10003;</span></li>
+    </ol>
+    <p class="note">Sein Grab wurde zweimal verlegt. Seit 1950 liegt er in der Thomaskirche, in der er so lange gearbeitet hat.</p>
+    <button class="loesen" type="button">Auflösen</button>
+  </section>
+
+  <section class="f" tabindex="0">
+    <p class="nr">Frage 10 von 10</p>
+    <h2>Wie alt war Bach, als seine Eltern starben?</h2>
+    <ol>
+      <li class="e1"><span class="z">1</span><span class="t">15 Jahre</span><span class="haken">&#10003;</span></li>
+      <li class="e2"><span class="z">2</span><span class="t">3 Jahre</span><span class="haken">&#10003;</span></li>
+      <li class="e3 ok"><span class="z">3</span><span class="t">9 Jahre</span><span class="haken">&#10003;</span></li>
+    </ol>
+    <p class="note">Erst starb die Mutter, ein Jahr später der Vater. Danach zog er zu seinem großen Bruder Johann Christoph.</p>
+    <button class="loesen" type="button">Auflösen</button>
+  </section>
+<script>
+  document.querySelectorAll("section.f").forEach(function(s){
+    function auf(){ s.classList.add("auf"); }
+    s.querySelector(".loesen").addEventListener("click", auf);
+    s.addEventListener("keydown", function(ev){
+      if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); auf(); }
+    });
+  });
+</script>
+</body>
+</html>
