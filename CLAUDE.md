@@ -9,3 +9,7 @@
   (Feld `pfad` immer mit `index.html` am Ende, damit es auch lokal geöffnet funktioniert). Sonst nichts ändern.
 - Pfade bestehender Materialien nicht verschieben: Schüler haben QR-Codes dazu.
 - Materialseiten verlinken mit „🏠 Übersicht“ (`href="../index.html"`) zurück zur Startseite.
+- Recht: Das Repo ist öffentlich. Hier nur Eigenes, Gemeinfreies oder frei Lizenziertes (Quelle nennen) hochladen.
+  Fremde Texte, Schulbuchauszüge, Fotos, Karikaturen nach 1900 nicht kopieren, sondern verlinken oder in eigenen Worten schreiben.
+  Keine Schülernamen, keine Schülerfotos, keine externen Schriften oder Tracker einbinden.
+- Jede neue Materialseite bekommt unten den Link „Impressum & Datenschutz“ auf `impressum/index.html`.

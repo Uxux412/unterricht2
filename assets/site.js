@@ -49,7 +49,7 @@
   function fuss() {
     return `<footer class="fuss"><div class="wrap">
       <span>${esc(D.titel)} · Unterrichtsmaterial · ${new Date().getFullYear()}</span>
-      <a href="${wurzel}index.html">Startseite</a>
+      <span><a href="${wurzel}index.html">Startseite</a> · <a href="${wurzel}impressum/index.html">Impressum &amp; Datenschutz</a></span>
     </div></footer>
     <div class="qr-fenster" id="qrFenster" onclick="if (event.target === this) Seite.qrZu()">
       <div class="qr-box">
