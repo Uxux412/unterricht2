@@ -12,9 +12,6 @@
   #hud { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; background: #263545;
          padding: 7px 14px; border-bottom: 2px solid #18222c; font-size: 14px; font-weight: bold; }
   #hud small { font-size: 12px; color: #cbd5e1; font-weight: normal; }
-  #btnAgent4 { background: #1e3a7a; color: #ffe066; border: 1px solid #f1c40f; border-radius: 4px; padding: 3px 9px;
-               font-size: 12px; font-weight: bold; cursor: pointer; }
-  #btnAgent4:hover { background: #2a50a6; }
   #wrap { position: relative; background: #161e22; }
   canvas { display: block; width: 100%; height: auto; aspect-ratio: 640 / 380;
            image-rendering: pixelated; image-rendering: crisp-edges; touch-action: none; background: #3b5c3b; }
@@ -54,25 +51,6 @@
   #victoryBox p { font-size: 14px; line-height: 1.45; margin-bottom: 14px; }
   #victoryBox button { background: #1e3a7a; color: #fff; border: 2px solid #f1c40f; padding: 8px 18px;
                        border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
-  /* Agent 4 – Visueller Screenshot- & Pixel-Schärfe-Inspektor */
-  #agent4Modal { position: absolute; inset: 0; background: rgba(12,16,23,.95); display: none;
-                 flex-direction: column; padding: 10px 14px; z-index: 20; overflow-y: auto; color: #e2e8f0; font-size: 12px; }
-  #agent4Head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155;
-                padding-bottom: 6px; margin-bottom: 8px; }
-  #agent4Head h3 { font-size: 14px; color: #ffe066; }
-  #agent4Grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
-  .snapCard { background: #1e293b; border: 1px solid #475569; border-radius: 6px; padding: 6px; text-align: center; }
-  .snapCard h4 { font-size: 12px; margin-bottom: 4px; color: #93c5fd; display: flex; justify-content: space-between; align-items: center; }
-  .snapCanvas { width: 100%; height: auto; aspect-ratio: 640 / 380; image-rendering: pixelated; border: 1px solid #0f172a; cursor: crosshair; }
-  #agent4Bottom { display: grid; grid-template-columns: 170px 1fr; gap: 10px; align-items: start; }
-  #loupeBox { background: #0f172a; border: 1px solid #475569; border-radius: 6px; padding: 6px; text-align: center; }
-  #loupeCanvas { width: 144px; height: 144px; image-rendering: pixelated; border: 2px solid #f1c40f; background: #000; display: block; margin: 4px auto; }
-  #agentReport { background: #1e293b; border: 1px solid #475569; border-radius: 6px; padding: 8px 10px; line-height: 1.4; }
-  .agBadge { display: inline-block; background: #14532d; color: #86efac; border: 1px solid #22c55e; padding: 1px 6px;
-             border-radius: 4px; font-weight: bold; font-size: 11px; margin-right: 4px; }
-  .dlBtn { background: #334155; color: #f8fafc; border: 1px solid #64748b; border-radius: 3px; padding: 2px 6px;
-           font-size: 10.5px; cursor: pointer; }
-  .dlBtn:hover { background: #475569; }
   /* Touch-Steuerkreuz unterhalb des Spielfelds */
   #pad { display: flex; justify-content: space-between; align-items: center; background: #263545;
          padding: 8px 14px; border-top: 2px solid #18222c; }
@@ -124,8 +102,7 @@
 <div id="game">
   <div id="hud">
     <span id="stars">⭐ Sterne: 0 / 12</span>
-    <small id="help">Pfeile/WASD · [E] Betreten · [G] Raster · [V] Pixel-Check</small>
-    <button id="btnAgent4" type="button">🔍 Agent 4: Pixel-Check [V]</button>
+    <small id="help">Pfeile/WASD · [E] Betreten · [G] Raster</small>
   </div>
   <div id="wrap">
     <canvas id="c" width="1280" height="760"></canvas>
@@ -136,33 +113,6 @@
         <h2>🎉 Alle 12 Sterne von Europa leuchten! 🎉</h2>
         <p>Stark gemacht! Du hast die Schmiede der Montanunion, die Ratshalle der EU-Organe, den Flipper-Bau der Gesetzgebung und das Markthaus des Binnenmarkts erfolgreich gemeistert.</p>
         <button id="closeVictory" type="button">Weiter im Dorf umsehen</button>
-      </div>
-    </div>
-    <div id="agent4Modal">
-      <div id="agent4Head">
-        <h3>🔍 4-Agenten Qualitäts-, Screenshot- & Pixel-Schärfe-Abgleich (1280×760 HiDPI)</h3>
-        <button id="closeAgent4" class="dlBtn" type="button" style="font-size:12px;padding:3px 10px;">✕ Schließen [V]</button>
-      </div>
-      <div id="agent4Grid">
-        <div class="snapCard">
-          <h4><span>1. Außenansicht (Dorfkarte Draufsicht)</span><button id="dlExt" class="dlBtn" type="button">⬇ PNG</button></h4>
-          <canvas id="snapExt" class="snapCanvas" width="1280" height="760"></canvas>
-        </div>
-        <div class="snapCard">
-          <h4><span>2. Innenansicht (Isometrische Holzstube)</span><button id="dlInt" class="dlBtn" type="button">⬇ PNG</button></h4>
-          <canvas id="snapInt" class="snapCanvas" width="1280" height="760"></canvas>
-        </div>
-      </div>
-      <div id="agent4Bottom">
-        <div id="loupeBox">
-          <strong>Model 1 (4×) &amp; Pixel-Lupe</strong>
-          <div style="display:flex;gap:6px;justify-content:center;align-items:center;margin:4px 0;">
-            <canvas id="model1Preview" width="152" height="192" style="width:76px;height:96px;image-rendering:pixelated;border:2px solid #f1c40f;background:#1e242b;"></canvas>
-            <canvas id="loupeCanvas" width="36" height="36" style="width:96px;height:96px;margin:0;"></canvas>
-          </div>
-          <small id="loupeInfo">Model 1 (links) · Lupe (rechts)</small>
-        </div>
-        <div id="agentReport"></div>
       </div>
     </div>
   </div>
@@ -423,6 +373,7 @@ const victoryEl = document.getElementById("victory");
 const player = { c: 15, r: 14, dir: "down" }; // Start auf dem Weg südlich des Brunnens
 let stars = 0, showGrid = false, modalOpen = false, victoryShown = false, current = null, lastMove = 0;
 const solved = {};
+const starBorn = [];
 
 function tile(c, r) { return (c < 0 || r < 0 || c >= COLS || r >= ROWS) ? "#" : MAP[r][c]; }
 function walkable(c, r) { return !SOLID.includes(tile(c, r)); }
@@ -563,11 +514,6 @@ const DIRS = {
   ArrowRight: [1, 0], KeyD: [1, 0]
 };
 window.addEventListener("keydown", e => {
-  if (e.code === "KeyV") {
-    e.preventDefault();
-    toggleAgent4();
-    return;
-  }
   if (modalOpen) {
     if (e.code === "Escape") closeHouse();
     return;
@@ -2048,7 +1994,32 @@ function renderVillage(t) {
   // 12 leuchtende Goldsterne im äußeren Ring um den Brunnen
   for (let i = 0; i < 12; i++) {
     const a = -Math.PI / 2 + i * Math.PI / 6;
-    drawStarAt1280(640 + Math.round(Math.cos(a) * 102), 392 + Math.round(Math.sin(a) * 78), i < stars, t, i);
+    const sx = 640 + Math.round(Math.cos(a) * 102), sy = 392 + Math.round(Math.sin(a) * 78);
+    if (i >= stars) { pebble1280(sx, sy + 6); continue; }
+    if (starBorn[i] === undefined) starBorn[i] = t + (i % 3) * 450; // 3 Sterne nacheinander
+    const age = t - starBorn[i];
+    if (age < 0) { pebble1280(sx, sy + 6); continue; }
+    if (age < 700) {
+      // Entstehen: Lichtblitz + wachsender Stern
+      const k = age / 700, s = Math.sin(k * Math.PI / 2) * (1 + 0.25 * Math.sin(k * Math.PI));
+      activeCtx.save();
+      activeCtx.globalCompositeOperation = "lighter";
+      const r = 10 + 50 * k;
+      const g = activeCtx.createRadialGradient(sx, sy, 1, sx, sy, r);
+      g.addColorStop(0, "rgba(255,255,220," + (1 - k) + ")");
+      g.addColorStop(1, "rgba(255,200,40,0)");
+      activeCtx.fillStyle = g;
+      activeCtx.fillRect(sx - r, sy - r, r * 2, r * 2);
+      activeCtx.restore();
+      activeCtx.save();
+      activeCtx.translate(sx, sy);
+      activeCtx.scale(s, s);
+      activeCtx.translate(-sx, -sy);
+      drawStarAt1280(sx, sy, true, t, i);
+      activeCtx.restore();
+      continue;
+    }
+    drawStarAt1280(sx, sy, true, t, i);
   }
 
   // Spielfigur
@@ -2076,105 +2047,6 @@ function render(t) {
   if (modalOpen) drawInterior(t);
   else renderVillage(t);
 }
-
-// =====================================================================
-// AGENT 4 & AGENT 5 – VISUELLER SCREENSHOT- & 1PX-SCHÄRFE-INSPEKTOR
-// =====================================================================
-const agent4Modal = document.getElementById("agent4Modal");
-const snapExt = document.getElementById("snapExt");
-const snapInt = document.getElementById("snapInt");
-const loupeCanvas = document.getElementById("loupeCanvas");
-const loupeCtx = loupeCanvas.getContext("2d");
-loupeCtx.imageSmoothingEnabled = false;
-
-function measurePixelSharpness(imageData) {
-  const d = imageData.data, w = imageData.width, h = imageData.height;
-  let microTransitions = 0, totalChecks = 0, outlinePixels = 0;
-  for (let y = 12; y < h - 12; y += 6) {
-    for (let x = 12; x < w - 12; x += 6) {
-      const i = (y * w + x) * 4;
-      const r = d[i], g = d[i + 1], b = d[i + 2];
-      if (r < 42 && g < 42 && b < 42) outlinePixels++;
-      const j = (y * w + (x + 1)) * 4;
-      const diff1 = Math.abs(r - d[j]) + Math.abs(g - d[j + 1]) + Math.abs(b - d[j + 2]);
-      if (diff1 > 12) microTransitions++;
-      totalChecks++;
-    }
-  }
-  return {
-    detailDensityPct: Math.min(100, Math.round((microTransitions / totalChecks) * 260)),
-    outlinePct: Math.round((outlinePixels / totalChecks) * 100)
-  };
-}
-
-function runFourAgentLoop() {
-  const prevStars = stars;
-  stars = 6;
-  renderVillage(1200);
-  snapExt.getContext("2d").drawImage(canvas, 0, 0);
-  const extMetrics = measurePixelSharpness(ctx.getImageData(0, 0, canvas.width, canvas.height));
-
-  drawInterior(1200);
-  snapInt.getContext("2d").drawImage(canvas, 0, 0);
-  const intMetrics = measurePixelSharpness(ctx.getImageData(0, 0, canvas.width, canvas.height));
-  stars = prevStars;
-  render(performance.now());
-
-  // 4× Vorschau von "Model 1" im Agent-4-Inspektor rendern
-  const m1Canvas = document.getElementById("model1Preview");
-  if (m1Canvas) {
-    const prev = activeCtx;
-    activeCtx = m1Canvas.getContext("2d");
-    activeCtx.imageSmoothingEnabled = false;
-    activeCtx.fillStyle = "#1e242b";
-    activeCtx.fillRect(0, 0, m1Canvas.width, m1Canvas.height);
-    bitmapP(MODEL1_SPRITE, 0, 0, 4, MODEL1_PAL, false);
-    activeCtx = prev;
-  }
-
-  const testErrors = selfTest();
-  const reportEl = document.getElementById("agentReport");
-  reportEl.innerHTML =
-    `<div><span class="agBadge">Agent 5 · 1px Pixel-Shader</span>` +
-    `<strong>Ursache der Grobpixeligkeit behoben:</strong> Statt grober 4×4-Blöcke im 640×380-Raum arbeitet <code>TEIL D</code> jetzt mit echtem 1:1 Per-Pixel-Shading (<code>1280×760</code>, 1 Kachel = <code>40×40</code> Pixel) und Offscreen-Sprite-Caching für abgerundete Einzelsteine, Rauten-Schindeln, 6-Kugel-Laubbäume und gewellte Heckenkonturen.</div>` +
-    `<div style="margin-top:4px;"><span class="agBadge">Agent 1–3 · Spiel & Modul</span>` +
-    `<strong>MeilensteineModul & Selbsttest:</strong> Schmiede öffnet das 5-Ereignisse-Modul („IN VIELFALT GEEINT“), ${testErrors.length === 0 ? "alle 4 Türen erreichbar, 0 Fehler." : testErrors.join(", ")}</div>` +
-    `<div style="margin-top:4px;"><span class="agBadge">Agent 4 · Mikro-Detail-Check</span>` +
-    `<strong>1px-Detaildichte:</strong> Außen: <strong>${extMetrics.detailDensityPct}%</strong> (1px-Konturanteil ${extMetrics.outlinePct}%) · Innen: <strong>${intMetrics.detailDensityPct}%</strong> (1px-Konturanteil ${intMetrics.outlinePct}%). Bewege die Maus über die Bilder für die 4× Lupe!</div>`;
-}
-
-function toggleAgent4() {
-  if (agent4Modal.style.display === "flex") {
-    agent4Modal.style.display = "none";
-  } else {
-    runFourAgentLoop();
-    agent4Modal.style.display = "flex";
-  }
-}
-
-document.getElementById("btnAgent4").addEventListener("click", toggleAgent4);
-document.getElementById("closeAgent4").addEventListener("click", toggleAgent4);
-
-[snapExt, snapInt].forEach((sc, idx) => {
-  sc.addEventListener("pointermove", e => {
-    const rect = sc.getBoundingClientRect();
-    const px = Math.max(18, Math.min(1262, Math.floor(((e.clientX - rect.left) / rect.width) * 1280)));
-    const py = Math.max(18, Math.min(742, Math.floor(((e.clientY - rect.top) / rect.height) * 760)));
-    loupeCtx.clearRect(0, 0, 36, 36);
-    loupeCtx.drawImage(sc, px - 18, py - 18, 36, 36, 0, 0, 36, 36);
-    document.getElementById("loupeInfo").textContent =
-      (idx === 0 ? "Außen" : "Innen") + " · Pixel (" + px + ", " + py + ")";
-  });
-});
-
-function downloadCanvas(sourceCanvas, filename) {
-  const link = document.createElement("a");
-  link.download = filename;
-  link.href = sourceCanvas.toDataURL("image/png");
-  link.click();
-}
-document.getElementById("dlExt").addEventListener("click", () => downloadCanvas(snapExt, "euroquest-aussen.png"));
-document.getElementById("dlInt").addEventListener("click", () => downloadCanvas(snapInt, "euroquest-innen.png"));
 
 function loop(t) { render(t); requestAnimationFrame(loop); }
 selfTest();
