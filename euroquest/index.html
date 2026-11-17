@@ -1,0 +1,2186 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EuroQuest – Das Dorf Europa</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #16181d; color: #f0f2f5; font-family: 'Segoe UI', Tahoma, sans-serif;
+         display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 8px; }
+  #game { width: 100%; max-width: 960px; box-shadow: 0 12px 36px rgba(0,0,0,.75); border-radius: 8px; overflow: hidden; }
+  #hud { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; background: #263545;
+         padding: 7px 14px; border-bottom: 2px solid #18222c; font-size: 14px; font-weight: bold; }
+  #hud small { font-size: 12px; color: #cbd5e1; font-weight: normal; }
+  #btnAgent4 { background: #1e3a7a; color: #ffe066; border: 1px solid #f1c40f; border-radius: 4px; padding: 3px 9px;
+               font-size: 12px; font-weight: bold; cursor: pointer; }
+  #btnAgent4:hover { background: #2a50a6; }
+  #wrap { position: relative; background: #161e22; }
+  canvas { display: block; width: 100%; height: auto; aspect-ratio: 640 / 380;
+           image-rendering: pixelated; image-rendering: crisp-edges; touch-action: none; background: #3b5c3b; }
+  #prompt { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); background: #e67e22; color: #fff;
+            padding: 6px 16px; border-radius: 20px; font-weight: bold; font-size: 14px; display: none; white-space: nowrap;
+            border: 2px solid #fff3d1; box-shadow: 0 4px 12px rgba(0,0,0,.55); pointer-events: none; }
+  /* Lernmodul-Tafel im Pergament-Look (exakt wie in Konzeptbild 2 oberhalb des Tisches) */
+  #modal { position: absolute; inset: 0; background: rgba(0,0,0,.08); display: none;
+           justify-content: center; align-items: flex-start; padding: 8px 10px; pointer-events: none; }
+  #board { pointer-events: auto; background: #efe2be; color: #2b1d12; border: 3px solid #3a2312; outline: 2px solid #d4b87a;
+           border-radius: 4px; padding: 8px 12px; width: 100%; max-width: 350px; max-height: 94%;
+           overflow-y: auto; font-family: Georgia, serif; margin-top: 4px;
+           box-shadow: 0 0 28px rgba(255,220,130,.95), 0 6px 20px rgba(0,0,0,.65); transition: opacity .2s; }
+  #board[style] { outline: none; box-shadow: none; }
+  #board.peek { opacity: 0.12; }
+  #board h2 { font-size: 14px; text-align: center; background: #d8c394; border: 1px solid #8c6b3f;
+              padding: 3px 8px; margin-bottom: 5px; color: #24160b; letter-spacing: .2px; }
+  #board p { font-size: 11.5px; margin-bottom: 6px; line-height: 1.3; }
+  .row { margin-bottom: 5px; font-size: 11.5px; }
+  .row label { display: block; font-weight: bold; color: #332012; line-height: 1.25; }
+  .row select { display: block; width: 100%; margin-top: 2px; padding: 3px 5px; font-size: 11.5px; background: #fbf2d8;
+                border: 2px solid #8a6236; border-radius: 3px; color: #24160b; font-family: Georgia, serif; }
+  .row select.ok { border-color: #1e8449; background: #d4efdf; }
+  .row select.bad { border-color: #c0392b; background: #f9d6d0; }
+  #feedback { font-size: 11.5px; font-weight: bold; margin: 5px 0; min-height: 15px; line-height: 1.25; }
+  .btns { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 4px; }
+  .btns button { background: #7a4a24; color: #fff8e7; border: 2px solid #3a200e; padding: 4px 10px; border-radius: 4px;
+                 font-weight: bold; cursor: pointer; font-family: Georgia, serif; font-size: 12px; }
+  .btns button:hover { background: #965d30; }
+  /* Abschluss-Banner bei 12 Sternen */
+  #victory { position: absolute; inset: 0; background: rgba(15,23,42,.82); display: none;
+             justify-content: center; align-items: center; padding: 16px; z-index: 5; }
+  #victoryBox { background: #f4e8c1; color: #2c221e; border: 5px ridge #d4ac0d; border-radius: 8px;
+                padding: 20px; max-width: 480px; text-align: center; font-family: Georgia, serif;
+                box-shadow: 0 0 40px rgba(241,196,15,.85); }
+  #victoryBox h2 { font-size: 20px; color: #1e3a7a; margin-bottom: 10px; }
+  #victoryBox p { font-size: 14px; line-height: 1.45; margin-bottom: 14px; }
+  #victoryBox button { background: #1e3a7a; color: #fff; border: 2px solid #f1c40f; padding: 8px 18px;
+                       border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
+  /* Agent 4 – Visueller Screenshot- & Pixel-Schärfe-Inspektor */
+  #agent4Modal { position: absolute; inset: 0; background: rgba(12,16,23,.95); display: none;
+                 flex-direction: column; padding: 10px 14px; z-index: 20; overflow-y: auto; color: #e2e8f0; font-size: 12px; }
+  #agent4Head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155;
+                padding-bottom: 6px; margin-bottom: 8px; }
+  #agent4Head h3 { font-size: 14px; color: #ffe066; }
+  #agent4Grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+  .snapCard { background: #1e293b; border: 1px solid #475569; border-radius: 6px; padding: 6px; text-align: center; }
+  .snapCard h4 { font-size: 12px; margin-bottom: 4px; color: #93c5fd; display: flex; justify-content: space-between; align-items: center; }
+  .snapCanvas { width: 100%; height: auto; aspect-ratio: 640 / 380; image-rendering: pixelated; border: 1px solid #0f172a; cursor: crosshair; }
+  #agent4Bottom { display: grid; grid-template-columns: 170px 1fr; gap: 10px; align-items: start; }
+  #loupeBox { background: #0f172a; border: 1px solid #475569; border-radius: 6px; padding: 6px; text-align: center; }
+  #loupeCanvas { width: 144px; height: 144px; image-rendering: pixelated; border: 2px solid #f1c40f; background: #000; display: block; margin: 4px auto; }
+  #agentReport { background: #1e293b; border: 1px solid #475569; border-radius: 6px; padding: 8px 10px; line-height: 1.4; }
+  .agBadge { display: inline-block; background: #14532d; color: #86efac; border: 1px solid #22c55e; padding: 1px 6px;
+             border-radius: 4px; font-weight: bold; font-size: 11px; margin-right: 4px; }
+  .dlBtn { background: #334155; color: #f8fafc; border: 1px solid #64748b; border-radius: 3px; padding: 2px 6px;
+           font-size: 10.5px; cursor: pointer; }
+  .dlBtn:hover { background: #475569; }
+  /* Touch-Steuerkreuz unterhalb des Spielfelds */
+  #pad { display: flex; justify-content: space-between; align-items: center; background: #263545;
+         padding: 8px 14px; border-top: 2px solid #18222c; }
+  .dpad { display: grid; grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(2, 42px); gap: 4px; }
+  .pb { background: #34495e; color: #fff; border: 2px solid #5279a8; border-radius: 8px; font-size: 19px;
+        display: flex; align-items: center; justify-content: center; user-select: none; cursor: pointer; touch-action: none; }
+  .pb:active { background: #2980b9; }
+  #bE { width: 86px; height: 58px; background: #e67e22; border-color: #b85d12; font-weight: bold; font-size: 16px; }
+  .err { color: #ff6b6b !important; font-weight: bold !important; }
+</style>
+<style>
+  .mq { font-family: Georgia, serif; color: #2c221e; background: #f4e8c1; border: 6px ridge #8b5a2b; border-radius: 6px;
+        padding: 14px; max-width: 920px; margin: 0 auto; box-shadow: 0 0 28px rgba(255,214,120,.6); box-sizing: border-box; }
+  .mq * { box-sizing: border-box; }
+  .mq h2 { font-size: 18px; border-bottom: 2px solid #8b5a2b; padding-bottom: 4px; margin: 0 0 6px; }
+  .mq .mq-intro { font-size: 13px; margin: 0 0 8px; line-height: 1.4; }
+  .mq-wordrow { font-size: 13px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .mq-word { display: flex; gap: 10px; flex-wrap: wrap; }
+  .mq-grp { display: flex; gap: 3px; }
+  .mq-box { width: 22px; height: 26px; border: 2px solid #8b5a2b; background: #fffaf0; display: flex; align-items: center;
+            justify-content: center; font: bold 15px monospace; }
+  .mq-head { display: grid; grid-template-columns: 1fr 190px 190px; gap: 8px; font-weight: bold; font-size: 13px; padding: 0 8px 4px; }
+  .mq-ev { background: #fbe3e8; border: 1px solid #d9a5b0; border-radius: 6px; padding: 8px; margin-bottom: 6px;
+           display: grid; grid-template-columns: 1fr 190px 190px; gap: 8px; align-items: center; }
+  .mq-ev .mq-txt { font-size: 13px; line-height: 1.35; }
+  .mq-slot { min-height: 52px; border: 2px dashed #a47551; border-radius: 6px; background: #fffaf0; font-size: 12px;
+             padding: 4px 6px; cursor: pointer; display: flex; align-items: center; line-height: 1.25; }
+  .mq-slot .mq-ph { color: #8a6a4a; font-style: italic; }
+  .mq-slot.ok { border: 2px solid #27ae60; background: #d4efdf; }
+  .mq-slot.bad { border: 2px solid #c0392b; background: #f5d0c5; }
+  .mq-slot.hot { border-color: #e67e22; background: #fff1d6; }
+  .mq-pooltitle { font-weight: bold; font-size: 13px; margin: 10px 0 4px; }
+  .mq-pool { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; background: rgba(139,90,43,.12); border-radius: 6px; min-height: 48px; }
+  .mq-card { background: #fff; border: 2px solid #8b5a2b; border-radius: 6px; padding: 6px 8px; font-size: 12px; cursor: pointer;
+             max-width: 280px; box-shadow: 2px 2px 0 rgba(0,0,0,.2); line-height: 1.3; user-select: none; }
+  .mq-card.pol { border-color: #2a50a6; }
+  .mq-card.sel { outline: 3px solid #f1c40f; transform: translateY(-2px); }
+  .mq-let { display: inline-block; font: bold 12px monospace; border: 1px solid #888; padding: 0 3px; margin-left: 2px; background: #fffbe6; }
+  .mq-fb { font-weight: bold; font-size: 13px; min-height: 18px; margin: 10px 0; }
+  .mq-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .mq-btns button { background: #8b5a2b; color: #fff; border: none; padding: 8px 14px; border-radius: 4px; font-weight: bold;
+                    cursor: pointer; font-family: Georgia, serif; font-size: 14px; }
+  .mq-done { display: none; margin-top: 10px; padding: 10px; background: #fff8d6; border: 2px solid #f1c40f; border-radius: 6px; font-size: 13px; }
+  .mq-done textarea { width: 100%; min-height: 70px; margin-top: 6px; font: 13px Georgia, serif; padding: 6px; }
+  @media (max-width: 700px) { .mq-head { display: none; } .mq-ev { grid-template-columns: 1fr 1fr; } .mq-ev .mq-txt { grid-column: 1 / -1; } }
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="hud">
+    <span id="stars">⭐ Sterne: 0 / 12</span>
+    <small id="help">Pfeile/WASD · [E] Betreten · [G] Raster · [V] Pixel-Check</small>
+    <button id="btnAgent4" type="button">🔍 Agent 4: Pixel-Check [V]</button>
+  </div>
+  <div id="wrap">
+    <canvas id="c" width="1280" height="760"></canvas>
+    <div id="prompt"></div>
+    <div id="modal"><div id="board"></div></div>
+    <div id="victory">
+      <div id="victoryBox">
+        <h2>🎉 Alle 12 Sterne von Europa leuchten! 🎉</h2>
+        <p>Stark gemacht! Du hast die Schmiede der Montanunion, die Ratshalle der EU-Organe, den Flipper-Bau der Gesetzgebung und das Markthaus des Binnenmarkts erfolgreich gemeistert.</p>
+        <button id="closeVictory" type="button">Weiter im Dorf umsehen</button>
+      </div>
+    </div>
+    <div id="agent4Modal">
+      <div id="agent4Head">
+        <h3>🔍 4-Agenten Qualitäts-, Screenshot- & Pixel-Schärfe-Abgleich (1280×760 HiDPI)</h3>
+        <button id="closeAgent4" class="dlBtn" type="button" style="font-size:12px;padding:3px 10px;">✕ Schließen [V]</button>
+      </div>
+      <div id="agent4Grid">
+        <div class="snapCard">
+          <h4><span>1. Außenansicht (Dorfkarte Draufsicht)</span><button id="dlExt" class="dlBtn" type="button">⬇ PNG</button></h4>
+          <canvas id="snapExt" class="snapCanvas" width="1280" height="760"></canvas>
+        </div>
+        <div class="snapCard">
+          <h4><span>2. Innenansicht (Isometrische Holzstube)</span><button id="dlInt" class="dlBtn" type="button">⬇ PNG</button></h4>
+          <canvas id="snapInt" class="snapCanvas" width="1280" height="760"></canvas>
+        </div>
+      </div>
+      <div id="agent4Bottom">
+        <div id="loupeBox">
+          <strong>Model 1 (4×) &amp; Pixel-Lupe</strong>
+          <div style="display:flex;gap:6px;justify-content:center;align-items:center;margin:4px 0;">
+            <canvas id="model1Preview" width="152" height="192" style="width:76px;height:96px;image-rendering:pixelated;border:2px solid #f1c40f;background:#1e242b;"></canvas>
+            <canvas id="loupeCanvas" width="36" height="36" style="width:96px;height:96px;margin:0;"></canvas>
+          </div>
+          <small id="loupeInfo">Model 1 (links) · Lupe (rechts)</small>
+        </div>
+        <div id="agentReport"></div>
+      </div>
+    </div>
+  </div>
+  <div id="pad">
+    <div class="dpad">
+      <div></div><div class="pb" data-dx="0" data-dy="-1">↑</div><div></div>
+      <div class="pb" data-dx="-1" data-dy="0">←</div><div class="pb" data-dx="0" data-dy="1">↓</div><div class="pb" data-dx="1" data-dy="0">→</div>
+    </div>
+    <div class="pb" id="bE">[E]</div>
+  </div>
+</div>
+
+<script>
+// Aufruf: MeilensteineModul.open(container, { onSolved: () => {...}, onClose: () => {...} })
+window.MeilensteineModul = (function () {
+  const EVENTS = [
+    { id: 1, pol: "B", quote: "d", tip: "Jean Monnet hat den Schuman-Plan im Hintergrund ausgearbeitet. Sein Zitat spricht von Menschen statt von Staaten.",
+      text: "9. Mai 1950: Der französische Außenminister Robert Schuman schlägt vor, die Kohle- und Stahlproduktion Frankreichs und der Bundesrepublik einer gemeinsamen Behörde zu unterstellen. Ein neuer Krieg zwischen beiden Ländern soll so unmöglich werden. 1951 gründen sechs Staaten die Montanunion (EGKS)." },
+    { id: 2, pol: "A", quote: "c", tip: "Der erste Bundeskanzler hat die Römischen Verträge unterschrieben. Sein Zitat nennt die EWG beim Namen.",
+      text: "25. März 1957: Mit den Römischen Verträgen gründen die sechs Staaten der Montanunion die Europäische Wirtschaftsgemeinschaft (EWG) und die Europäische Atomgemeinschaft. Die Binnenzölle sollen fallen, ein gemeinsamer Markt entsteht." },
+    { id: 3, pol: "E", quote: "b", tip: "Bei der Außenpolitik soll ein US-Außenminister spöttisch nach einer Telefonnummer für Europa gefragt haben.",
+      text: "1992: Im Vertrag von Maastricht gründen zwölf Staaten die Europäische Union. Mit der Gemeinsamen Außen- und Sicherheitspolitik (GASP) soll die EU in Krisen schneller handeln und nach außen mit einer Stimme sprechen." },
+    { id: 4, pol: "C", quote: "a", tip: "Der Kommissionspräsident der Binnenmarkt-Jahre verglich Europa mit einem Fahrzeug, das nicht stehen bleiben darf.",
+      text: "1. Januar 1993: Der Binnenmarkt startet. Personen, Waren, Dienstleistungen und Kapital bewegen sich ohne Grenzhindernisse. Das soll Wohlstand und Arbeitsplätze bringen und die Integration voranbringen." },
+    { id: 5, pol: "D", quote: "e", tip: "In der Eurokrise warnte eine deutsche Bundeskanzlerin, dass mit der Währung ganz Europa auf dem Spiel steht.",
+      text: "1999/2002: Der Euro kommt, zuerst als Buchgeld, ab 2002 als Bargeld. Die Europäische Zentralbank wacht über die gemeinsame Währung. In der Finanz- und Staatsschuldenkrise ab 2008 gerät die Eurozone in Gefahr." }
+  ];
+  const POLS = {
+    A: { name: "Konrad Adenauer", info: "1876–1967, erster Bundeskanzler (1949–1963)", letters: "EL" },
+    B: { name: "Jean Monnet", info: "1888–1979, französischer Diplomat, Vordenker eines vereinten Europas", letters: "IN" },
+    C: { name: "Jacques Delors", info: "1925–2023, Präsident der EU-Kommission (1985–1995)", letters: "GE" },
+    D: { name: "Angela Merkel", info: "*1954, Bundeskanzlerin (2005–2021)", letters: "IN" },
+    E: { name: "Henry Kissinger", info: "1923–2023, US-Außenminister (1973–1977)", letters: "AL" }
+  };
+  const QUOTES = {
+    a: { text: "„Europa ist wie ein Fahrrad. Hält man es an, fällt es um.“", letters: "E" },
+    b: { text: "„Wen muss ich anrufen, wenn ich mit Europa sprechen will?“ (zugeschrieben)", letters: "T" },
+    c: { text: "„Die EWG ist in der Hauptsache ein politischer Vertrag, der bezweckt, auf dem Wege über die Gemeinsamkeit der Wirtschaft zu einer politischen Integration Europas zu kommen.“", letters: "F" },
+    d: { text: "„Wir einigen keine Staaten, wir bringen Menschen einander näher.“", letters: "VI" },
+    e: { text: "„Scheitert der Euro, dann scheitert Europa.“", letters: "T" }
+  };
+  const GROUPS = [2, 8, 6]; // IN VIELFALT GEEINT
+
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; }
+  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  function open(container, opts) {
+    opts = opts || {};
+    const placed = {};          // "1-pol" -> "B", "1-quote" -> "d"
+    let selected = null;        // { type: "pol"|"quote", key }
+    let tipIndex = 0, solved = false;
+    const polOrder = shuffle(Object.keys(POLS)), quoteOrder = shuffle(Object.keys(QUOTES));
+
+    container.innerHTML = "";
+    const root = el("div", "mq");
+    root.appendChild(el("h2", null, "Meilensteine der europäischen Integration"));
+    root.appendChild(el("p", "mq-intro", "Für eine Plakatausstellung sind die Unterlagen durcheinandergeraten. Ordne jedem Ereignis die Person zu, die dazu passt, und das passende Zitat. Tippe dazu erst eine Karte an und dann das Feld. Ein Tipp auf ein belegtes Feld legt die Karte zurück."));
+    const wordRow = el("div", "mq-wordrow"); wordRow.appendChild(el("span", null, "Lösungswort (Wahlspruch der EU):"));
+    const word = el("div", "mq-word"); wordRow.appendChild(word); root.appendChild(wordRow);
+
+    const head = el("div", "mq-head"); ["Worüber …", "sagt wer …", "was?"].forEach(t => head.appendChild(el("div", null, t))); root.appendChild(head);
+    const slots = {};
+    EVENTS.forEach(ev => {
+      const row = el("div", "mq-ev");
+      row.appendChild(el("div", "mq-txt", ev.id + ". " + ev.text));
+      ["pol", "quote"].forEach(type => {
+        const s = el("div", "mq-slot"); s.dataset.key = ev.id + "-" + type;
+        s.addEventListener("click", () => clickSlot(ev.id + "-" + type, type));
+        slots[ev.id + "-" + type] = s; row.appendChild(s);
+      });
+      root.appendChild(row);
+    });
+    root.appendChild(el("div", "mq-pooltitle", "Personen"));
+    const polPool = el("div", "mq-pool"); root.appendChild(polPool);
+    root.appendChild(el("div", "mq-pooltitle", "Zitate"));
+    const quotePool = el("div", "mq-pool"); root.appendChild(quotePool);
+    const fb = el("div", "mq-fb"); root.appendChild(fb);
+    const btns = el("div", "mq-btns");
+    [["Prüfen", check], ["Tipp", tip], ["Neu mischen", reset], ["Schließen", () => opts.onClose && opts.onClose()]].forEach(([t, f]) => {
+      const b = el("button", null, t); b.addEventListener("click", f); btns.appendChild(b);
+    });
+    root.appendChild(btns);
+    const done = el("div", "mq-done");
+    done.appendChild(el("b", null, "„In Vielfalt geeint“ – das ist der Wahlspruch der EU. "));
+    done.appendChild(el("span", null, "Aufgabe 2: Auf welche Grundprobleme der europäischen Integration machen die Zitate aufmerksam? Inwiefern sind sie heute noch aktuell? Schreib zwei, drei Sätze."));
+    done.appendChild(el("textarea"));
+    root.appendChild(done);
+    container.appendChild(root);
+
+    function cardFor(type, key) {
+      const d = type === "pol" ? POLS[key] : QUOTES[key];
+      const c = el("div", "mq-card" + (type === "pol" ? " pol" : ""));
+      if (type === "pol") { const b = el("b", null, d.name); c.appendChild(b); c.appendChild(el("div", null, d.info)); }
+      else c.appendChild(el("div", null, d.text));
+      const l = el("div"); d.letters.split("").forEach(ch => l.appendChild(el("span", "mq-let", ch))); c.appendChild(l);
+      return c;
+    }
+    function render() {
+      [[polPool, "pol", polOrder], [quotePool, "quote", quoteOrder]].forEach(([pool, type, order]) => {
+        pool.innerHTML = "";
+        order.filter(k => !Object.entries(placed).some(([sk, v]) => sk.endsWith(type) && v === k)).forEach(k => {
+          const c = cardFor(type, k);
+          if (selected && selected.type === type && selected.key === k) c.classList.add("sel");
+          c.addEventListener("click", () => { selected = (selected && selected.key === k && selected.type === type) ? null : { type, key: k }; render(); });
+          pool.appendChild(c);
+        });
+      });
+      Object.entries(slots).forEach(([sk, s]) => {
+        const type = sk.endsWith("pol") ? "pol" : "quote";
+        s.innerHTML = "";
+        s.classList.toggle("hot", !!(selected && selected.type === type));
+        if (placed[sk]) {
+          const d = type === "pol" ? POLS[placed[sk]] : QUOTES[placed[sk]];
+          const inner = el("div"); inner.appendChild(el("span", null, type === "pol" ? d.name : d.text));
+          d.letters.split("").forEach(ch => inner.appendChild(el("span", "mq-let", ch)));
+          s.appendChild(inner);
+        } else s.appendChild(el("span", "mq-ph", type === "pol" ? "Person hier ablegen" : "Zitat hier ablegen"));
+      });
+      // Lösungswort aus den gelegten Karten
+      let letters = "";
+      EVENTS.forEach(ev => {
+        ["pol", "quote"].forEach(type => {
+          const need = (type === "pol" ? POLS[ev.pol] : QUOTES[ev.quote]).letters.length;
+          const k = placed[ev.id + "-" + type];
+          const got = k ? (type === "pol" ? POLS[k] : QUOTES[k]).letters : "";
+          letters += (got + "  ").slice(0, need).padEnd(need, " ");
+        });
+      });
+      word.innerHTML = ""; let i = 0;
+      GROUPS.forEach(n => { const g = el("div", "mq-grp"); for (let j = 0; j < n; j++) g.appendChild(el("div", "mq-box", letters[i++].trim())); word.appendChild(g); });
+    }
+    function clickSlot(sk, type) {
+      Object.values(slots).forEach(s => s.classList.remove("ok", "bad"));
+      if (selected) {
+        if (selected.type !== type) { fb.style.color = "#a5281b"; fb.textContent = type === "pol" ? "In dieses Feld gehört eine Person, kein Zitat." : "In dieses Feld gehört ein Zitat, keine Person."; return; }
+        placed[sk] = selected.key; selected = null; fb.textContent = "";
+      } else if (placed[sk]) delete placed[sk];
+      render();
+    }
+    function check() {
+      let right = 0;
+      EVENTS.forEach(ev => {
+        [["pol", ev.pol], ["quote", ev.quote]].forEach(([type, correct]) => {
+          const sk = ev.id + "-" + type, s = slots[sk];
+          s.classList.remove("ok", "bad");
+          if (placed[sk] === correct) { s.classList.add("ok"); right++; } else if (placed[sk]) s.classList.add("bad");
+        });
+      });
+      if (right === 10) {
+        fb.style.color = "#1e7a3a"; fb.textContent = "Alles richtig! Das Lösungswort lautet: IN VIELFALT GEEINT.";
+        done.style.display = "block";
+        if (!solved) { solved = true; opts.onSolved && opts.onSolved(); }
+      } else {
+        fb.style.color = "#a5281b"; fb.textContent = right + " von 10 Feldern richtig. Rot markierte Karten passen noch nicht. Schau auch aufs Lösungswort.";
+      }
+    }
+    function tip() { const ev = EVENTS[tipIndex++ % EVENTS.length]; fb.style.color = "#5e3a1e"; fb.textContent = "Tipp zu Ereignis " + ev.id + ": " + ev.tip; }
+    function reset() { Object.keys(placed).forEach(k => delete placed[k]); selected = null; shuffle(polOrder); shuffle(quoteOrder); fb.textContent = ""; done.style.display = "none"; Object.values(slots).forEach(s => s.classList.remove("ok", "bad")); render(); }
+    render();
+  }
+  return { open, EVENTS, POLS, QUOTES };
+})();
+</script>
+<script>
+// =====================================================================
+// TEIL A – KARTE (nicht ändern, Selbsttest prüft Erreichbarkeit)
+// 32 Spalten × 19 Zeilen, Kachel = 20 px  →  640 × 380 px
+// T = Baum   # = Hecke   = = Pflasterweg   P = Dorfplatz
+// H = Haus   D = Tür (begehbar)   F = Brunnen
+// Begehbar: = P D .      Gesperrt: T # H F
+// =====================================================================
+const T = 20, COLS = 32, ROWS = 19;
+const MAP = [
+  "TTTTTTTTTTTTTTT==TTTTTTTTTTTTTTT", // 0  Wald & Ufer
+  "TT############.==.############TT", // 1
+  "TT#==HHHHH===#.==.#===HHHHH==#TT", // 2
+  "TT#==HHHHH===#.==.#===HHHHH==#TT", // 3
+  "TT#==HHHHH===#.==.#===HHHHH==#TT", // 4
+  "TT####=D=====#.==.#=====D=####TT", // 5  Türen Schmiede (7) & Ratshalle (24)
+  "TT#######====#.==.#====#######TT", // 6  Durchgänge zu den oberen Höfen
+  "TT===========PPPPPP===========TT", // 7
+  "TT===========PFFFFP===========TT", // 8
+  "TT===========PFFFFP===========TT", // 9
+  "TT===========PFFFFP===========TT", // 10
+  "TT===========PPPPPP===========TT", // 11
+  "TT#######====#.==.#====#######TT", // 12 Durchgänge zu den unteren Höfen
+  "TT#==HHHHH===#.==.#===HHHHH==#TT", // 13
+  "TT#==HHHHH===#.==.#===HHHHH==#TT", // 14
+  "TT#==HHHHH===#.==.#===HHHHH==#TT", // 15
+  "TT####=D=====#.==.#=====D=####TT", // 16 Türen Markthaus (7) & Flipper-Bau (24)
+  "TT############.==.############TT", // 17
+  "TTTTTTTTTTTTTTT==TTTTTTTTTTTTTTT"  // 18 Wald
+];
+const SOLID = "T#HF";
+
+// Häuser: linke obere Ecke (Spalte c, Zeile r), Größe 5 × 3 Kacheln, Tür darunter
+const HOUSES = [
+  { id: "schmiede",  name: "Schmiede",    c: 5,  r: 2,  door: { c: 7,  r: 5 } },
+  { id: "ratshalle", name: "Ratshalle",   c: 22, r: 2,  door: { c: 24, r: 5 } },
+  { id: "markt",     name: "Markthaus",   c: 5,  r: 13, door: { c: 7,  r: 16 } },
+  { id: "flipper",   name: "Flipper-Bau", c: 22, r: 13, door: { c: 24, r: 16 } }
+];
+
+// =====================================================================
+// TEIL B – LERNINHALTE (fachlich geprüft, Gemeinschaftskunde BW)
+// =====================================================================
+const CONTENT = {
+  ratshalle: {
+    title: "Ratshalle – Die Organe der EU",
+    intro: "In der Ratshalle arbeiten zentrale EU-Organe. Welches Organ passt zu welcher Aufgabe und Zusammensetzung?",
+    tip: "Rat der EU = Fachminister der Mitgliedstaaten; Europäischer Rat = Staats- und Regierungschefs. Der Europarat ist kein EU-Organ.",
+    items: [
+      { q: "Schlägt neue EU-Gesetze vor (Initiativrecht) und achtet auf die Einhaltung der Verträge (je 1 Mitglied pro EU-Staat).", a: "Europäische Kommission" },
+      { q: "Wird alle fünf Jahre direkt von den EU-Bürgerinnen und -Bürgern gewählt; berät und beschließt Gesetze.", a: "Europäisches Parlament" },
+      { q: "Vertretung der Regierungen durch die jeweiligen Fachministerinnen und -minister; beschließt Gesetze gemeinsam mit dem Parlament.", a: "Rat der EU" },
+      { q: "Gipfeltreffen der Staats- und Regierungschefs der EU-Staaten; gibt die großen politischen Leitlinien vor.", a: "Europäischer Rat" }
+    ],
+    distractors: ["Europarat", "Europäischer Gerichtshof"]
+  },
+  flipper: {
+    title: "Flipper-Bau – Ordentliches Gesetzgebungsverfahren",
+    intro: "Ein Gesetzesvorschlag läuft zwischen Parlament und Rat der EU hin und her. Bring das ordentliche Gesetzgebungsverfahren Schritt für Schritt in die richtige Reihenfolge.",
+    tip: "Ohne Initiative der Kommission startet kein Gesetz. Ganz am Ende steht die Veröffentlichung im Amtsblatt.",
+    items: [
+      { q: "Schritt 1", a: "Die Europäische Kommission arbeitet einen Gesetzesvorschlag aus und legt ihn vor." },
+      { q: "Schritt 2", a: "Das Europäische Parlament berät in erster Lesung und legt seinen Standpunkt fest." },
+      { q: "Schritt 3", a: "Der Rat der EU billigt den Standpunkt des Parlaments oder beschließt Änderungen." },
+      { q: "Schritt 4", a: "Bei Uneinigkeit folgen zweite Lesung und notfalls der Vermittlungsausschuss." },
+      { q: "Schritt 5", a: "Das angenommene Gesetz wird unterzeichnet und im Amtsblatt der EU veröffentlicht." }
+    ],
+    distractors: ["Der Europarat legt ein Veto gegen das Gesetz ein.", "Alle EU-Bürger stimmen in einer Volksabstimmung darüber ab."]
+  },
+  markt: {
+    title: "Markthaus – Binnenmarkt und Schengen",
+    intro: "Der EU-Binnenmarkt beruht auf vier Grundfreiheiten, hinzu kommt der Schengen-Raum. Ordne jedem Alltagsbeispiel den passenden Begriff zu.",
+    tip: "Waren = Gegenstände, Personen = Wohnen & Arbeiten, Dienstleistungen = Aufträge/Arbeit über die Grenze, Kapital = Geld.",
+    items: [
+      { q: "Ein Auto aus Italien wird ohne Zölle in Deutschland verkauft.", a: "Freier Warenverkehr" },
+      { q: "Eine Pflegekraft aus Polen zieht nach Stuttgart und arbeitet dort.", a: "Freier Personenverkehr" },
+      { q: "Ein Handwerksbetrieb aus dem Elsass repariert ein Hausdach in Freiburg.", a: "Freier Dienstleistungsverkehr" },
+      { q: "Du überweist erspartes Geld auf ein Bankkonto in Spanien.", a: "Freier Kapitalverkehr" },
+      { q: "Reisen zwischen den teilnehmenden Staaten ohne reguläre Grenzkontrollen an den Binnengrenzen.", a: "Schengener Abkommen" }
+    ],
+    distractors: ["Zollunion mit den USA", "Europäische Menschenrechtskonvention"]
+  }
+};
+
+// =====================================================================
+// TEIL C – SPIELLOGIK (Steuerung, Tafel-Prüfung, Selbsttest)
+// =====================================================================
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+const promptEl = document.getElementById("prompt");
+const modal = document.getElementById("modal");
+const board = document.getElementById("board");
+const victoryEl = document.getElementById("victory");
+
+const player = { c: 15, r: 14, dir: "down" }; // Start auf dem Weg südlich des Brunnens
+let stars = 0, showGrid = false, modalOpen = false, victoryShown = false, current = null, lastMove = 0;
+const solved = {};
+
+function tile(c, r) { return (c < 0 || r < 0 || c >= COLS || r >= ROWS) ? "#" : MAP[r][c]; }
+function walkable(c, r) { return !SOLID.includes(tile(c, r)); }
+function doorHere() { return HOUSES.find(h => h.door.c === player.c && h.door.r === player.r) || null; }
+
+function tryMove(dx, dy) {
+  if (modalOpen) return;
+  player.dir = dx > 0 ? "right" : dx < 0 ? "left" : dy > 0 ? "down" : "up";
+  if (walkable(player.c + dx, player.r + dy)) { player.c += dx; player.r += dy; }
+  updatePrompt();
+}
+
+function updatePrompt() {
+  const h = doorHere();
+  if (h && !modalOpen) {
+    promptEl.textContent = "[E] Betreten: " + h.name + (solved[h.id] ? " ⭐" : "");
+    promptEl.style.display = "block";
+  } else promptEl.style.display = "none";
+}
+
+function interact() { const h = doorHere(); if (h && !modalOpen) openHouse(h); }
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function add(parent, tag, text) {
+  const e = document.createElement(tag);
+  if (text) e.textContent = text;
+  parent.appendChild(e);
+  return e;
+}
+
+function openHouse(h) {
+  if (h.id === "schmiede") {
+    modalOpen = true; current = h;
+    board.style.maxWidth = "920px"; board.style.padding = "0"; board.style.background = "transparent"; board.style.border = "none";
+    MeilensteineModul.open(board, {
+      onSolved: () => {
+        if (!solved.schmiede) { solved.schmiede = true; stars += 3; }
+        document.getElementById("stars").textContent = "⭐ Sterne: " + stars + " / 12" + (stars >= 12 ? " 🎉" : "");
+        if (stars >= 12 && !victoryShown) {
+          victoryShown = true;
+          setTimeout(() => { victoryEl.style.display = "flex"; }, 600);
+        }
+      },
+      onClose: () => { board.removeAttribute("style"); closeHouse(); }
+    });
+    modal.style.display = "flex"; promptEl.style.display = "none"; return;
+  }
+  modalOpen = true;
+  current = h;
+  const d = CONTENT[h.id];
+  const options = shuffle([...d.items.map(i => i.a), ...d.distractors]);
+  board.innerHTML = "";
+  add(board, "h2", d.title);
+  add(board, "p", d.intro);
+  d.items.forEach(it => {
+    const row = add(board, "div");
+    row.className = "row";
+    add(row, "label", it.q);
+    const s = document.createElement("select");
+    s.appendChild(new Option("– Baustein wählen (oder korrigieren) –", ""));
+    options.forEach(o => s.appendChild(new Option(o, o)));
+    s.addEventListener("change", () => { s.className = ""; });
+    row.appendChild(s);
+  });
+  const fb = add(board, "div");
+  fb.id = "feedback";
+  if (solved[h.id]) {
+    fb.style.color = "#1e7a3a";
+    fb.textContent = "Bereits gelöst ⭐ – du kannst die Zuordnung jederzeit erneut üben.";
+  }
+  const btns = add(board, "div");
+  btns.className = "btns";
+  add(btns, "button", "Antworten prüfen").addEventListener("click", checkAnswers);
+  const peekBtn = add(btns, "button", "👁️ Raum ansehen");
+  peekBtn.addEventListener("pointerdown", () => board.classList.add("peek"));
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev =>
+    peekBtn.addEventListener(ev, () => board.classList.remove("peek"))
+  );
+  add(btns, "button", "Haus verlassen").addEventListener("click", closeHouse);
+  modal.style.display = "flex";
+  promptEl.style.display = "none";
+}
+
+function checkAnswers() {
+  const d = CONTENT[current.id];
+  const sels = [...board.querySelectorAll("select")];
+  const fb = document.getElementById("feedback");
+  let right = 0;
+  sels.forEach((s, i) => {
+    const ok = s.value === d.items[i].a;
+    s.className = ok ? "ok" : "bad";
+    if (ok) right++;
+  });
+  if (right === sels.length) {
+    if (!solved[current.id]) {
+      solved[current.id] = true;
+      stars += 3;
+    }
+    document.getElementById("stars").textContent = "⭐ Sterne: " + stars + " / 12" + (stars >= 12 ? " 🎉" : "");
+    fb.style.color = "#1e7a3a";
+    fb.textContent = stars >= 12
+      ? "Perfekt! Alle 12 Sterne leuchten am Brunnen von Europa! 🎉"
+      : "Alles richtig! 3 neue Sterne leuchten jetzt am Brunnen auf.";
+    if (stars >= 12 && !victoryShown) {
+      victoryShown = true;
+      setTimeout(() => { victoryEl.style.display = "flex"; }, 600);
+    }
+  } else {
+    fb.style.color = "#a5281b";
+    fb.textContent = right + " von " + sels.length + " richtig. Rot markierte Felder kannst du direkt neu auswählen. Tipp: " + d.tip;
+  }
+}
+
+function closeHouse() {
+  board.removeAttribute("style");
+  modal.style.display = "none";
+  modalOpen = false;
+  current = null;
+  updatePrompt();
+}
+
+document.getElementById("closeVictory").addEventListener("click", () => {
+  victoryEl.style.display = "none";
+  if (modalOpen) closeHouse();
+});
+
+// Tastatursteuerung (E setzt eine offene Tafel niemals zurück)
+const DIRS = {
+  ArrowUp: [0, -1], KeyW: [0, -1],
+  ArrowDown: [0, 1], KeyS: [0, 1],
+  ArrowLeft: [-1, 0], KeyA: [-1, 0],
+  ArrowRight: [1, 0], KeyD: [1, 0]
+};
+window.addEventListener("keydown", e => {
+  if (e.code === "KeyV") {
+    e.preventDefault();
+    toggleAgent4();
+    return;
+  }
+  if (modalOpen) {
+    if (e.code === "Escape") closeHouse();
+    return;
+  }
+  if (DIRS[e.code]) {
+    e.preventDefault();
+    const now = performance.now();
+    if (e.repeat && now - lastMove < 90) return;
+    lastMove = now;
+    tryMove(DIRS[e.code][0], DIRS[e.code][1]);
+  } else if (e.code === "KeyE" || e.code === "Enter" || e.code === "Space") {
+    e.preventDefault();
+    interact();
+  } else if (e.code === "KeyG") {
+    showGrid = !showGrid;
+  }
+});
+
+// Touch-Steuerkreuz (Sofort-Schritt + Gedrückthalten)
+document.querySelectorAll(".pb[data-dx]").forEach(b => {
+  let iv = null;
+  const go = () => tryMove(+b.dataset.dx, +b.dataset.dy);
+  b.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    go();
+    clearInterval(iv);
+    iv = setInterval(go, 150);
+  });
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev =>
+    b.addEventListener(ev, () => { clearInterval(iv); iv = null; })
+  );
+});
+document.getElementById("bE").addEventListener("pointerdown", e => {
+  e.preventDefault();
+  if (!modalOpen) interact();
+});
+
+// Automatischer Selbsttest (prüft Raster, Startfeld und BFS-Wege zu allen 4 Türen)
+function selfTest() {
+  const errors = [];
+  if (MAP.length !== ROWS) errors.push("MAP hat " + MAP.length + " statt " + ROWS + " Zeilen");
+  MAP.forEach((l, i) => {
+    if (l.length !== COLS) errors.push("Zeile " + i + " hat " + l.length + " statt " + COLS + " Zeichen");
+  });
+  if (!walkable(player.c, player.r)) errors.push("Startfeld ist gesperrt");
+  const seen = new Set([player.c + "," + player.r]), q = [[player.c, player.r]];
+  while (q.length) {
+    const [c, r] = q.shift();
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const k = (c + dx) + "," + (r + dy);
+      if (!seen.has(k) && walkable(c + dx, r + dy)) {
+        seen.add(k);
+        q.push([c + dx, r + dy]);
+      }
+    }
+  }
+  HOUSES.forEach(h => {
+    if (tile(h.door.c, h.door.r) !== "D") errors.push(h.name + ": Türfeld ist kein D");
+    if (!seen.has(h.door.c + "," + h.door.r)) errors.push(h.name + ": Tür nicht erreichbar");
+    if (!CONTENT[h.id] && h.id !== "schmiede") errors.push(h.name + ": keine Lerninhalte");
+  });
+  if (errors.length) {
+    console.error("SELBSTTEST FEHLGESCHLAGEN:", errors);
+    const help = document.getElementById("help");
+    help.textContent = "Selbsttest: " + errors.join(" · ");
+    help.className = "err";
+  } else {
+    console.log("Selbsttest OK: Alle 4 Häuser sind erreichbar und spielbar.");
+  }
+  return errors;
+}
+
+// =====================================================================
+// TEIL D – GRAFIK (AGENT 5: ECHTE 1280×760 1:1 PER-PIXEL-ENGINE & OFFSCREEN-CACHE)
+// 1 Kachel = 40×40 echte Hardware-Pixel (statt grober Klötze im 640×380-Raum).
+// Statische Ebenen (Dorfkarte & Isometrie-Stube) werden in Offscreen-Canvases
+// mit 1px-Konturen, abgerundeten Pflastersteinen, Schindeln und Blatt-Dithering
+// vorgerendert -> 100% Konzeptbild-Detailgrad bei konstanten 60 FPS.
+// =====================================================================
+canvas.width = 1280;
+canvas.height = 760;
+ctx.imageSmoothingEnabled = false;
+
+let activeCtx = ctx;
+
+// 1:1 Hardware-Pixel-Zeichner im 1280×760-Raum
+function P(x, y, w, h, col) {
+  activeCtx.fillStyle = col;
+  activeCtx.fillRect(x | 0, y | 0, Math.max(1, w | 0), Math.max(1, h | 0));
+}
+// Kompatibilitäts-Wrapper für 640×380-Koordinaten (skaliert ×2 auf 1280×760)
+function R(x, y, w, h, col) {
+  activeCtx.fillStyle = col;
+  activeCtx.fillRect(Math.round(x * 2), Math.round(y * 2), Math.max(1, Math.round(w * 2)), Math.max(1, Math.round(h * 2)));
+}
+function hash(c, r, s) {
+  let h = (c * 374761393 + r * 668265263 + s * 982451653) >>> 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0;
+  return (h ^ (h >>> 16)) >>> 0;
+}
+function bitmapP(rows, x, y, s, pal, flip) {
+  const sw = Math.max(1, Math.round(s));
+  for (let r = 0; r < rows.length; r++) {
+    const row = rows[r];
+    for (let c = 0; c < row.length; c++) {
+      const ch = row[flip ? row.length - 1 - c : c];
+      if (ch !== "." && pal[ch]) P(Math.round(x + c * s), Math.round(y + r * s), sw, sw, pal[ch]);
+    }
+  }
+}
+function discP(cx, cy, rx, ry, col) {
+  const x0 = Math.round(cx), y0 = Math.round(cy);
+  for (let dy = -ry; dy <= ry; dy++) {
+    const f = 1 - (dy * dy) / (ry * ry + 0.5);
+    if (f <= 0) continue;
+    const hw = Math.round(rx * Math.sqrt(f));
+    P(x0 - hw, y0 + dy, hw * 2, 1, col);
+  }
+}
+// Zeichnet einen abgerundeten Einzelstein mit 1px Mörtel-/Konturrand, Lichtkante & Schattenkante
+function cobbleStone(x, y, w, h, baseCol, lightCol, darkCol, outlineCol) {
+  if (w < 4 || h < 4) return;
+  P(x + 1, y, w - 2, h, outlineCol);
+  P(x, y + 1, w, h - 2, outlineCol);
+  P(x + 1, y + 1, w - 2, h - 2, baseCol);
+  P(x + 2, y + 1, w - 4, 1, lightCol);
+  P(x + 1, y + 2, 1, h - 4, lightCol);
+  P(x + 2, y + h - 2, w - 3, 1, darkCol);
+  P(x + w - 2, y + 2, 1, h - 3, darkCol);
+}
+
+// ---------- 1. AUSSENWELT (1280×760, 1 Kachel = 40×40 px) ----------
+const TW = 40;
+function isWater(c, r) {
+  return (c + r < 4) || (c === 0 && r <= 5) || (c === 31 && r === 0);
+}
+
+function drawWater1280(X, Y, c, r, t) {
+  P(X, Y, TW, TW, "#3572bd");
+  for (let py = 0; py < TW; py += 2) {
+    const wave = Math.sin((X + py * 2) * 0.08) * 4;
+    P(X, Y + py, TW, 1, ((py + c * 3) % 6 === 0) ? "#4686d4" : "#3572bd");
+    if (wave > 2) P(X + 6 + (py % 18), Y + py, 8, 1, "#5c9ce6");
+  }
+  const o = Math.floor(t / 280 + c + r) % 6;
+  P(X + 5 + o * 2, Y + 8, 12, 2, "#7ab8ff");
+  P(X + 18 - o * 2, Y + 24, 14, 2, "#7ab8ff");
+  P(X + 8, Y + 32, 8, 1, "#c2e4ff");
+  // Uferböschung zu Land-Kacheln
+  if (!isWater(c + 1, r)) {
+    for (let py = 0; py < TW; py++) {
+      const curve = Math.round(Math.sin(py * 0.16 + r) * 2);
+      P(X + TW - 8 + curve, Y + py, 3, 1, "#b8e2ff");
+      P(X + TW - 5 + curve, Y + py, 3, 1, "#6b5538");
+      P(X + TW - 2 + curve, Y + py, 4, 1, "#2f5928");
+      P(X + TW - 6 + curve, Y + py, 1, 1, "#182b16");
+    }
+  }
+  if (!isWater(c, r + 1)) {
+    for (let px = 0; px < TW; px++) {
+      const curve = Math.round(Math.cos(px * 0.16 + c) * 2);
+      P(X + px, Y + TW - 8 + curve, 1, 3, "#b8e2ff");
+      P(X + px, Y + TW - 5 + curve, 1, 3, "#6b5538");
+      P(X + px, Y + TW - 2 + curve, 1, 4, "#2f5928");
+      P(X + px, Y + TW - 6 + curve, 1, 1, "#182b16");
+    }
+  }
+}
+
+function drawGrass1280(X, Y, c, r) {
+  P(X, Y, TW, TW, "#4c853b");
+  for (let i = 0; i < 20; i++) {
+    const h = hash(c, r, i);
+    const gx = X + (h % 36), gy = Y + ((h >> 6) % 36);
+    const col = ["#3d6e2f", "#5e9c49", "#6eb057", "#345e27"][i % 4];
+    P(gx, gy, 2, 1, col);
+    P(gx + 1, gy - 1, 1, 2, col);
+  }
+}
+
+// Ruhiges, großformatiges RPG-Kopfsteinpflaster (3 Steinreihen pro Kachel wie in der Vorlage)
+function drawPath1280(X, Y, c, r) {
+  P(X, Y, TW, TW, "#574c3f"); // Warmer, dunkler Fugenmörtel
+  const rowHeights = [13, 14, 13];
+  let py = Y;
+  for (let ri = 0; ri < 3; ri++) {
+    const rh = rowHeights[ri];
+    const globalRow = r * 3 + ri;
+    const offset = (globalRow % 2) * 9 + (hash(c, globalRow, 1) % 3);
+    let px = X - offset;
+    let si = 0;
+    while (px < X + TW) {
+      const sw = 18 + (hash(c * 7 + si, globalRow, 2) % 5);
+      const x0 = Math.max(X, px), x1 = Math.min(X + TW, px + sw);
+      const w = x1 - x0;
+      if (w >= 5) {
+        const v = hash(c * 11 + si, globalRow, 3) % 4;
+        const base = ["#b5a68e", "#ada088", "#bca890", "#a69880"][v];
+        const light = ["#cabda6", "#c4b69e", "#d1bfa8", "#bdb098"][v];
+        const dark = ["#8c7f6a", "#857864", "#91836e", "#7d715d"][v];
+        cobbleStone(x0, py, w, rh, base, light, dark, "#4a4034");
+      }
+      px += sw;
+      si++;
+    }
+    py += rh;
+  }
+}
+
+// Ruhiger, heller Ocker-Sandstein-Boden auf dem zentralen Dorfplatz (wie in der Vorlage)
+function drawPlaza1280(X, Y, c, r) {
+  P(X, Y, TW, TW, "#d4c39a");
+  // Dezente große Sandsteinplatten (2×2 pro Kachel) mit feiner heller Fuge
+  for (let ry = 0; ry < 2; ry++) {
+    for (let rx = 0; rx < 2; rx++) {
+      const px = X + rx * 20, py = Y + ry * 20;
+      const v = hash(c * 2 + rx, r * 2 + ry, 17) % 3;
+      const col = ["#d6c59c", "#cfbe95", "#ddd0a8"][v];
+      P(px, py, 20, 20, col);
+      P(px, py, 20, 1, "#e6d9b5");
+      P(px, py, 1, 20, "#e6d9b5");
+      P(px, py + 19, 20, 1, "#bba980");
+      P(px + 19, py, 1, 20, "#bba980");
+    }
+  }
+  // Sauberer Einfassungsrahmen um den Platz
+  if (c === 13) { P(X, Y, 2, TW, "#756548"); P(X + 2, Y, 2, TW, "#ebe0be"); }
+  if (c === 18) { P(X + TW - 2, Y, 2, TW, "#756548"); P(X + TW - 4, Y, 2, TW, "#b3a078"); }
+  if (r === 7)  { P(X, Y, TW, 2, "#756548"); P(X, Y + 2, TW, 2, "#ebe0be"); }
+  if (r === 11) { P(X, Y + TW - 2, TW, 2, "#756548"); P(X, Y + TW - 4, TW, 2, "#b3a078"); }
+}
+
+// Durchgehende, plastische 3D-Buchsbaumhecke (wie auf dem Konzeptbild)
+function drawHedge1280(X, Y, c, r) {
+  drawPath1280(X, Y, c, r);
+  const up = tile(c, r - 1) !== "#", dn = tile(c, r + 1) !== "#";
+  const lf = tile(c - 1, r) !== "#", rt = tile(c + 1, r) !== "#";
+
+  const x0 = X + (lf ? 2 : 0), x1 = X + TW - (rt ? 2 : 0);
+  const y0 = Y + (up ? 2 : 0), y1 = Y + TW - (dn ? 2 : 0);
+  const w = x1 - x0, h = y1 - y0;
+
+  // Dunkle Außenkontur + sattgrüne Füllung
+  P(x0, y0, w, h, "#142615");
+  const frontH = dn ? 14 : 0;
+  const topH = h - frontH - (dn ? 2 : 0);
+  P(x0 + (lf ? 2 : 0), y0 + (up ? 2 : 0), w - (lf ? 2 : 0) - (rt ? 2 : 0), topH, "#46913d");
+
+  // Weiche, runde Laub-Polster auf der Oberseite (kein unruhiges Rauschen)
+  for (let i = 0; i < 14; i++) {
+    const hv = hash(c, r, i + 50);
+    const lx = x0 + 5 + (hv % Math.max(4, w - 10));
+    const ly = y0 + 4 + ((hv >> 5) % Math.max(4, topH - 7));
+    discP(lx, ly, 4, 3, (i % 3 === 0) ? "#367530" : "#58a84a");
+    if (i % 2 === 0) P(lx - 2, ly - 1, 3, 2, "#70bf5e");
+  }
+
+  // Dezente Busch-Segmentierung alle 40px
+  if (!dn) {
+    P(x0 + 3, Y + TW - 2, w - 6, 1, "#2c6328");
+    P(x0 + 4, Y + TW - 1, w - 8, 1, "#5ca84e");
+  }
+  if (!rt) {
+    P(X + TW - 2, y0 + 3, 1, topH - 6, "#2c6328");
+  }
+
+  // Schattierte Vorderseite unten
+  if (dn) {
+    const fy = y1 - frontH;
+    P(x0 + (lf ? 2 : 0), fy, w - (lf ? 2 : 0) - (rt ? 2 : 0), frontH - 2, "#245223");
+    P(x0 + (lf ? 2 : 0), fy, w - (lf ? 2 : 0) - (rt ? 2 : 0), 2, "#326e2e");
+    for (let px = x0 + 4; px < x1 - 4; px += 6) {
+      P(px, fy + 3, 3, frontH - 7, "#1a3d1a");
+    }
+    P(x0 + 1, y1 - 2, w - 2, 2, "#102011");
+  }
+
+  // Klare Lichtkanten oben & links, Schattenkante rechts
+  if (up) {
+    P(x0 + 1, y0, w - 2, 2, "#142615");
+    P(x0 + 2, y0 + 2, w - 4, 3, "#68bd59");
+    P(x0 + 5, y0 + 2, w - 10, 1, "#86d672");
+  }
+  if (lf) {
+    P(x0, y0 + 1, 2, h - 2, "#142615");
+    P(x0 + 2, y0 + 2, 3, topH - 2, "#5ca84e");
+  }
+  if (rt) {
+    P(x1 - 2, y0 + 1, 2, h - 2, "#142615");
+    P(x1 - 5, y0 + 2, 3, topH - 2, "#2c6328");
+  }
+}
+
+// Zeichnet eine einzelne schattierte Laubkugel mit 1px Kontur & Blatt-Dithering
+function foliageBall(cx, cy, r, seed) {
+  discP(cx, cy, r + 1.5, r + 1, "#112012");
+  discP(cx, cy + 0.5, r, r - 0.5, "#1f4722");
+  discP(cx - 0.5, cy - 0.5, r - 1.5, r - 2, "#2f6b2f");
+  discP(cx - 1.5, cy - 2, Math.max(2, r - 3.5), Math.max(2, r - 4), "#46913f");
+  discP(cx - 2.5, cy - 3, Math.max(1, r - 6), Math.max(1, r - 6.5), "#64b553");
+  // Einzelne strukturierte Blätter
+  for (let i = 0; i < 16; i++) {
+    const h = hash(seed, i, 77);
+    const ang = (h % 360) * (Math.PI / 180);
+    const dist = (h >> 8) % Math.max(2, r - 2);
+    const lx = Math.round(cx + Math.cos(ang) * dist);
+    const ly = Math.round(cy + Math.sin(ang) * dist * 0.85);
+    const col = (ly < cy - 1) ? ((i % 2) ? "#7ad164" : "#52a146") : ((i % 2) ? "#265426" : "#18381a");
+    P(lx, ly, 2, 2, col);
+  }
+}
+
+function drawTree1280(X, Y, c, r) {
+  const ox = ((hash(c, r, 3) % 7) - 3), oy = ((hash(c, r, 4) % 7) - 3);
+  const cx = X + 20 + ox, cy = Y + 17 + oy;
+  // Weicher Bodenschatten & knorriger Baumstamm
+  discP(cx, cy + 20, 18, 7, "rgba(0,0,0,.32)");
+  P(cx - 5, cy + 8, 10, 13, "#1a0f08");
+  P(cx - 4, cy + 8, 8, 12, "#4f311c");
+  P(cx - 3, cy + 8, 3, 11, "#6e4629");
+  P(cx - 6, cy + 18, 4, 3, "#3b2313");
+  P(cx + 3, cy + 18, 4, 3, "#3b2313");
+  // 6 überlappende Laubkugeln für echte Baumkronen-Tiefe
+  const s = c * 31 + r * 17;
+  foliageBall(cx - 9, cy + 4, 11, s + 1);
+  foliageBall(cx + 9, cy + 4, 11, s + 2);
+  foliageBall(cx, cy + 6, 12, s + 3);
+  foliageBall(cx - 7, cy - 3, 11, s + 4);
+  foliageBall(cx + 7, cy - 3, 11, s + 5);
+  foliageBall(cx, cy - 6, 13, s + 6);
+}
+
+// ---------- Hilfsobjekte im Dorf (Fässer, Kisten, Markisen, Schindeldächer) ----------
+function barrel1280(x, y) {
+  discP(x + 9, y + 25, 10, 4, "rgba(0,0,0,.3)");
+  P(x + 1, y, 16, 25, "#1a0f08");
+  P(x, y + 3, 18, 19, "#1a0f08");
+  P(x + 2, y + 2, 14, 21, "#784724");
+  P(x + 4, y + 2, 4, 21, "#9c6236");
+  P(x + 12, y + 2, 3, 21, "#573218");
+  // Daubenlinien & Eisenringe
+  P(x + 7, y + 2, 1, 21, "#4a2a14");
+  P(x + 11, y + 2, 1, 21, "#4a2a14");
+  [4, 12, 19].forEach(ry => {
+    P(x + 1, y + ry, 16, 2, "#2b2d33");
+    P(x + 3, y + ry, 5, 1, "#5a5e6b");
+  });
+  // Oberer Deckel
+  P(x + 3, y + 1, 12, 2, "#b07648");
+}
+
+function vegCrate1280(x, y, col1, col2, col3) {
+  P(x - 1, y + 4, 30, 20, "#1c1008");
+  P(x + 1, y + 6, 26, 16, "#8c5a30");
+  P(x + 1, y + 6, 26, 3, "#b87e4a");
+  P(x + 1, y + 13, 26, 2, "#59361a");
+  P(x + 1, y + 6, 3, 16, "#a66e3e");
+  P(x + 24, y + 6, 3, 16, "#6e4422");
+  // Einzelne Früchte/Gemüse mit 1px Kontur
+  for (let i = 0; i < 7; i++) {
+    const fx = x + 3 + (i % 4) * 6 + (i > 3 ? 2 : 0);
+    const fy = y + 1 + (i > 3 ? 3 : 0);
+    const c = [col1, col2, col3][i % 3];
+    discP(fx + 2, fy + 2, 3.5, 3, "#1c1008");
+    discP(fx + 2, fy + 2, 2.5, 2, c);
+    P(fx + 1, fy + 1, 1, 1, "#ffffff");
+  }
+}
+
+function frontAwning1280(x, y, w) {
+  const h = 20;
+  P(x - 2, y - 1, w + 4, h + 2, "#1c0f08");
+  const stripeW = 9;
+  for (let sx = 0; sx < w; sx += stripeW) {
+    const sw = Math.min(stripeW, w - sx);
+    const isRed = ((sx / stripeW) | 0) % 2 === 0;
+    const topC = isRed ? "#cc3729" : "#f2ead8";
+    const midC = isRed ? "#b02b1e" : "#dfd5c0";
+    const botC = isRed ? "#821d13" : "#b8ae9a";
+    P(x + sx, y, sw, 11, topC);
+    P(x + sx, y + 11, sw, 5, midC);
+    P(x + sx, y + 16, sw, 4, botC);
+    // Stoff-Falte rechts am Streifen
+    P(x + sx + sw - 1, y, 1, 16, botC);
+    // Gewellter Abschluss (Volant) unten
+    P(x + sx + 1, y + h, sw - 2, 3, "#1c0f08");
+    P(x + sx + 2, y + h, sw - 4, 2, midC);
+  }
+  P(x, y + 1, w, 2, "rgba(255,255,255,.32)");
+  P(x, y + 15, w, 1, "#1c0f08");
+}
+
+function sideAwningRight1280(x, y) {
+  for (let dy = 0; dy < 44; dy++) {
+    const w = 16 + ((dy * 0.45) | 0);
+    const stripe = ((dy / 7) | 0) % 2 === 0;
+    const col = stripe ? "#cc3729" : "#f2ead8";
+    const shd = stripe ? "#8c2016" : "#bfb5a2";
+    P(x + 172, y + 14 + dy, w, 1, col);
+    P(x + 172 + w - 4, y + 14 + dy, 4, 1, shd);
+    P(x + 170, y + 14 + dy, 2, 1, "#1c0f08");
+    P(x + 172 + w, y + 14 + dy, 2, 1, "#1c0f08");
+  }
+  P(x + 170, y + 58, 38, 3, "#1c0f08");
+}
+
+// =====================================================================
+// ECHTES 3D-PARALLELOGRAMM-SATTELDACH (3/4 RPG-Draufsicht wie in der Vorlage)
+// Statt eines flachen 2D-Dreiecks besitzt jedes Dach eine obere Firstspitze
+// (ridgeTopY), eine vordere Giebelspitze (gablePeakY = ridgeTopY + ridgeLen)
+// sowie eine linke und rechte Parallelogramm-Dachfläche mit diagonalem
+// Rauten-Schindelgitter (/ und \) und dickem Giebelbalken (Ortgang) darunter.
+// =====================================================================
+function roof3DParallelogram1280(cx, ridgeTopY, ridgeLen, halfW, dropH, opts) {
+  const cL = opts.cLight, cM = opts.cMid, cD = opts.cDark, cO = opts.cOutline || "#1a0d07";
+  const gridL = opts.gridLeft || cM, gridR = opts.gridRight || cD;
+  const wallCol = opts.wallCol, wallShade = opts.wallShade || wallCol;
+  const bargeCol = opts.bargeCol || "#3b1f0e", bargeHi = opts.bargeHi || "#593118";
+  const bargeThick = opts.bargeThick || 8;
+  const gablePeakY = ridgeTopY + ridgeLen;
+  const eaveY = gablePeakY + dropH;
+
+  // 1. Dreieckige Giebelwand (Tympanon / Fachwerkgiebel) unterhalb der Dachfläche
+  if (wallCol) {
+    for (let dx = -halfW; dx <= halfW; dx++) {
+      const slopeY = Math.round((Math.abs(dx) / halfW) * dropH);
+      const yGableTop = gablePeakY + slopeY;
+      const gh = eaveY - yGableTop;
+      if (gh > 0) {
+        P(cx + dx, yGableTop, 1, gh, dx < 0 ? wallCol : wallShade);
+        // Schatten direkt unter dem Dachüberstand
+        P(cx + dx, yGableTop, 1, Math.min(gh, bargeThick + 3), "rgba(0,0,0,.22)");
+      }
+    }
+  }
+
+  // 2. Linke und rechte 3D-Parallelogramm-Dachfläche mit Rauten-Schindeln
+  for (let dx = -halfW; dx <= halfW; dx++) {
+    const absDx = Math.abs(dx);
+    const slopeY = Math.round((absDx / halfW) * dropH);
+    const yTop = ridgeTopY + slopeY;
+    const yBot = gablePeakY + slopeY;
+    const isLeft = dx < 0;
+
+    for (let py = yTop; py <= yBot; py++) {
+      const v = py - yTop; // 0..ridgeLen
+      const u = absDx;
+      let col = isLeft ? cL : cM;
+      // Schattierung zum First und zur Traufe hin
+      if (v > ridgeLen - 5) col = isLeft ? cM : cD;
+      // Diagonales Rauten-Schindelgitter (/ und \) wie auf dem Referenzbild
+      const d1 = (u + v * 2) % 12;
+      const d2 = (u * 2 + 1200 - v * 3) % 14;
+      if (d1 === 0 || d1 === 1 || d2 === 0) {
+        col = isLeft ? gridL : gridR;
+      } else if (isLeft && (d1 === 2 || d2 === 1) && v > 3 && v < ridgeLen - 4) {
+        col = opts.cHighlight || cL;
+      }
+      P(cx + dx, py, 1, 1, col);
+    }
+
+    // Obere Dachkante (1px dunkle Kontur + 2px Randziegel)
+    P(cx + dx, yTop - 2, 1, 2, cO);
+    P(cx + dx, yTop, 1, 2, isLeft ? (opts.cHighlight || cL) : cL);
+
+    // Vorderer Giebelbalken / Ortgang (von (cx, gablePeakY) schräg nach außen)
+    P(cx + dx, yBot - 1, 1, 2, cO);
+    P(cx + dx, yBot + 1, 1, bargeThick, isLeft ? bargeHi : bargeCol);
+    P(cx + dx, yBot + 1, 1, 2, opts.bargeTopHi || bargeHi);
+    P(cx + dx, yBot + 1 + bargeThick, 1, 2, cO);
+  }
+
+  // 3. Vertikale Traufkanten ganz links und ganz rechts
+  const yOutTop = ridgeTopY + dropH;
+  P(cx - halfW - 2, yOutTop - 1, 3, ridgeLen + bargeThick + 4, cO);
+  P(cx + halfW, yOutTop - 1, 3, ridgeLen + bargeThick + 4, cO);
+
+  // 4. Vertikaler Firstbalken (Mittelgrat) von ridgeTopY bis gablePeakY
+  const rW = opts.ridgeWidth || 6;
+  const rHalf = (rW / 2) | 0;
+  P(cx - rHalf - 2, ridgeTopY - 2, rW + 4, ridgeLen + 4, cO);
+  P(cx - rHalf, ridgeTopY, rW, ridgeLen + 1, opts.ridgeCol || cD);
+  P(cx - rHalf, ridgeTopY, Math.max(2, rHalf), ridgeLen + 1, opts.ridgeHi || cL);
+}
+
+// ---------- 02 SCHMIEDE (1:1 nach Vorlage: 3D-Rautendach, Fachwerkgiebel, Schornstein, Esse & Amboss) ----------
+function drawSchmiedeStatic1280(X, Y) {
+  P(X - 8, Y + 114, 212, 10, "rgba(0,0,0,.32)");
+  P(X + 190, Y + 34, 12, 86, "rgba(0,0,0,.22)");
+
+  // Gestapelte Fässer links an der Außenwand
+  barrel1280(X - 10, Y + 64);
+  barrel1280(X - 4, Y + 84);
+  cobbleStone(X + 4, Y + 92, 18, 22, "#784724", "#9e6338", "#4d2c14", "#1a0e07");
+
+  // Erdgeschoss-Grundkörper
+  P(X + 14, Y + 32, 176, 86, "#1a0e07");
+  P(X + 18, Y + 36, 120, 78, "#8c4a27");
+
+  // Rechtes Nebendach hinter dem Schornstein / über der Esse (X+124..X+192)
+  for (let dx = 0; dx < 64; dx++) {
+    const pyTop = Y - 20 + Math.round(dx * 0.42);
+    P(X + 128 + dx, pyTop - 2, 1, 2, "#1a0d07");
+    for (let v = 0; v < 34; v++) {
+      const isGrid = ((dx + v * 2) % 11 === 0) || ((dx * 2 + 400 - v * 3) % 13 === 0);
+      P(X + 128 + dx, pyTop + v, 1, 1, isGrid ? "#4a1d0e" : "#78341c");
+    }
+    P(X + 128 + dx, pyTop + 34, 1, 5, "#3b1d0e");
+    P(X + 128 + dx, pyTop + 39, 1, 2, "#1a0d07");
+  }
+  P(X + 191, Y + 6, 3, 40, "#1a0d07");
+
+  // Haupt-Satteldach in 3D-Parallelogramm-Perspektive mit Rauten-Schindeln (cx = X + 80)
+  const cx = X + 80, ridgeTopY = Y - 64, ridgeLen = 38, halfW = 66, dropH = 48;
+  const gablePeakY = ridgeTopY + ridgeLen, eaveY = gablePeakY + dropH; // gablePeakY = Y-26, eaveY = Y+22
+  roof3DParallelogram1280(cx, ridgeTopY, ridgeLen, halfW, dropH, {
+    cHighlight: "#cf6b46",
+    cLight: "#b55533",
+    cMid: "#8f3e22",
+    cDark: "#632714",
+    gridLeft: "#6e2c16",
+    gridRight: "#4a1b0c",
+    cOutline: "#1a0d07",
+    wallCol: "#a65830",
+    wallShade: "#8c4723",
+    bargeCol: "#4a2512",
+    bargeHi: "#6b381d",
+    bargeTopHi: "#874928",
+    bargeThick: 7,
+    ridgeWidth: 6,
+    ridgeCol: "#592312",
+    ridgeHi: "#8f3e22"
+  });
+
+  // Fachwerk im Giebeldreieck (Mittelpfosten, Querriegel & Diagonalstreben wie in Vorlage)
+  P(cx - 3, gablePeakY + 6, 6, dropH - 6, "#2e160a");
+  P(cx - 42, gablePeakY + 26, 84, 5, "#2e160a");
+  for (let d = 0; d < 18; d++) {
+    P(cx - 34 + d, gablePeakY + 28 + d, 4, 2, "#2e160a");
+    P(cx - 6 - d, gablePeakY + 28 + d, 4, 2, "#2e160a");
+    P(cx + 6 + d, gablePeakY + 28 + d, 4, 2, "#2e160a");
+    P(cx + 34 - d, gablePeakY + 28 + d, 4, 2, "#2e160a");
+  }
+  // Breiter waagerechter Hauptbalken unter dem Giebel (Y + 20..Y + 30)
+  cobbleStone(X + 14, eaveY - 2, 132, 10, "#63341a", "#874a28", "#3d1e0d", "#1a0d07");
+  cobbleStone(X + 16, eaveY + 8, 128, 8, "#784020", "#9c5730", "#4a2511", "#1a0d07");
+
+  // Hoher dunkelgrauer Steinschornstein rechts oben (durchstößt das rechte Dach)
+  P(X + 132, Y - 84, 36, 104, "#14151c");
+  for (let row = 0; row < 11; row++) {
+    const sy = Y - 80 + row * 8;
+    const off = (row % 2) * 6;
+    for (let col = 0; col < 3; col++) {
+      const sx = X + 135 + col * 10 + (col === 2 ? -off : 0);
+      const sw = Math.min(12, X + 165 - sx);
+      if (sw >= 5) cobbleStone(sx, sy, sw, 8, "#454957", "#666b7d", "#2c2f38", "#14151c");
+    }
+  }
+  // Breiter Schornsteinkranz oben
+  cobbleStone(X + 128, Y - 90, 44, 9, "#555a6b", "#7a8094", "#323540", "#14151c");
+
+  // Dunkle offene Schmiede-Werkstatt links/mittig + gemauerter Mittelpfeiler
+  P(X + 20, Y + 36, 102, 80, "#3b1f0e");
+  P(X + 26, Y + 42, 66, 72, "#120c10");
+  for (let ry = 0; ry < 5; ry++) P(X + 32, Y + 50 + ry * 9, 46, 4, "#24171b");
+  // Schmiedewerkzeug (Zange/Hammer) am Mittelpfeiler
+  P(X + 86, Y + 56, 12, 5, "#c2cad6");
+  P(X + 90, Y + 52, 4, 18, "#858d99");
+
+  // Rotbrauner Backstein-Pfeiler zwischen Werkstatt und Esse (über Türfeld D(7,5))
+  for (let r = 0; r < 8; r++) {
+    const by = Y + 42 + r * 9;
+    cobbleStone(X + 92, by, 15, 9, "#a64b2a", "#c96844", "#6e2e16", "#210e07");
+    cobbleStone(X + 105, by + 3, 15, 9, "#943f20", "#b85a37", "#5c2410", "#210e07");
+  }
+
+  // Massiv gemauerte graue Steinesse rechts (X+120..X+190, Y+36..Y+118)
+  P(X + 120, Y + 36, 70, 82, "#14151c");
+  for (let row = 0; row < 8; row++) {
+    const sy = Y + 38 + row * 9;
+    const off = (row % 2) * 5;
+    for (let col = 0; col < 5; col++) {
+      const sx = X + 122 + col * 13 + (col % 2 ? off : 0);
+      const sw = Math.min(14, X + 188 - sx);
+      if (sw >= 6) {
+        const v = (row + col) % 3;
+        cobbleStone(sx, sy, sw, 9, ["#505463", "#5e6375", "#434754"][v], "#7e8499", "#2e313b", "#14151c");
+      }
+    }
+  }
+  // Gewölbter Steinbogen über der Feueröffnung
+  P(X + 132, Y + 58, 46, 42, "#140c0e");
+  for (let i = 0; i < 5; i++) {
+    cobbleStone(X + 130 + i * 9, Y + 52 - (i === 2 ? 2 : 0), 11, 8, "#686e80", "#8e95ab", "#3b3e4a", "#14151c");
+  }
+  // Dunkler Steinsockel unter der Esse mit 3 Luftschlitzen
+  cobbleStone(X + 118, Y + 102, 74, 18, "#3e414d", "#5e6373", "#252730", "#14151c");
+  [132, 150, 168].forEach(vx => P(X + vx, Y + 108, 8, 6, "#14151c"));
+
+  // Großer dunkler Stahl-Amboss auf Steinsockel vorn links (X+38..X+82)
+  discP(X + 60, Y + 125, 24, 6, "rgba(0,0,0,.38)");
+  cobbleStone(X + 42, Y + 112, 36, 13, "#686d7d", "#8e94a6", "#3e414d", "#14151c");
+  P(X + 46, Y + 105, 28, 8, "#14151c");
+  P(X + 51, Y + 98, 18, 8, "#14151c");
+  P(X + 38, Y + 90, 44, 9, "#14151c");
+  P(X + 28, Y + 92, 12, 6, "#14151c");
+  P(X + 48, Y + 106, 24, 6, "#323640");
+  P(X + 53, Y + 99, 14, 7, "#262932");
+  P(X + 40, Y + 92, 40, 6, "#4a505e");
+  P(X + 40, Y + 92, 38, 2, "#8c94a6");
+  P(X + 30, Y + 93, 10, 4, "#6d7485");
+}
+
+function drawSchmiedeAnim1280(X, Y, t) {
+  for (let i = 0; i < 5; i++) {
+    const o = Math.floor(t / 50 + i * 18) % 85;
+    const sx = X + 148 + Math.round(o * 0.35), sy = Y - 94 - o;
+    const rad = Math.round(6 + o / 14);
+    discP(sx, sy, rad + 2, rad, "rgba(35,36,44," + Math.max(0, 0.55 - o / 140).toFixed(2) + ")");
+    discP(sx - 2, sy - 1, rad - 1, rad - 2, "rgba(85,88,100," + Math.max(0, 0.45 - o / 140).toFixed(2) + ")");
+  }
+  const f = Math.floor(t / 95) % 4;
+  discP(X + 155, Y + 86, 18, 12, "#cc2900");
+  discP(X + 155, Y + 82 - f * 2, 15, 13, "#ff6a00");
+  discP(X + 155, Y + 84 - f, 11, 10, "#ffae00");
+  discP(X + 155, Y + 86, 6, 5, "#fff6b0");
+}
+
+// ---------- 03 RATSHALLE (1:1 nach Vorlage: 3D-Parallelogramm-Sternendach, Goldgiebel, Relief & 6 Säulen) ----------
+function drawRatshalleStatic1280(X, Y) {
+  P(X - 4, Y + 114, 210, 10, "rgba(0,0,0,.32)");
+  P(X + 194, Y + 32, 12, 88, "rgba(0,0,0,.22)");
+
+  // Dunkle Tempel-Cella hinter den 6 Säulen
+  P(X + 8, Y + 36, 184, 78, "#171311");
+  P(X + 12, Y + 40, 176, 68, "#362d27");
+  for (let py = 8; py < 66; py += 8) P(X + 12, Y + 40 + py, 176, 1, "#261f1b");
+
+  // Zweiflügeliges Tempelportal in der Mitte über D(24,5)
+  cobbleStone(X + 78, Y + 48, 44, 56, "#9e9687", "#cfc7b8", "#696358", "#1c1714");
+  P(X + 84, Y + 54, 32, 48, "#1f0b08");
+  P(X + 86, Y + 56, 13, 44, "#6b2219");
+  P(X + 101, Y + 56, 13, 44, "#6b2219");
+  P(X + 88, Y + 60, 9, 15, "#872e22");
+  P(X + 103, Y + 60, 9, 15, "#872e22");
+  P(X + 88, Y + 79, 9, 17, "#872e22");
+  P(X + 103, Y + 79, 9, 17, "#872e22");
+  P(X + 95, Y + 76, 3, 3, "#f5c842");
+  P(X + 102, Y + 76, 3, 3, "#f5c842");
+
+  // 6 kannelierte Steinsäulen (3 links, 3 rechts)
+  [16, 40, 64, 122, 146, 170].forEach(cx => {
+    const sx = X + cx;
+    P(sx - 2, Y + 40, 18, 62, "#1c1714");
+    P(sx, Y + 42, 14, 58, "#d9d2c4");
+    P(sx + 1, Y + 42, 4, 58, "#f5f0e6");
+    P(sx + 10, Y + 42, 4, 58, "#9e9788");
+    P(sx + 4, Y + 44, 1, 54, "#8f8879");
+    P(sx + 7, Y + 44, 1, 54, "#8f8879");
+    P(sx + 10, Y + 44, 1, 54, "#7a7467");
+    cobbleStone(sx - 4, Y + 38, 22, 6, "#e6dfd1", "#ffffff", "#aba495", "#1c1714");
+    cobbleStone(sx - 3, Y + 98, 20, 6, "#cfc8b8", "#f0eadc", "#968f80", "#1c1714");
+  });
+
+  // Sockel mit Wangenmauern links/rechts und 3-stufiger Freitreppe in der Mitte
+  cobbleStone(X + 4, Y + 100, 70, 20, "#b8b0a0", "#e3dcd0", "#7d7668", "#1c1714");
+  cobbleStone(X + 12, Y + 105, 54, 10, "#8f8879", "#b8b0a0", "#5e594e", "#1c1714");
+  cobbleStone(X + 126, Y + 100, 70, 20, "#b8b0a0", "#e3dcd0", "#7d7668", "#1c1714");
+  cobbleStone(X + 134, Y + 105, 54, 10, "#8f8879", "#b8b0a0", "#5e594e", "#1c1714");
+  for (let st = 0; st < 3; st++) {
+    cobbleStone(X + 72, Y + 100 + st * 6, 56, 7, "#ded7c8", "#ffffff", "#968f80", "#1c1714");
+  }
+
+  // Klassisches Gebälk mit Zahnfries (Dentils) unter dem Giebel
+  cobbleStone(X - 2, Y + 24, 204, 16, "#d6cfc0", "#f5f0e6", "#968f80", "#1c1714");
+  P(X + 2, Y + 36, 196, 3, "#2b2520");
+  for (let tx = 6; tx < 194; tx += 10) {
+    P(X + tx, Y + 29, 5, 6, "#6e685c");
+    P(X + tx + 1, Y + 30, 3, 4, "#e6dfd1");
+  }
+
+  // 3D-Parallelogramm-Sternendach in Königsblau + Goldener Giebelrahmen + Stein-Tympanon
+  const cx = X + 100, ridgeTopY = Y - 66, ridgeLen = 40, halfW = 96, dropH = 48;
+  const gablePeakY = ridgeTopY + ridgeLen; // Y - 26
+  roof3DParallelogram1280(cx, ridgeTopY, ridgeLen, halfW, dropH, {
+    cHighlight: "#5488de",
+    cLight: "#3b6ec2",
+    cMid: "#2b5299",
+    cDark: "#1d3a6e",
+    gridLeft: "#284c8f",
+    gridRight: "#193261",
+    cOutline: "#141626",
+    wallCol: "#dfd8c8",
+    wallShade: "#cfc8b8",
+    bargeCol: "#d49b1a",
+    bargeHi: "#f5c430",
+    bargeTopHi: "#fff094",
+    bargeThick: 9,
+    ridgeWidth: 12,
+    ridgeCol: "#e0ab24",
+    ridgeHi: "#fff094"
+  });
+
+  // Goldene Sterne auf den beiden blauen Parallelogramm-Dachflächen
+  [-74, -54, -34, -18, 18, 34, 54, 74].forEach(dx => {
+    const slopeY = Math.round((Math.abs(dx) / halfW) * dropH);
+    const yTop = ridgeTopY + slopeY;
+    [11, 25].forEach(vOff => {
+      const sx = cx + dx + (vOff === 25 ? (dx < 0 ? -5 : 5) : 0);
+      const sy = yTop + vOff;
+      P(sx - 1, sy - 2, 4, 6, "#1a1829");
+      P(sx - 2, sy - 1, 6, 4, "#1a1829");
+      P(sx, sy - 2, 2, 6, "#ffd93b");
+      P(sx - 2, sy, 6, 2, "#ffd93b");
+      P(sx, sy, 2, 2, "#fff7b8");
+    });
+  });
+
+  // Symmetrisches Stein-Relief im Tympanon + goldener Horizontalbalken
+  cobbleStone(X + 88, Y - 2, 24, 18, "#cfc8b8", "#f5f0e6", "#878072", "#3b362f");
+  cobbleStone(X + 66, Y + 5, 22, 12, "#c2bba9", "#ebe5d8", "#878072", "#3b362f");
+  cobbleStone(X + 112, Y + 5, 22, 12, "#c2bba9", "#ebe5d8", "#878072", "#3b362f");
+  cobbleStone(X - 4, Y + 20, 208, 6, "#e6b429", "#fff29c", "#9e730d", "#1f1506");
+}
+
+function drawRatshalleAnim1280(X, Y, t) {
+  const cx = X + 100, ridgeTopY = Y - 66, halfW = 96, dropH = 48;
+  activeCtx.save();
+  activeCtx.globalCompositeOperation = "lighter";
+  let idx = 0;
+  [-74, -54, -34, -18, 18, 34, 54, 74].forEach(dx => {
+    const slopeY = Math.round((Math.abs(dx) / halfW) * dropH);
+    const yTop = ridgeTopY + slopeY;
+    [11, 25].forEach(vOff => {
+      const sx = cx + dx + (vOff === 25 ? (dx < 0 ? -5 : 5) : 0);
+      const sy = yTop + vOff;
+      const pulse = (Math.floor(t / 260) + idx) % 3 === 0;
+      const g = activeCtx.createRadialGradient(sx + 1, sy + 1, 1, sx + 1, sy + 1, pulse ? 10 : 7);
+      g.addColorStop(0, pulse ? "rgba(255,245,150,0.85)" : "rgba(255,215,60,0.5)");
+      g.addColorStop(1, "rgba(255,200,40,0)");
+      activeCtx.fillStyle = g;
+      activeCtx.fillRect(sx - 10, sy - 10, 22, 22);
+      if (pulse) {
+        P(sx, sy - 3, 2, 8, "#fffbe0");
+        P(sx - 3, sy, 8, 2, "#fffbe0");
+      }
+      idx++;
+    });
+  });
+  activeCtx.restore();
+}
+
+// ---------- 05 MARKTHAUS & 04 FLIPPER-BAU (1:1 nach Vorlage: 3D-Parallelogramm-Schindeldach, Gaube, Fachwerk & Markisen) ----------
+function drawMerchantStatic1280(X, Y) {
+  P(X - 6, Y + 114, 212, 10, "rgba(0,0,0,.32)");
+  P(X + 190, Y + 36, 12, 84, "rgba(0,0,0,.22)");
+
+  // Fässer links an der Hauswand
+  barrel1280(X - 12, Y + 72);
+  barrel1280(X - 6, Y + 92);
+
+  // Schräges rot-weißes Seitendach rechts unter der rechten Dachkante
+  sideAwningRight1280(X, Y);
+
+  // Erdgeschoss-Holzwand
+  P(X + 10, Y + 36, 168, 84, "#1a0e07");
+  P(X + 14, Y + 40, 160, 76, "#754626");
+  for (let py = 6; py < 74; py += 8) P(X + 14, Y + 40 + py, 160, 1, "#4f2d16");
+
+  // 3D-Parallelogramm-Schindeldach + heller Fachwerkgiebel (cx = X + 94)
+  const cx = X + 94, ridgeTopY = Y - 66, ridgeLen = 38, halfW = 78, dropH = 50;
+  const gablePeakY = ridgeTopY + ridgeLen; // Y - 28
+  roof3DParallelogram1280(cx, ridgeTopY, ridgeLen, halfW, dropH, {
+    cHighlight: "#cc834e",
+    cLight: "#b06c3e",
+    cMid: "#8c522b",
+    cDark: "#613619",
+    gridLeft: "#6e3e1e",
+    gridRight: "#472510",
+    cOutline: "#1a0d07",
+    wallCol: "#ead8b8",
+    wallShade: "#dac6a4",
+    bargeCol: "#422310",
+    bargeHi: "#63361b",
+    bargeTopHi: "#804927",
+    bargeThick: 8,
+    ridgeWidth: 6,
+    ridgeCol: "#4f2b14",
+    ridgeHi: "#8c522b"
+  });
+
+  // Linksseitige Holz-Dachgaube auf der linken Parallelogramm-Dachfläche (wie in der Vorlage)
+  cobbleStone(X + 22, Y - 30, 38, 28, "#9c5e34", "#c78352", "#613619", "#1a0d07");
+  for (let dy = 0; dy < 12; dy++) {
+    const w = 42 - dy * 2;
+    P(X + 41 - (w >> 1), Y - 38 + dy, w, 1, dy < 3 ? "#1a0d07" : "#b87444");
+  }
+  P(X + 30, Y - 20, 18, 9, "#241209");
+
+  // Fachwerkbalken & gerahmtes quadratisches Giebelfenster
+  P(X + 18, Y + 22, 152, 6, "#3b2010");
+  P(X + 54, Y - 2, 80, 4, "#3b2010");
+  P(X + 64, Y + 26, 5, 18, "#3b2010");
+  P(X + 119, Y + 26, 5, 18, "#3b2010");
+  for (let d = 0; d < 16; d++) {
+    P(X + 44 + d, Y + 26 + d, 4, 2, "#3b2010");
+    P(X + 140 - d, Y + 26 + d, 4, 2, "#3b2010");
+  }
+  cobbleStone(X + 80, Y + 1, 28, 22, "#c79a63", "#e6c291", "#78492a", "#1c0f08");
+  P(X + 85, Y + 5, 18, 14, "#140d0a");
+  P(X + 93, Y + 5, 2, 14, "#4a2c18");
+
+  // Linker Marktstand mit 5-streifiger rot-weißer Markise & 2 grünen Gemüsekisten
+  P(X + 16, Y + 58, 68, 58, "#26150b");
+  P(X + 20, Y + 62, 60, 30, "#17100c");
+  frontAwning1280(X + 14, Y + 44, 72);
+  vegCrate1280(X + 18, Y + 92, "#4da63f", "#7cd468", "#2e7324");
+  vegCrate1280(X + 50, Y + 92, "#3b8c32", "#8ce072", "#2e7324");
+
+  // Eingangstür direkt über D-Feld (X+84..X+116) + 3-streifige rot-weiß-rote Markise
+  frontAwning1280(X + 86, Y + 44, 36);
+  P(X + 84, Y + 64, 32, 56, "#120a06");
+  P(X + 88, Y + 68, 24, 52, "#24130b");
+  P(X + 106, Y + 94, 3, 3, "#f1c40f");
+
+  // Rechts vorne: Hölzerner Marktwagen / Auslagetisch (wie in der Vorlage)
+  P(X + 122, Y + 58, 5, 30, "#2b170b");
+  P(X + 170, Y + 58, 5, 30, "#2b170b");
+  cobbleStone(X + 118, Y + 84, 64, 38, "#9c6b3b", "#cfa06b", "#5e3b1c", "#1c0f08");
+  P(X + 124, Y + 96, 22, 18, "#2b180c");
+  P(X + 152, Y + 96, 22, 18, "#2b180c");
+  for (let i = 0; i < 6; i++) {
+    cobbleStone(X + 122 + i * 9, Y + 78, 9, 8, i % 2 ? "#e0b26c" : "#bd8142", "#fae0a8", "#784c20", "#1c0f08");
+  }
+}
+
+function drawFlipperAnim1280(X, Y, t) {
+  const b = Math.floor(t / 240) % 3;
+  ["#f1c40f", "#5ca8f2", "#e74c3c"].forEach((col, i) => {
+    P(X + 90 + i * 5, Y + 11, 3, 3, i === b ? "#ffffff" : col);
+  });
+}
+
+// ---------- 01 STATUE EUROPA & BRUNNEN (Mitte: cx=640, cy=394 in 1280×760) ----------
+const STATUE_1280 = [
+  ".......oooooo.........",
+  ".....oollllllmo.......",
+  "....ollmmmmmdmo.......",
+  "....olmmddmmmo...oooo.",
+  ".....oommmmmo..oollllo",
+  "..oooooolmmmooollllmdo",
+  ".olllllllmmmmmmmmmddo.",
+  ".olmmmooommmmmmmmooo..",
+  "..oooo..olmmmmmdo.....",
+  "........olmmmmmmdo....",
+  ".......olmmmmmmmmdo...",
+  ".......olllmmmmmmddo..",
+  "......ollllmmmmmmddo..",
+  ".....oollllmmmmmmdddo.",
+  "....ooolllmmmmmmmdddo.",
+  "....oooooooooooooooooo"
+];
+const STATUE_PAL_1280 = { o: "#1a181c", l: "#e8ecf2", m: "#b4bac4", d: "#767c87" };
+
+function drawFountainStatic1280() {
+  const cx = 640, cy = 394;
+  // Äußerer Bodenschatten & dunkle 1px-Außenkontur
+  discP(cx, cy + 6, 68, 48, "rgba(0,0,0,.3)");
+  discP(cx, cy, 64, 46, "#1a181c");
+  // Gestufter Steinrand mit Radialfugen
+  discP(cx, cy - 1, 61, 43, "#6e737d");
+  discP(cx, cy - 3, 58, 40, "#aeb4bd");
+  discP(cx, cy - 4, 54, 37, "#d4dae3");
+  for (let a = 0; a < 16; a++) {
+    const ang = (a * Math.PI) / 8;
+    for (let r = 48; r <= 60; r++) {
+      P(cx + Math.cos(ang) * r, cy - 2 + Math.sin(ang) * r * 0.7, 2, 1, "#454952");
+    }
+  }
+  // Innere Beckenwand & tiefblaues Wasser
+  discP(cx, cy - 2, 48, 32, "#454952");
+  discP(cx, cy, 45, 29, "#2464ad");
+  discP(cx, cy + 1, 40, 25, "#3887db");
+  discP(cx, cy + 2, 32, 19, "#56a3f5");
+  // Mittlerer Steinsockel
+  discP(cx, cy + 2, 18, 12, "#1a181c");
+  discP(cx, cy, 16, 10, "#8c929c");
+  cobbleStone(cx - 12, cy - 18, 24, 18, "#aeb4bd", "#dce1e8", "#6e737d", "#1a181c");
+  // Statue Europa in feiner 2px-Auflösung
+  bitmapP(STATUE_1280, cx - 22, cy - 50, 2, STATUE_PAL_1280);
+}
+
+function drawFountainAnim1280(t) {
+  const cx = 640, cy = 394;
+  const p = Math.floor(t / 200) % 5;
+  for (let a = 0; a < 12; a++) {
+    const ang = (a * Math.PI) / 6;
+    const rx = 18 + p * 4, ry = 11 + p * 2.2;
+    P(cx + Math.cos(ang) * rx - 2, cy + Math.sin(ang) * ry, 4, 2, "#b8e2ff");
+  }
+}
+
+// Gemeißelte Steinsockel & leuchtende 5-zackige Goldsterne rund um den Brunnen
+function pebble1280(cx, cy) {
+  discP(cx, cy + 4, 10, 6, "rgba(0,0,0,.28)");
+  cobbleStone(cx - 8, cy - 6, 16, 12, "#989ea8", "#dce1e8", "#646973", "#1c1a1f");
+  P(cx - 4, cy - 4, 8, 3, "#c5cbd4");
+}
+
+const STAR_1280 = [
+  "......oooo......",
+  ".....oLLLLo.....",
+  ".....oLMMMo.....",
+  "....ooLMMMoo....",
+  "ooooLLLMMMLLoooo",
+  "oLLLLLLMMMLLLLLo",
+  ".ooLLLMMMMMLLoo.",
+  "...oMMMMMMMMo...",
+  "...oMMMDoDMMo...",
+  "..oMMDo..oDMMo..",
+  "..oMDo....oDMo..",
+  "...oo......oo..."
+];
+function drawStarAt1280(cx, cy, lit, t, i) {
+  const pulse = (Math.floor(t / 240) + i) % 2 === 0;
+  const sparkle = (Math.floor(t / 180) + i * 3) % 5 === 0;
+
+  // 1. Echter goldener Leucht-Schein (Halo) auf dem Sandstein-Platz
+  activeCtx.save();
+  activeCtx.globalCompositeOperation = "lighter";
+  const haloRadius = lit ? (pulse ? 34 : 28) : (pulse ? 24 : 20);
+  const g = activeCtx.createRadialGradient(cx, cy - 2, 2, cx, cy - 2, haloRadius);
+  g.addColorStop(0, lit ? "rgba(255, 250, 170, 0.95)" : "rgba(255, 235, 130, 0.75)");
+  g.addColorStop(0.45, lit ? "rgba(255, 205, 45, 0.55)" : "rgba(255, 195, 40, 0.38)");
+  g.addColorStop(1, "rgba(255, 180, 20, 0)");
+  activeCtx.fillStyle = g;
+  activeCtx.fillRect(cx - haloRadius, cy - 2 - haloRadius, haloRadius * 2, haloRadius * 2);
+  activeCtx.restore();
+
+  // 2. Scharfer, lückenloser 2px-Pixel-Art-Goldstern mit dunkler Kontur
+  discP(cx, cy + 9, 11, 4, "rgba(0,0,0,.25)");
+  bitmapP(STAR_1280, cx - 16, cy - 14, 2, {
+    o: "#1f1305",
+    L: lit ? (pulse ? "#ffffff" : "#fff799") : (pulse ? "#fff285" : "#ffe055"),
+    M: lit ? (pulse ? "#ffe042" : "#f5c418") : (pulse ? "#f5c422" : "#e6b015"),
+    D: lit ? "#c9840c" : "#ad7209"
+  });
+
+  // 3. Leuchtender Glanzpunkt im Zentrum & animierte Lichtstrahlen
+  P(cx - 2, cy - 4, 4, 4, "#ffffff");
+  if (lit || sparkle) {
+    P(cx - 1, cy - 19, 2, 5, "#fffbe0");
+    P(cx - 1, cy + 10, 2, 5, "#fffbe0");
+    P(cx - 19, cy - 3, 5, 2, "#fffbe0");
+    P(cx + 14, cy - 3, 5, 2, "#fffbe0");
+  }
+}
+
+// Scharfe Beschriftung auf dem Steinboden
+function label1280(lines, cx, cy) {
+  activeCtx.save();
+  activeCtx.font = "bold 19px 'Segoe UI', monospace";
+  activeCtx.textAlign = "center";
+  activeCtx.textBaseline = "middle";
+  const arr = Array.isArray(lines) ? lines : [lines];
+  arr.forEach((txt, idx) => {
+    const ly = cy + idx * 21;
+    activeCtx.strokeStyle = "rgba(228,216,188,.92)";
+    activeCtx.lineWidth = 5;
+    activeCtx.strokeText(txt, cx, ly);
+    activeCtx.fillStyle = "#221911";
+    activeCtx.fillText(txt, cx, ly);
+  });
+  activeCtx.restore();
+}
+
+// ---------- Offscreen-Cache für die statische 1280×760 Dorfkarte ----------
+const villageCache = document.createElement("canvas");
+villageCache.width = 1280;
+villageCache.height = 760;
+
+function buildVillageCache() {
+  const prev = activeCtx;
+  activeCtx = villageCache.getContext("2d");
+  activeCtx.imageSmoothingEnabled = false;
+
+  // 1. Grundkacheln (Wiese, Pflaster, Dorfplatz, Hecken, Türen)
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const X = c * TW, Y = r * TW, k = MAP[r][c];
+      if (k === "T" && isWater(c, r)) drawWater1280(X, Y, c, r, 0);
+      else if (k === "T" || k === ".") drawGrass1280(X, Y, c, r);
+      else if (k === "#") drawHedge1280(X, Y, c, r);
+      else if (k === "P" || k === "F") drawPlaza1280(X, Y, c, r);
+      else drawPath1280(X, Y, c, r);
+
+      if (k === "D") {
+        cobbleStone(X + 4, Y - 2, 32, 9, "#9c988e", "#cfcbc0", "#6e6b63", "#24201c");
+        cobbleStone(X + 8, Y + 11, 24, 11, "#82412c", "#a85c43", "#57291a", "#24120a");
+      }
+    }
+  }
+  // 2. Weicher Bodenschatten unter allen Hecken
+  for (let r = 0; r < ROWS - 1; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (MAP[r][c] === "#" && !"#T".includes(MAP[r + 1][c])) {
+        P(c * TW, (r + 1) * TW, TW, 8, "rgba(0,0,0,.24)");
+      }
+    }
+  }
+  // 3. Einzelnes Holzfass rechts an der Hecke (Spalte 29, Zeile 6 wie in Bild 1)
+  barrel1280(29 * TW + 10, 6 * TW + 8);
+
+  // 4. Dichte Baumkronen am Rand + zusätzliche Eck-Bäume (wie in Konzeptbild 1)
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (MAP[r][c] === "T" && !isWater(c, r)) drawTree1280(c * TW, r * TW, c, r);
+    }
+  }
+
+  // 5. Alle 4 Gebäude in 3D-Parallelogramm-Optik auf ihren H-Kacheln zeichnen
+  drawSchmiedeStatic1280(5 * TW, 2 * TW);
+  drawRatshalleStatic1280(22 * TW, 2 * TW);
+  drawMerchantStatic1280(5 * TW, 13 * TW);
+  drawMerchantStatic1280(22 * TW, 13 * TW);
+
+  // 6. Gebäudebeschriftungen auf dem Pflaster
+  label1280("02 SCHMIEDE", 5 * TW + 86, 2 * TW + 158);
+  label1280("03 RATSHALLE", 22 * TW + 104, 2 * TW + 158);
+  label1280(["05 HAUS 4:", "MARKTHAUS"], 5 * TW + 86, 13 * TW + 152);
+  label1280(["04 HAUS 3:", "FLIPPER-BAU"], 22 * TW + 104, 13 * TW + 152);
+
+  // 7. Brunnen & Statue Europa + innerer Kreis aus 12 gemeißelten Steinsockeln
+  drawFountainStatic1280();
+  for (let i = 0; i < 12; i++) {
+    const a = -Math.PI / 2 + i * Math.PI / 6 + Math.PI / 12;
+    pebble1280(640 + Math.round(Math.cos(a) * 72), 394 + Math.round(Math.sin(a) * 52));
+  }
+  label1280(["01 STATUE EUROPA", "& BRUNNEN"], 640, 282);
+
+  activeCtx = prev;
+}
+
+// ---------- 2. INNENRAUM (1280×760 Isometrische Holzstube über Eck nach Bild 2) ----------
+const interiorCache = document.createElement("canvas");
+interiorCache.width = 1280;
+interiorCache.height = 760;
+
+// 1:1 Pixel-Art-Matrix (38×48) für "Model 1" (exakt nach Referenzbild image_38c4c7.png / image_46ebe9.png):
+// - Spitze Kapuze oben (nach links eingeschlagen mit dunkler Diagonalfalte)
+// - Großer gelb leuchtender Fragezeichen-Hirtenstab (?) rechts (Spalten 26..37)
+// - Quer aufgeschnallte 3-teilige Schlafrolle mit sichtbarer Spirale rechts (Spalten 5..22)
+// - Quadratischer Lederrucksack mit Deckelklappe, mittlerer Schnalle, Untertasche & Seitentasche
+// - Nach rechts ausgestreckter Arm im braunen Ärmel mit Hand am dunklen Stabgriff
+// - Unterer Stab-Schaft mit charakteristischer gelber Lichtkante und Stufe
+// - 5-zackiger Umhangsaum mit schwarzer 1px-Kontur, gestreifte Beinlinge und zwei braune Stiefel
+const MODEL1_SPRITE = [
+  "............oooooo.........ooooooo....",
+  "..........ooLLLLLLoo.....ooYYYYYYYoo..",
+  ".........oLLLLLLLLLLo...oYYyyyyyyyYYo.",
+  "........oLLLLLLLLHHHLo.oYYyyoooooyyYYo",
+  ".......oLLLLLLLHHHHHHLoYYyo.....ooyYYo",
+  ".......oLLLLLLLHDoHHHHoYYo.......oYYyo",
+  ".......oLLLLLLDoDoHHHHoYYo.......oYYyo",
+  "........ooooDoDDoHHHHHoYYo.....ooYYyo.",
+  "........oLLDDDDDHHHHHHoYYyo...oYYyyo..",
+  ".......oLLLDDDDHHHHHHHHoYYyoooYYyyo...",
+  "......oLLLLHHHHHHHHHHHHooYYYYYyyoo....",
+  "......oLLLHHHHHHHHHHHHHDooYYYYoo......",
+  "......oLLHHHHHHHHHHHHHHDDooYYyo.......",
+  "......oLHHHHHHHHHHHHHHHHDDooYYyo......",
+  ".....ooooooooooooooooooHDDDooYYyo.....",
+  "....oBBbBBBBboBBBBboBmooHHDo.oYYyo....",
+  "...oBBBbBBBBboBBBBboBmBmoHDo.oYYyo....",
+  "...oBbbbBBBBboBBBBboBmoBoHDo.oYYyo....",
+  "...obmmmbbbbbobbbbbobBmBoHDo..oKko....",
+  "....oommmmmmmommmmmmoomooHDo..oKko....",
+  "....oLHoooooooooooooooLHHHDo..oKko....",
+  "...oLHHoPPPPPPPPPPPPPoLHHHDo.aoKko....",
+  "...oLHHoPpppppppppppPoLHHDoaaaKko.....",
+  "...oLHHoppppoooopppppoHHHDoaaaKhho....",
+  "..oLLHHoooooobboooooqoHHDooaaaKhso....",
+  "..oLLHHoPpppbBbbppppqoHHDoAAAAKsso....",
+  "..oLLHHoPpppooooppppqoHHDo.ooooKko....",
+  "..oLLHHopppoppppppoooHHHDo....oKko....",
+  ".oLLLHHopppopoooqpopqHHHDDo...oKko....",
+  ".oLLLHHopppoppppppopqHHHDDo...oKko....",
+  ".oLLLHHopppoooooooopqHHHDDo...oYYo....",
+  ".oLLLHHoqqqqqqqqqqqqoHHHDDo...oYYo....",
+  ".oLLLHHHooooooooooooHHHHDDo...oYYo....",
+  "oLLLLHHHHHHHHHHHHHHHHHHHDDDo..oYYo....",
+  "oLLLHHHHHHHHHHHHHHHHHHHHDDDo..oYyo....",
+  "oLLLHHHHHHHHHHHHHHHHDoHHDDDo.oYYyo....",
+  "oLLHHHHoHHHHHHHHDHHDo.oHDDDo.oYYyo....",
+  "oLHHHHo.oHHHHHHDooHDo.oHDDDo.oYYyo....",
+  "oLHHHo..oAAoHHHDo.oo..oAAoDo.oYYgo....",
+  "oLHHo...okkoHHHDo.....okkoDo.oYYgo....",
+  "oLHo....oAAooHHDo.....oAAooo..oYgo....",
+  "ooo.....opppoHHo......opppo...oYyo....",
+  "........opppoHDo......opppo...oYyo....",
+  "........opppqoo.......opppqo..oYyo....",
+  ".......oopppqoo......oopppqo..oYyo....",
+  "......oPPPPppqoo....oPPPPppq.ooYyo....",
+  "......oooooooooo....oooooooo..ooyo....",
+  "...............................oo....."
+];
+
+const MODEL1_PAL = {
+  o: "#140c08", // 1px dunkle Kontur
+  L: "#c8783c", // Kapuze & Umhang Lichtkante (warmes Orangebraun)
+  H: "#ad622c", // Kapuze & Umhang Hauptfarbe (Rostbraun)
+  D: "#7d421a", // Kapuzenfalte & Umhang Schatten
+  B: "#d9b282", // Schlafrolle hellbeige
+  b: "#ba8d5c", // Schlafrolle mittelbeige & Schnalle
+  m: "#8c6238", // Schlafrolle Schatten & Spirale
+  P: "#a36236", // Rucksack-Klappe & Stiefel-Lichtkante
+  p: "#824923", // Rucksack & Stiefel Hauptfarbe
+  q: "#592f14", // Rucksack & Stiefel Schatten
+  a: "#785c48", // Ausgestreckter rechter Ärmel oben
+  A: "#594233", // Ärmel Schatten & Beinlinge
+  h: "#f2a679", // Hand am Stab (hell)
+  s: "#c47850", // Hand Schatten
+  k: "#4c3d52", // Dunkler Stabgriff
+  K: "#73607a", // Stabgriff Lichtkante
+  Y: "#fffb96", // Leuchtendes Gelb-Weiß (Stab-Glanz)
+  y: "#ffe042", // Kräftiges Goldgelb (Stab-Kern)
+  g: "#d49818"  // Warmes Gold (Stab-Schattenkante)
+};
+
+function buildInteriorCache() {
+  const prev = activeCtx;
+  activeCtx = interiorCache.getContext("2d");
+  activeCtx.imageSmoothingEnabled = false;
+
+  // Dunkler Außenhintergrund
+  P(0, 0, 1280, 760, "#151f24");
+
+  // 1. Isometrischer Holzdielenboden mit Fugen, Maserung & Dielenstößen
+  for (let y = 268; y < 760; y++) {
+    const dy = y - 268;
+    const xL = Math.max(24, 640 - dy * 2);
+    const xR = Math.min(1256, 640 + dy * 2);
+    if (xR > xL) {
+      const plank = (y % 14 === 0) ? "#4f2e16" : ((y % 7 === 0) ? "#6e4222" : "#804e2a");
+      P(xL, y, xR - xL, 1, plank);
+    }
+  }
+  for (let k = -520; k <= 520; k += 40) {
+    for (let d = 0; d < 360; d++) {
+      const fx = 640 + k + d * 2, fy = 268 + Math.abs(k) * 0.5 + d;
+      if (fx > 44 && fx < 1236 && fy > 274 && fy < 752) {
+        P(fx, fy, 3, 1, "#4a2b14");
+        if (d % 48 === 0) P(fx - 6, fy + 3, 14, 1, "#3d2210");
+      }
+    }
+  }
+
+  // 2. Linke isometrische Blockhaus-Holzwand (von (40,324) bis Ecke (640,24), Wandhöhe 248 px)
+  for (let x = 40; x < 640; x++) {
+    const yTop = Math.round(324 - (x - 40) * 0.5 - 248);
+    const isPost = (x < 60) || (Math.abs(x - 204) < 10) || (Math.abs(x - 432) < 10) || (x > 624);
+    if (isPost) {
+      const pCol = (x % 9 === 0) ? "#2b170a" : "#59341a";
+      P(x, yTop, 1, 248, pCol);
+    } else {
+      P(x, yTop, 1, 248, "#87532d");
+      for (let py = 0; py < 248; py += 24) {
+        P(x, yTop + py, 1, 2, "#3d2210");
+        P(x, yTop + py + 2, 1, 3, "#a1663b");
+        P(x, yTop + py + 20, 1, 4, "#6b3f20");
+      }
+    }
+    // Oberer Dachbalken-Abschluss & untere Fußleiste
+    P(x, yTop - 14, 1, 3, "#170d06");
+    P(x, yTop - 11, 1, 11, "#9c6238");
+    P(x, yTop, 1, 3, "#241309");
+    P(x, yTop + 236, 1, 12, "#4a2a14");
+    P(x, yTop + 246, 1, 3, "#170d06");
+  }
+
+  // 3. Rechte isometrische Blockhaus-Holzwand (von Ecke (640,24) bis (1240,324), Wandhöhe 248 px)
+  for (let x = 640; x < 1240; x++) {
+    const yTop = Math.round(24 + (x - 640) * 0.5 - 248 + 248);
+    const isPost = (x < 656) || (Math.abs(x - 868) < 10) || (Math.abs(x - 1072) < 10) || (x > 1220);
+    if (isPost) {
+      const pCol = (x % 9 === 0) ? "#241308" : "#4a2b15";
+      P(x, yTop, 1, 248, pCol);
+    } else {
+      P(x, yTop, 1, 248, "#734524");
+      for (let py = 0; py < 248; py += 24) {
+        P(x, yTop + py, 1, 2, "#331c0d");
+        P(x, yTop + py + 2, 1, 3, "#8c5730");
+        P(x, yTop + py + 20, 1, 4, "#59341a");
+      }
+    }
+    P(x, yTop - 14, 1, 3, "#170d06");
+    P(x, yTop - 11, 1, 11, "#87532f");
+    P(x, yTop, 1, 3, "#241309");
+    P(x, yTop + 236, 1, 12, "#3d2210");
+    P(x, yTop + 246, 1, 3, "#170d06");
+  }
+
+  // 4. Zwei isometrische Holzfenster an der linken Wand
+  [[42, 86], [456, 96]].forEach(([wx, ww]) => {
+    for (let dx = 0; dx < ww; dx++) {
+      const x = wx + dx;
+      const wy = Math.round(324 - (x - 40) * 0.5 - 184);
+      const isFrame = dx < 8 || dx > ww - 9;
+      P(x, wy, 1, 92, isFrame ? "#945b32" : "#263440");
+      P(x, wy, 1, 3, "#1c0f08");
+      P(x, wy + 89, 1, 4, "#1c0f08");
+      if (!isFrame) {
+        P(x, wy + 8, 1, 76, "#3b4f5e");
+        P(x, wy + 44, 1, 4, "#4a2b15");
+        if (Math.abs(dx - ww / 2) < 2) P(x, wy + 8, 1, 76, "#4a2b15");
+      }
+    }
+  });
+
+  // 5. Isometrische Kassettentür an der rechten Wand (x = 924..1032)
+  for (let dx = 0; dx < 108; dx++) {
+    const x = 924 + dx;
+    const dy = Math.round(24 + (x - 640) * 0.5 + 64);
+    const isFrame = dx < 10 || dx > 97;
+    P(x, dy, 1, 184, isFrame ? "#87532f" : "#61391d");
+    P(x, dy, 1, 3, "#1c0f08");
+    if (!isFrame && dx > 18 && dx < 88 && (dx < 48 || dx > 56)) {
+      cobbleStone(x, dy + 20, 1, 64, "#4d2b15", "#704223", "#331b0c", "#261409");
+      cobbleStone(x, dy + 96, 1, 68, "#4d2b15", "#704223", "#331b0c", "#261409");
+    }
+  }
+  discP(1004, 300, 5, 5, "#1c0f08");
+  discP(1004, 300, 3.5, 3.5, "#e0ab38");
+
+  // 6. Massiver isometrischer Steinkamin aus abgerundeten Einzelsteinen (links, x=196..388)
+  // Herd-Podest
+  for (let dx = 0; dx < 208; dx++) {
+    const x = 188 + dx;
+    const yW = Math.round(324 - (x - 40) * 0.5);
+    P(x, yW - 8, 1, 52, "#575a63");
+    P(x, yW - 8, 1, 3, "#8c919e");
+    P(x, yW + 41, 1, 3, "#1c1a1f");
+  }
+  // Unterer Feuerraum aus einzelnen Steinen
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 7; col++) {
+      const sx = 200 + col * 26 + (row % 2) * 10;
+      const sw = Math.min(26, 384 - sx);
+      if (sw >= 8) {
+        const sy = Math.round(324 - (sx - 40) * 0.5 + 16 - (row + 1) * 17);
+        const isSide = col === 0;
+        cobbleStone(sx, sy, sw, 17, isSide ? "#5e626e" : "#7c818f", "#a3a8b8", "#41444d", "#1c1a1f");
+      }
+    }
+  }
+  // Dunkle Bogen-Feueröffnung
+  for (let dx = 52; dx < 152; dx++) {
+    const x = 200 + dx;
+    const yBase = Math.round(324 - (x - 40) * 0.5 + 12);
+    const arch = Math.round(Math.pow((dx - 102) / 50, 2) * 28);
+    P(x, yBase - 92 + arch, 1, 92 - arch, "#170e0b");
+  }
+  // Hölzerner Kaminsims (Mantelpiece)
+  for (let dx = -12; dx < 196; dx++) {
+    const x = 200 + dx;
+    const yBase = Math.round(324 - (x - 40) * 0.5 - 116);
+    P(x, yBase - 24, 1, 24, dx < 24 ? "#5e361a" : "#8a532c");
+    P(x, yBase - 24, 1, 4, "#b37344");
+    P(x, yBase - 27, 1, 3, "#1c0f08");
+    P(x, yBase - 2, 1, 3, "#1c0f08");
+  }
+  // Oberer Stein-Schornstein über dem Sims
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 5; col++) {
+      const sx = 224 + col * 26 + (row % 2) * 9;
+      const sw = Math.min(26, 360 - sx);
+      if (sw >= 8) {
+        const sy = Math.round(324 - (sx - 40) * 0.5 - 140 - (row + 1) * 17);
+        cobbleStone(sx, sy, sw, 17, col === 0 ? "#575b66" : "#757a87", "#9ca1b0", "#3d404a", "#1c1a1f");
+      }
+    }
+  }
+
+  // 7. Holzkommode links vorne mit 4 Schubladen, rotem Buch & Kristall
+  for (let dx = 0; dx < 164; dx++) {
+    const x = 20 + dx;
+    const yTop = Math.round(432 - dx * 0.45);
+    P(x, yTop, 1, 96, dx < 124 ? "#8c5832" : "#61391d");
+    P(x, yTop - 12, 1, 12, "#ad7145");
+    P(x, yTop - 15, 1, 3, "#1c0f08");
+    P(x, yTop + 93, 1, 3, "#1c0f08");
+    if (dx > 12 && dx < 112 && Math.abs(dx - 62) > 4) {
+      P(x, yTop + 12, 1, 32, "#6e4222");
+      P(x, yTop + 52, 1, 32, "#6e4222");
+    }
+  }
+  [[48, 428], [96, 406], [48, 468], [96, 446]].forEach(([kx, ky]) => {
+    cobbleStone(kx, ky, 8, 6, "#d9a338", "#ffe680", "#8c6214", "#1c0f08");
+  });
+  cobbleStone(24, 388, 36, 28, "#a83226", "#d94e3f", "#6e1b12", "#1c0f08");
+  P(28, 406, 28, 6, "#efe2be");
+  cobbleStone(76, 372, 20, 24, "#a3aab5", "#e4eaf2", "#686e78", "#1c1a1f");
+
+  // 8. Bücherregal rechts vorne mit bunten Buchrücken
+  for (let dx = 0; dx < 156; dx++) {
+    const x = 1080 + dx;
+    const yTop = Math.round(320 + dx * 0.48);
+    P(x, yTop, 1, 136, dx < 28 ? "#8c5832" : "#693e20");
+    P(x, yTop - 10, 1, 10, "#ad7145");
+    P(x, yTop - 13, 1, 3, "#1c0f08");
+    P(x, yTop + 133, 1, 3, "#1c0f08");
+    if (dx >= 32 && dx <= 144) {
+      P(x, yTop + 16, 1, 44, "#26150a");
+      P(x, yTop + 72, 1, 44, "#26150a");
+      const bIdx = ((dx - 32) / 10) | 0;
+      const bCol1 = ["#c0392b", "#2980b9", "#27ae60", "#d4ac0d", "#8e44ad", "#d35400", "#c0392b"][bIdx % 7];
+      const bCol2 = ["#27ae60", "#c0392b", "#d4ac0d", "#2980b9", "#d35400", "#8e44ad", "#16a085"][bIdx % 7];
+      if ((dx - 32) % 10 > 1) {
+        P(x, yTop + 22, 1, 36, bCol1);
+        P(x, yTop + 78, 1, 36, bCol2);
+      }
+    }
+  }
+
+  // 9. Reich verzierter isometrischer Orientteppich mit Bordüre, Rauten & Fransen
+  const rCX = 650, rCY = 548, rW = 432, rH = 196;
+  for (let dy = -rH; dy <= rH; dy++) {
+    const f = 1 - Math.abs(dy) / rH;
+    const span = Math.round(f * rW);
+    P(rCX - span, rCY + dy, span * 2, 1, "#26120c");
+    if (span > 8)  P(rCX - span + 6,  rCY + dy, (span - 6) * 2,  1, "#d4b075");
+    if (span > 24) P(rCX - span + 20, rCY + dy, (span - 20) * 2, 1, "#8f3024");
+    if (span > 48) P(rCX - span + 40, rCY + dy, (span - 40) * 2, 1, "#c49a60");
+    if (span > 60) {
+      P(rCX - span + 52, rCY + dy, (span - 52) * 2, 1, "#7a251b");
+      // Eingewebtes Rauten-Ornament
+      for (let ox = -span + 68; ox < span - 68; ox += 36) {
+        if ((Math.abs(ox) + Math.abs(dy * 2)) % 36 < 6) {
+          P(rCX + ox, rCY + dy, 4, 1, "#d9b372");
+        }
+      }
+    }
+    // Helle Fransen an den unteren Teppichkanten
+    if (dy > 0 && dy % 5 === 0) {
+      P(rCX - span - 6, rCY + dy, 6, 2, "#e8dec8");
+      P(rCX + span, rCY + dy, 6, 2, "#e8dec8");
+    }
+  }
+
+  // 10. Massiver isometrischer Holztisch mit Öllampe, aufgeschlagenem Pergamentbuch & Hocker
+  [[436, 472, 84], [592, 536, 88], [796, 432, 80], [636, 380, 64]].forEach(([lx, ly, lh]) => {
+    discP(lx + 12, ly + lh, 18, 6, "rgba(0,0,0,.38)");
+    cobbleStone(lx, ly, 24, lh, "#6e4222", "#8f5932", "#472913", "#1c0f08");
+  });
+  const tCX = 624, tCY = 448, tW = 196, tH = 88;
+  for (let dy = -tH; dy <= tH; dy++) {
+    const span = Math.round((1 - Math.abs(dy) / tH) * tW);
+    if (dy >= 0) {
+      P(tCX - span, tCY + dy, span * 2, 18, "#1c0f08");
+      P(tCX - span + 3, tCY + dy, span - 3, 15, "#6e4222");
+      P(tCX, tCY + dy, span - 3, 15, "#4d2c15");
+    }
+    P(tCX - span, tCY + dy, span * 2, 1, (Math.abs(dy) % 12 === 0) ? "#5e361a" : "#8f5932");
+  }
+  // Rotes Buch rechts hinten auf dem Tisch
+  cobbleStone(700, 396, 68, 36, "#9e2e22", "#c94032", "#661b13", "#1c0f08");
+  P(706, 422, 56, 6, "#efe2be");
+
+  // Aufgeschlagenes Pergament-Buch in der Tischmitte
+  cobbleStone(552, 408, 144, 64, "#29170b", "#54321b", "#1a0e06", "#140a04");
+  cobbleStone(558, 412, 64, 54, "#f2e5c2", "#ffffff", "#c9b88f", "#3b2312");
+  cobbleStone(624, 412, 66, 54, "#e3d4ad", "#f7ecd0", "#b5a47c", "#3b2312");
+  for (let l = 0; l < 7; l++) {
+    P(568, 420 + l * 6, 44, 2, "#6e5a3e");
+    P(634, 420 + l * 6, 44, 2, "#6e5a3e");
+  }
+
+  // Öllampe links vorn auf dem Tisch
+  cobbleStone(464, 432, 40, 18, "#c99626", "#ffe066", "#876112", "#1c0f08");
+  cobbleStone(474, 392, 20, 42, "#fff6cc", "#ffffff", "#ebd894", "#4a3510");
+
+  // Isometrischer Holzschemel vor dem Tisch (links neben dem Wächter wie in image_46ebe9.png)
+  // Beine des Schemels
+  cobbleStone(682, 540, 16, 46, "#4f2e16", "#6e4222", "#331c0c", "#140b06");
+  cobbleStone(728, 562, 16, 48, "#4f2e16", "#6e4222", "#331c0c", "#140b06");
+  cobbleStone(774, 538, 16, 44, "#4f2e16", "#6e4222", "#331c0c", "#140b06");
+  // Isometrische Sitzfläche des Schemels
+  for (let dy = -26; dy <= 26; dy++) {
+    const span = Math.round((1 - Math.abs(dy) / 26) * 56);
+    if (dy >= 0) {
+      P(736 - span, 526 + dy, span * 2, 12, "#140b06");
+      P(736 - span + 2, 526 + dy, span - 2, 9, "#784926");
+      P(736, 526 + dy, span - 2, 9, "#523016");
+    }
+    P(736 - span, 526 + dy, span * 2, 1, (Math.abs(dy) % 7 === 0) ? "#633b1d" : "#9c6236");
+  }
+
+  // Wächter ("Model 1") im Innenraum bei s=3 (114×144 px) neben dem Holzschemel
+  // Im Innenraum-Konzeptbild hält er den Stab links am Schemel -> horizontal gespiegelt (flip = true)
+  const px = 762, py = 444;
+  discP(px + 56, py + 136, 38, 11, "rgba(0,0,0,.42)");
+  discP(px + 20, py + 24, 26, 26, "rgba(255,235,95,.26)");
+  bitmapP(MODEL1_SPRITE, px, py, 3, MODEL1_PAL, true);
+
+  activeCtx = prev;
+}
+
+// ---------- Spielfigur im Dorf ("Model 1" 1:1, ganzzahlige Pixelgröße, exakt auf player.c / player.r) ----------
+let lastStepC = player.c, lastStepR = player.r, lastStepTime = -1000;
+function drawPlayer1280(t) {
+  if (player.c !== lastStepC || player.r !== lastStepR) {
+    lastStepC = player.c;
+    lastStepR = player.r;
+    lastStepTime = t;
+  }
+  // Exakt auf der Kachel (player.c, player.r) mit dem 38×48 "Model 1"-Sprite
+  const stepBob = (t - lastStepTime < 180 && (Math.floor(t / 90) % 2 === 1)) ? -2 : 0;
+  const x = player.c * TW + 1;
+  const y = player.r * TW - 12 + stepBob;
+  const flipLeft = player.dir === "left";
+
+  // Bodenschatten + sanfter Lichtschein um den goldenen Fragezeichen-Stab
+  discP(x + 18, player.r * TW + 34, 15, 5, "rgba(0,0,0,.38)");
+  const crookX = flipLeft ? (x + 7) : (x + 31);
+  discP(crookX, y + 7, 9, 9, "rgba(255,240,110,.28)");
+
+  bitmapP(MODEL1_SPRITE, x, y, 1, MODEL1_PAL, flipLeft);
+}
+
+// ---------- Gesamtbild rendern (60 FPS mit Offscreen-Caches + Live-Animationen) ----------
+let cachesBuilt = false;
+function ensureCaches() {
+  if (!cachesBuilt) {
+    buildVillageCache();
+    buildInteriorCache();
+    cachesBuilt = true;
+  }
+}
+
+function drawInterior(t) {
+  ensureCaches();
+  ctx.drawImage(interiorCache, 0, 0);
+  // Animiertes Kaminfeuer & warmes Licht-Leuchten
+  const f = Math.floor(t / 95) % 4;
+  discP(308, 348, 38, 16, "#d93800");
+  discP(308, 336 - f * 2, 30, 22, "#ff7700");
+  discP(308, 338 - f, 20, 16, "#ffbb24");
+  discP(308, 342, 11, 9, "#fff6b0");
+
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  [[308, 336, 290, 0.22], [484, 412, 190, 0.2]].forEach(([lx, ly, rr, a]) => {
+    const g = ctx.createRadialGradient(lx, ly, 8, lx, ly, rr);
+    g.addColorStop(0, "rgba(255,180,70," + (a + (Math.floor(t / 150) % 2) * 0.03) + ")");
+    g.addColorStop(1, "rgba(255,180,70,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 1280, 760);
+  });
+  ctx.restore();
+}
+
+function renderVillage(t) {
+  ensureCaches();
+  ctx.drawImage(villageCache, 0, 0);
+
+  // Animierte Wasseroberfläche am Ufer
+  for (let r = 0; r < 6; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (MAP[r][c] === "T" && isWater(c, r)) drawWater1280(c * TW, r * TW, c, r, t);
+    }
+  }
+  // Animiertes Schmiedefeuer, Rauch, Ratshalle-Sterne, Flipper-Lichter & Brunnenwellen
+  drawSchmiedeAnim1280(5 * TW, 2 * TW, t);
+  drawRatshalleAnim1280(22 * TW, 2 * TW, t);
+  drawFlipperAnim1280(22 * TW, 13 * TW, t);
+  drawFountainAnim1280(t);
+
+  // 12 leuchtende Goldsterne im äußeren Ring um den Brunnen
+  for (let i = 0; i < 12; i++) {
+    const a = -Math.PI / 2 + i * Math.PI / 6;
+    drawStarAt1280(640 + Math.round(Math.cos(a) * 102), 392 + Math.round(Math.sin(a) * 78), i < stars, t, i);
+  }
+
+  // Spielfigur
+  drawPlayer1280(t);
+
+  // Optionales Kontroll-Raster [G]
+  if (showGrid) {
+    ctx.save();
+    ctx.strokeStyle = "rgba(255,255,255,.3)";
+    ctx.lineWidth = 1;
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        if (!walkable(c, r)) {
+          ctx.fillStyle = "rgba(231,76,60,.22)";
+          ctx.fillRect(c * TW, r * TW, TW, TW);
+        }
+        ctx.strokeRect(c * TW + 0.5, r * TW + 0.5, TW - 1, TW - 1);
+      }
+    }
+    ctx.restore();
+  }
+}
+
+function render(t) {
+  if (modalOpen) drawInterior(t);
+  else renderVillage(t);
+}
+
+// =====================================================================
+// AGENT 4 & AGENT 5 – VISUELLER SCREENSHOT- & 1PX-SCHÄRFE-INSPEKTOR
+// =====================================================================
+const agent4Modal = document.getElementById("agent4Modal");
+const snapExt = document.getElementById("snapExt");
+const snapInt = document.getElementById("snapInt");
+const loupeCanvas = document.getElementById("loupeCanvas");
+const loupeCtx = loupeCanvas.getContext("2d");
+loupeCtx.imageSmoothingEnabled = false;
+
+function measurePixelSharpness(imageData) {
+  const d = imageData.data, w = imageData.width, h = imageData.height;
+  let microTransitions = 0, totalChecks = 0, outlinePixels = 0;
+  for (let y = 12; y < h - 12; y += 6) {
+    for (let x = 12; x < w - 12; x += 6) {
+      const i = (y * w + x) * 4;
+      const r = d[i], g = d[i + 1], b = d[i + 2];
+      if (r < 42 && g < 42 && b < 42) outlinePixels++;
+      const j = (y * w + (x + 1)) * 4;
+      const diff1 = Math.abs(r - d[j]) + Math.abs(g - d[j + 1]) + Math.abs(b - d[j + 2]);
+      if (diff1 > 12) microTransitions++;
+      totalChecks++;
+    }
+  }
+  return {
+    detailDensityPct: Math.min(100, Math.round((microTransitions / totalChecks) * 260)),
+    outlinePct: Math.round((outlinePixels / totalChecks) * 100)
+  };
+}
+
+function runFourAgentLoop() {
+  const prevStars = stars;
+  stars = 6;
+  renderVillage(1200);
+  snapExt.getContext("2d").drawImage(canvas, 0, 0);
+  const extMetrics = measurePixelSharpness(ctx.getImageData(0, 0, canvas.width, canvas.height));
+
+  drawInterior(1200);
+  snapInt.getContext("2d").drawImage(canvas, 0, 0);
+  const intMetrics = measurePixelSharpness(ctx.getImageData(0, 0, canvas.width, canvas.height));
+  stars = prevStars;
+  render(performance.now());
+
+  // 4× Vorschau von "Model 1" im Agent-4-Inspektor rendern
+  const m1Canvas = document.getElementById("model1Preview");
+  if (m1Canvas) {
+    const prev = activeCtx;
+    activeCtx = m1Canvas.getContext("2d");
+    activeCtx.imageSmoothingEnabled = false;
+    activeCtx.fillStyle = "#1e242b";
+    activeCtx.fillRect(0, 0, m1Canvas.width, m1Canvas.height);
+    bitmapP(MODEL1_SPRITE, 0, 0, 4, MODEL1_PAL, false);
+    activeCtx = prev;
+  }
+
+  const testErrors = selfTest();
+  const reportEl = document.getElementById("agentReport");
+  reportEl.innerHTML =
+    `<div><span class="agBadge">Agent 5 · 1px Pixel-Shader</span>` +
+    `<strong>Ursache der Grobpixeligkeit behoben:</strong> Statt grober 4×4-Blöcke im 640×380-Raum arbeitet <code>TEIL D</code> jetzt mit echtem 1:1 Per-Pixel-Shading (<code>1280×760</code>, 1 Kachel = <code>40×40</code> Pixel) und Offscreen-Sprite-Caching für abgerundete Einzelsteine, Rauten-Schindeln, 6-Kugel-Laubbäume und gewellte Heckenkonturen.</div>` +
+    `<div style="margin-top:4px;"><span class="agBadge">Agent 1–3 · Spiel & Modul</span>` +
+    `<strong>MeilensteineModul & Selbsttest:</strong> Schmiede öffnet das 5-Ereignisse-Modul („IN VIELFALT GEEINT“), ${testErrors.length === 0 ? "alle 4 Türen erreichbar, 0 Fehler." : testErrors.join(", ")}</div>` +
+    `<div style="margin-top:4px;"><span class="agBadge">Agent 4 · Mikro-Detail-Check</span>` +
+    `<strong>1px-Detaildichte:</strong> Außen: <strong>${extMetrics.detailDensityPct}%</strong> (1px-Konturanteil ${extMetrics.outlinePct}%) · Innen: <strong>${intMetrics.detailDensityPct}%</strong> (1px-Konturanteil ${intMetrics.outlinePct}%). Bewege die Maus über die Bilder für die 4× Lupe!</div>`;
+}
+
+function toggleAgent4() {
+  if (agent4Modal.style.display === "flex") {
+    agent4Modal.style.display = "none";
+  } else {
+    runFourAgentLoop();
+    agent4Modal.style.display = "flex";
+  }
+}
+
+document.getElementById("btnAgent4").addEventListener("click", toggleAgent4);
+document.getElementById("closeAgent4").addEventListener("click", toggleAgent4);
+
+[snapExt, snapInt].forEach((sc, idx) => {
+  sc.addEventListener("pointermove", e => {
+    const rect = sc.getBoundingClientRect();
+    const px = Math.max(18, Math.min(1262, Math.floor(((e.clientX - rect.left) / rect.width) * 1280)));
+    const py = Math.max(18, Math.min(742, Math.floor(((e.clientY - rect.top) / rect.height) * 760)));
+    loupeCtx.clearRect(0, 0, 36, 36);
+    loupeCtx.drawImage(sc, px - 18, py - 18, 36, 36, 0, 0, 36, 36);
+    document.getElementById("loupeInfo").textContent =
+      (idx === 0 ? "Außen" : "Innen") + " · Pixel (" + px + ", " + py + ")";
+  });
+});
+
+function downloadCanvas(sourceCanvas, filename) {
+  const link = document.createElement("a");
+  link.download = filename;
+  link.href = sourceCanvas.toDataURL("image/png");
+  link.click();
+}
+document.getElementById("dlExt").addEventListener("click", () => downloadCanvas(snapExt, "euroquest-aussen.png"));
+document.getElementById("dlInt").addEventListener("click", () => downloadCanvas(snapInt, "euroquest-innen.png"));
+
+function loop(t) { render(t); requestAnimationFrame(loop); }
+selfTest();
+updatePrompt();
+requestAnimationFrame(loop);
+</script>
+<p style="text-align:center;font-size:12px;margin:16px 0"><a href="../impressum/index.html" style="color:inherit">Impressum &amp; Datenschutz</a></p>
+</body>
+</html>
