@@ -2,19 +2,25 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>BRD Quest – Das Dorf der Demokratie</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #16181d; color: #f0f2f5; font-family: 'Segoe UI', Tahoma, sans-serif;
-         display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 8px; }
-  #game { width: 100%; max-width: 960px; box-shadow: 0 12px 36px rgba(0,0,0,.75); border-radius: 8px; overflow: hidden; }
-  #hud { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; background: #263545;
-         padding: 7px 14px; border-bottom: 2px solid #18222c; font-size: 13.5px; font-weight: bold; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { width: 100%; min-height: 100vh; min-height: 100dvh; background: #16181d; color: #f0f2f5;
+               font-family: 'Segoe UI', Tahoma, sans-serif; overflow-x: hidden; }
+  body { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 6px; }
+  #game { width: 100%; max-width: 960px; box-shadow: 0 12px 36px rgba(0,0,0,.75); border-radius: 8px;
+          overflow: hidden; background: #161e22; display: flex; flex-direction: column; position: relative; }
+  #hud { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; background: #263545;
+         padding: 7px 12px; border-bottom: 2px solid #18222c; font-size: 13px; font-weight: bold; z-index: 6; }
   #hud small { font-size: 11.5px; color: #cbd5e1; font-weight: normal; }
+  .hudRight { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   #rankBadge { background: #142234; color: #fde047; border: 1px solid #eab308; border-radius: 12px;
-               padding: 2px 9px; font-size: 12px; font-weight: bold; }
-  #wrap { position: relative; background: #161e22; }
+               padding: 2px 8px; font-size: 11.5px; font-weight: bold; }
+  .hudBtn { background: #34495e; color: #f8fafc; border: 1px solid #64748b; border-radius: 10px;
+            padding: 3px 8px; font-size: 11.5px; font-weight: bold; cursor: pointer; user-select: none; }
+  .hudBtn:hover, .hudBtn:active { background: #476482; }
+  #wrap { position: relative; background: #161e22; width: 100%; display: flex; justify-content: center; align-items: center; }
   canvas { display: block; width: 100%; height: auto; aspect-ratio: 640 / 380;
            image-rendering: pixelated; image-rendering: crisp-edges; touch-action: none; background: #3b5c3b; }
   #prompt { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); background: #e67e22; color: #fff;
@@ -25,7 +31,7 @@
              background: rgba(20, 28, 38, 0.92); color: #ffe066; border: 2px solid #d4b87a; border-radius: 16px;
              padding: 5px 12px; font-size: 12.5px; font-weight: bold; display: none; align-items: center;
              justify-content: center; flex-wrap: wrap; gap: 8px; max-width: 96%; text-align: center;
-             box-shadow: 0 4px 14px rgba(0,0,0,.6); z-index: 4; }
+             box-shadow: 0 4px 14px rgba(0,0,0,.6); z-index: 5; }
   #roomHud button { background: #7a4a24; color: #fff8e7; border: 1px solid #f1c40f; border-radius: 12px;
                     padding: 4px 10px; font-size: 12px; font-weight: bold; cursor: pointer; }
   #roomHud button:hover { background: #965d30; }
@@ -73,42 +79,77 @@
   #victoryBox p { font-size: 14px; line-height: 1.45; margin-bottom: 14px; }
   #victoryBox button { background: #1e3a7a; color: #fff; border: 2px solid #f1c40f; padding: 8px 18px;
                        border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
-  /* Touch-Steuerkreuz unterhalb des Spielfelds */
+  /* Touch-Steuerkreuz */
   #pad { display: flex; justify-content: space-between; align-items: center; background: #263545;
-         padding: 8px 14px; border-top: 2px solid #18222c; gap: 10px; }
+         padding: 8px 14px; border-top: 2px solid #18222c; gap: 10px; z-index: 8; }
+  #pad.hiddenPad { display: none !important; }
   .dpad { display: grid; grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(2, 46px); gap: 5px; }
   .pb { background: #34495e; color: #fff; border: 2px solid #5279a8; border-radius: 8px; font-size: 20px;
         display: flex; align-items: center; justify-content: center; user-select: none; cursor: pointer; touch-action: none; }
-  .pb:active { background: #2980b9; transform: scale(0.96); }
+  .pb:active { background: #2980b9; transform: scale(0.95); }
   #bE { width: 96px; height: 64px; background: #e67e22; border-color: #b85d12; font-weight: bold; font-size: 16px; }
   .err { color: #ff6b6b !important; font-weight: bold !important; }
+  /* Dezente Fußzeile für das Impressum UNTER dem Spiel statt daneben */
+  #footerBar { width: 100%; max-width: 960px; text-align: center; font-size: 11px; color: #94a3b8;
+               padding: 6px 8px 2px; line-height: 1.2; }
+  #footerBar a { color: #cbd5e1; text-decoration: none; }
+  #footerBar a:hover { text-decoration: underline; }
 
-  /* SMARTPHONE- & TABLET-OPTIMIERUNG:
-     Öffnet Infotafel & Aufgaben auf Handys im gut lesbaren Vollbild-Modus statt im kleinen Canvas-Streifen */
-  @media (max-width: 780px), (max-height: 580px) {
-    body { padding: 0; align-items: flex-start; }
-    #game { border-radius: 0; max-width: 100%; }
-    #hud { padding: 6px 10px; font-size: 12.5px; gap: 6px; }
-    #hud small { width: 100%; font-size: 11px; text-align: center; order: 4; }
+  /* 1. SMARTPHONE HOCHFORMAT (Portrait) */
+  @media (max-width: 780px) {
+    body { padding: 0; justify-content: flex-start; }
+    #game { border-radius: 0; max-width: 100%; width: 100%; }
+    #hud { padding: 6px 8px; font-size: 12px; gap: 4px; }
+    #hud small { width: 100%; font-size: 10.5px; text-align: center; order: 4; }
     #roomHud { position: static; transform: none; width: 100%; max-width: 100%; border-radius: 0;
-               border-left: none; border-right: none; border-top: none; padding: 6px 10px; font-size: 12px; }
+               border-left: none; border-right: none; border-top: none; padding: 5px 8px; font-size: 11.5px; }
     #prompt { font-size: 11.5px; padding: 4px 10px; bottom: 6px; }
-    #modal, #victory { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.86);
-                       padding: 10px; align-items: center; justify-content: center; }
-    #board { max-width: 100%; max-height: 92vh; padding: 12px 14px; margin-top: 0; border-radius: 8px; }
-    #board h2 { font-size: 16px; padding: 6px 10px; }
+    #modal, #victory { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.88);
+                       padding: 8px; align-items: center; justify-content: center; }
+    #board { max-width: 100%; max-height: 92vh; max-height: 92dvh; padding: 12px 14px; margin-top: 0; border-radius: 8px; }
+    #board h2 { font-size: 15.5px; padding: 6px 10px; }
     #board p { font-size: 13.5px; }
-    .modeTab { font-size: 13.5px; padding: 8px 10px; }
-    .infoCard { font-size: 13.5px; padding: 8px 11px; line-height: 1.45; }
+    .modeTab { font-size: 13px; padding: 8px 8px; }
+    .infoCard { font-size: 13.5px; padding: 8px 10px; line-height: 1.45; }
     .infoCard h4 { font-size: 14px; }
     .row { font-size: 13.5px; margin-bottom: 10px; }
     .row label { font-size: 13.5px; margin-bottom: 4px; }
-    .row select { font-size: 15px; padding: 9px 10px; min-height: 42px; }
-    #feedback { font-size: 13.5px; }
-    .btns button { font-size: 14px; padding: 9px 14px; min-height: 42px; flex: 1 1 auto; }
-    #pad { padding: 10px 14px; }
-    .dpad { grid-template-columns: repeat(3, 58px); grid-template-rows: repeat(2, 50px); gap: 6px; }
-    #bE { width: 108px; height: 74px; font-size: 17px; }
+    .row select { font-size: 14.5px; padding: 8px 10px; min-height: 40px; }
+    #feedback { font-size: 13px; }
+    .btns button { font-size: 13.5px; padding: 8px 12px; min-height: 40px; flex: 1 1 auto; }
+    #pad { padding: 10px 12px; }
+    .dpad { grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 48px); gap: 6px; }
+    #bE { width: 100px; height: 70px; font-size: 16px; }
+    #footerBar { padding: 4px 6px; font-size: 10.5px; }
+  }
+
+  /* 2. SMARTPHONE QUERFORMAT (Landscape-Vollbildmodus wie bei echten Mobile Games) */
+  @media (max-height: 540px) and (orientation: landscape) {
+    html, body { height: 100vh; height: 100dvh; overflow: hidden; padding: 0; }
+    #game { width: 100vw; max-width: 100vw; height: 100vh; height: 100dvh; border-radius: 0; }
+    #hud { padding: 3px 10px; font-size: 11.5px; gap: 6px; flex-shrink: 0; border-bottom: 1px solid #18222c; }
+    #hud small { display: none; }
+    #rankBadge { font-size: 10.5px; padding: 1px 7px; }
+    .hudBtn { font-size: 10.5px; padding: 2px 7px; }
+    #wrap { flex: 1; min-height: 0; width: 100%; height: 100%; overflow: hidden; }
+    canvas { width: auto; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; }
+    #roomHud { position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+               width: auto; max-width: 92%; border-radius: 12px; padding: 3px 10px; font-size: 11px;
+               border: 1.5px solid #d4b87a; }
+    #roomHud span:nth-child(2) { display: none; }
+    #prompt { bottom: 6px; font-size: 11px; padding: 3px 10px; max-width: 62%; }
+    /* Steuerkreuz schwebt halbtransparent links & rechts unten über dem Spiel */
+    #pad { position: absolute; left: 0; right: 0; bottom: 6px; background: transparent;
+           border-top: none; padding: 0 10px; pointer-events: none; }
+    .dpad { pointer-events: auto; grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(2, 38px);
+            gap: 4px; opacity: 0.78; }
+    .pb { font-size: 17px; background: rgba(38, 53, 69, 0.85); }
+    #bE { pointer-events: auto; width: 68px; height: 54px; font-size: 14px; border-radius: 14px; opacity: 0.82; }
+    #modal, #victory { position: fixed; inset: 0; padding: 6px; background: rgba(15, 23, 42, 0.9);
+                       align-items: center; justify-content: center; }
+    #board { max-width: 680px; max-height: 94vh; max-height: 94dvh; padding: 8px 12px; }
+    #footerBar { position: fixed; bottom: 2px; right: 90px; width: auto; padding: 1px 6px;
+                 font-size: 9.5px; background: rgba(15, 23, 42, 0.65); border-radius: 6px; z-index: 7; }
   }
 </style>
 </head>
@@ -117,7 +158,11 @@
   <div id="hud">
     <span id="titleHud">🇩🇪 BRD Quest</span>
     <span id="stars">⭐ Sterne: 0 / 12 (0/5 Häuser)</span>
-    <span id="rankBadge">🏅 Rang: Dorf-Besucher/in</span>
+    <div class="hudRight">
+      <span id="rankBadge">🏅 Rang: Dorf-Besucher/in</span>
+      <button id="btnTogglePad" class="hudBtn" type="button" title="Steuerkreuz ein-/ausblenden">🎮 Pad</button>
+      <button id="btnFullscreen" class="hudBtn" type="button" title="Vollbild umschalten">⛶ Vollbild</button>
+    </div>
     <small id="help">Tippe direkt auf ein Haus/Weg oder nutze Steuerkreuz &amp; [E]</small>
   </div>
   <div id="wrap">
@@ -145,14 +190,13 @@
     <div class="pb" id="bE">[E]</div>
   </div>
 </div>
+<footer id="footerBar">
+  <a href="../impressum/index.html">Impressum &amp; Datenschutz</a>
+</footer>
 
 <script>
 // =====================================================================
 // TEIL B – LERNINHALTE & INFOTEXTE IN EINFACHER SPRACHE
-// (Recherchiert & aufbereitet nach HanisauLand / bpb, helles-koepfchen.de,
-// bundestag.de & AB 4–8. Jeder Infotext vor dem Haus erklärt in einfacher
-// Sprache exakt die Inhalte, die in den Aufgaben und auf dem Arbeitsblatt
-// abgefragt werden.)
 // =====================================================================
 const CONTENT = {
   bundestag: {
@@ -395,30 +439,28 @@ const CONTENT = {
 // =====================================================================
 const T = 20, COLS = 32, ROWS = 19;
 const MAP = [
-  "TTTTTTTTTTTTTTT==TTTTTTTTTTTTTTT", // 0  Wald & Ufer
-  "TT############.==.############TT", // 1
-  "TT#==HHHHH===#HHHH#===HHHHH==#TT", // 2  Oben Mitte: Grenzhäuschen Wahlrecht (14..17)
-  "TT#==HHHHH===#HHHH#===HHHHH==#TT", // 3
-  "TT#==HHHHH===#=D==#===HHHHH==#TT", // 4  Tür Grenzhäuschen Wahlrecht (c:15, r:4)
-  "TT####=D=====#====#=====D=####TT", // 5  Türen Haus Bundestag (7) & Haus Bundesrat (24)
-  "TT#######====#====#====#######TT", // 6  Durchgänge zu den oberen Höfen & zum Grenzhäuschen
-  "TT===========PPPPPP===========TT", // 7
-  "TT===========PFFFFP===========TT", // 8
-  "TT===========PFFFFP===========TT", // 9
-  "TT===========PFFFFP===========TT", // 10
-  "TT===========PPPPPP===========TT", // 11
-  "TT#######====#.==.#====#######TT", // 12 Durchgänge zu den unteren Höfen
-  "TT#==HHHHH===#.==.#===HHHHH==#TT", // 13
-  "TT#==HHHHH===#.==.#===HHHHH==#TT", // 14
-  "TT#==HHHHH===#.==.#===HHHHH==#TT", // 15
-  "TT####=D=====#.==.#=====D=####TT", // 16 Türen Haus Gesetzgebung (7) & Haus Gewaltenteilung (24)
-  "TT############.==.############TT", // 17
-  "TTTTTTTTTTTTTTT==TTTTTTTTTTTTTTT"  // 18 Wald
+  "TTTTTTTTTTTTTTT==TTTTTTTTTTTTTTT",
+  "TT############.==.############TT",
+  "TT#==HHHHH===#HHHH#===HHHHH==#TT",
+  "TT#==HHHHH===#HHHH#===HHHHH==#TT",
+  "TT#==HHHHH===#=D==#===HHHHH==#TT",
+  "TT####=D=====#====#=====D=####TT",
+  "TT#######====#====#====#######TT",
+  "TT===========PPPPPP===========TT",
+  "TT===========PFFFFP===========TT",
+  "TT===========PFFFFP===========TT",
+  "TT===========PFFFFP===========TT",
+  "TT===========PPPPPP===========TT",
+  "TT#######====#.==.#====#######TT",
+  "TT#==HHHHH===#.==.#===HHHHH==#TT",
+  "TT#==HHHHH===#.==.#===HHHHH==#TT",
+  "TT#==HHHHH===#.==.#===HHHHH==#TT",
+  "TT####=D=====#.==.#=====D=####TT",
+  "TT############.==.############TT",
+  "TTTTTTTTTTTTTTT==TTTTTTTTTTTTTTT"
 ];
 const SOLID = "T#HF";
 
-// 5 Häuser: Bundestag (oben links), Bundesrat (oben rechts), Gewaltenteilung (unten rechts),
-// Gesetzgebung (unten links) und Grenzhäuschen Wahlrecht (oben Mitte am Dorfeingang)
 const HOUSES = [
   { id: "bundestag",       name: "Haus Bundestag",          c: 5,  r: 2,  door: { c: 7,  r: 5 } },
   { id: "bundesrat",       name: "Haus Bundesrat",          c: 22, r: 2,  door: { c: 24, r: 5 } },
@@ -436,9 +478,6 @@ const RANKS = [
   "Demokratie-Meister/in 🏆"
 ];
 
-// =====================================================================
-// TEIL C – SPIELLOGIK (Dorf & begehbarer Innenraum, Infotafel & Aufgaben-Tisch)
-// =====================================================================
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 const promptEl = document.getElementById("prompt");
@@ -447,19 +486,31 @@ const roomTitleTxt = document.getElementById("roomTitleTxt");
 const modal = document.getElementById("modal");
 const board = document.getElementById("board");
 const victoryEl = document.getElementById("victory");
+const padEl = document.getElementById("pad");
 
-// Szene: "village" (Außenwelt) oder "interior" (begehbarer Raum im Haus)
+// Mobile-Buttons: Steuerkreuz ein-/ausblenden & Vollbild-Modus
+document.getElementById("btnTogglePad").addEventListener("click", () => {
+  padEl.classList.toggle("hiddenPad");
+});
+document.getElementById("btnFullscreen").addEventListener("click", () => {
+  const docEl = document.documentElement;
+  if (!document.fullscreenElement) {
+    if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
+  } else if (document.exitFullscreen) {
+    document.exitFullscreen().catch(() => {});
+  }
+});
+
 let scene = "village";
-const player = { c: 15, r: 14, dir: "down" }; // Spielerposition im Dorf (Kachelkoordinaten)
-const intPlayer = { x: 890, y: 455, dir: "left", stepTick: 0 }; // Spielerposition im Raum (1280×760 Pixelkoordinaten)
+const player = { c: 15, r: 14, dir: "down" };
+const intPlayer = { x: 890, y: 455, dir: "left", stepTick: 0 };
 let hoverStationId = null;
 
-// Die 3 interaktiven Stationen im begehbaren Innenraum (1280×760 Koordinaten)
 const ROOM_STATIONS = [
   {
     id: "info",
     label: "📖 INFOTAFEL",
-    prompt: "[E] oder Klick: 📖 Infotafel lesen",
+    prompt: "[E] oder Tippen: 📖 Infotafel lesen",
     standX: 430,
     standY: 418,
     centerX: 415,
@@ -470,7 +521,7 @@ const ROOM_STATIONS = [
   {
     id: "quiz",
     label: "🧩 AUFGABEN-TISCH",
-    prompt: "[E] oder Klick: 🧩 Aufgabe bearbeiten (mit Nachschlagen)",
+    prompt: "[E] oder Tippen: 🧩 Aufgabe bearbeiten (mit Nachschlagen)",
     standX: 624,
     standY: 558,
     centerX: 624,
@@ -481,7 +532,7 @@ const ROOM_STATIONS = [
   {
     id: "exit",
     label: "🚪 AUSGANG INS DORF",
-    prompt: "[E] oder Klick: 🚪 Haus verlassen (zurück ins Dorf)",
+    prompt: "[E] oder Tippen: 🚪 Haus verlassen (zurück ins Dorf)",
     standX: 905,
     standY: 450,
     centerX: 965,
@@ -493,8 +544,8 @@ const ROOM_STATIONS = [
 
 let stars = 0, showGrid = false, modalOpen = false, victoryShown = false, current = null, lastMove = 0;
 const solved = {};
-const draftAnswers = {}; // Speichert ausgewählte Antworten pro Haus, auch wenn man im Raum zur Infotafel läuft
-const houseOptions = {}; // Speichert die gemischte Optionsreihenfolge pro Haus
+const draftAnswers = {};
+const houseOptions = {};
 const STAR_STEPS = [0, 2, 5, 7, 10, 12];
 const particles = [];
 
@@ -525,7 +576,6 @@ function tile(c, r) { return (c < 0 || r < 0 || c >= COLS || r >= ROWS) ? "#" : 
 function walkable(c, r) { return !SOLID.includes(tile(c, r)); }
 function doorHere() { return HOUSES.find(h => h.door.c === player.c && h.door.r === player.r) || null; }
 
-// Automatische Pfadsuche (BFS) im Dorf für komfortables Antippen auf dem Smartphone
 let autoWalkTimer = null;
 function stopAutoWalk() {
   if (autoWalkTimer) {
@@ -563,11 +613,9 @@ function findVillagePath(startC, startR, goalC, goalR) {
   return null;
 }
 
-// Prüft, ob ein Tipp auf der Dorfkarte einem der 5 Häuser (inkl. Dach, Fassade oder Tür) gilt
 function houseAtTile(tc, tr) {
   for (const h of HOUSES) {
     const w = h.id === "wahlrecht" ? 4 : 5;
-    const hRows = h.id === "wahlrecht" ? 2 : 3;
     if (
       (tc === h.door.c && tr === h.door.r) ||
       (tc >= h.c - 1 && tc <= h.c + w && tr >= h.r - 2 && tr <= h.door.r)
@@ -606,20 +654,16 @@ function walkToTileAndAct(goalC, goalR, openHouseOnArrival) {
   }, 95);
 }
 
-// Kollisions- & Begehbarkeitsprüfung für den isometrischen Innenraum (1280×760)
 function isInteriorWalkable(x, y) {
   if (x < 215 || x > 1045) return false;
   if (y > 724) return false;
-  // Isometrische Rückwände links & rechts (inkl. Kamin und Türwand)
   const wallBottomY = 295 + Math.abs(x - 640) * 0.52;
   if (y < wallBottomY) return false;
-  // Großer Holztisch in der Raummitte als Hindernis (Spieler läuft um den Tisch herum)
   const tableDiamond = Math.abs(x - 624) / 172 + Math.abs(y - 468) / 74;
   if (tableDiamond < 1.0) return false;
   return true;
 }
 
-// Prüft, an welcher Station im Raum die Spielfigur gerade steht
 function nearInteriorStation(px = intPlayer.x, py = intPlayer.y) {
   let best = null, bestDist = Infinity;
   for (const st of ROOM_STATIONS) {
@@ -634,7 +678,6 @@ function nearInteriorStation(px = intPlayer.x, py = intPlayer.y) {
   return best;
 }
 
-// Prüft, ob ein Klickpunkt (cx, cy) in 1280×760 auf einer Station im Raum liegt
 function stationAtPoint(cx, cy) {
   for (const st of ROOM_STATIONS) {
     const b = st.hitbox;
@@ -661,7 +704,6 @@ function tryMove(dx, dy) {
       intPlayer.y += stepY;
       intPlayer.stepTick = performance.now();
     } else {
-      // Sanftes Entlanggleiten an den schrägen isometrischen Wänden oder am Tisch
       for (const [altX, altY] of [[stepX, 14], [stepX, -14], [16, stepY], [-16, stepY]]) {
         if (isInteriorWalkable(intPlayer.x + altX, intPlayer.y + altY)) {
           intPlayer.x += altX;
@@ -690,7 +732,7 @@ function updatePrompt() {
       promptEl.textContent = st.prompt;
       promptEl.style.display = "block";
     } else {
-      promptEl.textContent = "Im Raum: Laufe zur 📖 Infotafel oder zum 🧩 Aufgaben-Tisch (oder klicke sie direkt an)";
+      promptEl.textContent = "Im Raum: Tippe auf 📖 Infotafel oder 🧩 Aufgaben-Tisch (oder laufe hin)";
       promptEl.style.display = "block";
     }
     return;
@@ -702,7 +744,6 @@ function updatePrompt() {
   } else promptEl.style.display = "none";
 }
 
-// Betritt den begehbaren Innenraum eines Hauses
 function enterHouse(h) {
   stopAutoWalk();
   current = h;
@@ -716,7 +757,6 @@ function enterHouse(h) {
   updatePrompt();
 }
 
-// Verlässt das Haus zurück auf die Dorfkarte
 function leaveHouseToVillage() {
   board.removeAttribute("style");
   modal.style.display = "none";
@@ -727,7 +767,6 @@ function leaveHouseToVillage() {
   updatePrompt();
 }
 
-// Schließt nur das offene Pergament-Fenster (Infotafel oder Aufgabe) und bleibt im Raum
 function closeStationModalToRoom() {
   board.removeAttribute("style");
   modal.style.display = "none";
@@ -763,7 +802,6 @@ function interact() {
     if (st) {
       triggerInteriorStation(st);
     } else {
-      // Falls man mitten im Raum [E] drückt: zur nächstgelegenen Station (Infotafel oder Tisch) gehen
       const dInfo = Math.hypot(intPlayer.x - ROOM_STATIONS[0].standX, intPlayer.y - ROOM_STATIONS[0].standY);
       const dQuiz = Math.hypot(intPlayer.x - ROOM_STATIONS[1].standX, intPlayer.y - ROOM_STATIONS[1].standY);
       triggerInteriorStation(dInfo <= dQuiz ? ROOM_STATIONS[0] : ROOM_STATIONS[1]);
@@ -771,7 +809,6 @@ function interact() {
   }
 }
 
-// Klick-Steuerung auf dem Canvas (im Raum: Infotafel, Aufgaben-Tisch, Ausgang oder Boden anklicken; im Dorf: Haustür anklicken)
 canvas.addEventListener("pointermove", e => {
   if (scene !== "interior" || modalOpen) {
     canvas.style.cursor = "default";
@@ -850,8 +887,6 @@ function saveCurrentDrafts() {
   }
 }
 
-// Öffnet entweder die Infotafel ("info") oder den Aufgaben-Tisch ("quiz") im Raum.
-// In der Aufgabe kann man jederzeit über den Nachschlagen-Reiter/-Button in den Infotext schauen!
 function openStationModal(h, forceReset, startTab) {
   modalOpen = true;
   current = h;
@@ -870,7 +905,6 @@ function openStationModal(h, forceReset, startTab) {
   board.innerHTML = "";
   add(board, "h2", d.title);
 
-  // Obere Reiter-Leiste: erlaubt auch in der Aufgabe jederzeit das Nachschlagen im Infotext
   const tabsBar = add(board, "div");
   tabsBar.className = "modeTabs";
   const tabInfoBtn = add(tabsBar, "button", "📖 Infotafel (Nachschlagen)");
@@ -880,7 +914,6 @@ function openStationModal(h, forceReset, startTab) {
   tabQuizBtn.type = "button";
   tabQuizBtn.className = "modeTab";
 
-  // Ansicht 1: Infotafel in Einfacher Sprache
   const infoView = add(board, "div");
   const badge = add(infoView, "div", d.infoSource);
   badge.className = "infoSourceBadge";
@@ -895,7 +928,7 @@ function openStationModal(h, forceReset, startTab) {
   });
   const infoBtns = add(infoView, "div");
   infoBtns.className = "btns";
-  const walkBackFromInfoBtn = add(infoBtns, "button", "🚶 Zurück in den Raum (weiterlaufen)");
+  const walkBackFromInfoBtn = add(infoBtns, "button", "🚶 Zurück in den Raum");
   walkBackFromInfoBtn.type = "button";
   walkBackFromInfoBtn.addEventListener("click", () => {
     saveCurrentDrafts();
@@ -904,11 +937,10 @@ function openStationModal(h, forceReset, startTab) {
   const toQuizBtn = add(infoBtns, "button", "🧩 Direkt zur Aufgabe am Tisch");
   toQuizBtn.type = "button";
 
-  // Ansicht 2: Aufgaben-Tisch (bleibt im DOM + speichert Eingaben in draftAnswers)
   const quizView = add(board, "div");
   add(quizView, "p", d.intro);
 
-  const note = add(quizView, "div", "✍️ Tipp: Du kannst hier direkt über „📖 Infotext nachschlagen“ nachlesen oder zurück in den Raum zur Infotafel laufen – deine Auswahl bleibt gespeichert!");
+  const note = add(quizView, "div", "✍️ Tipp: Du kannst hier direkt über „📖 Infotext nachschlagen“ nachlesen oder zurück in den Raum laufen – deine Auswahl bleibt gespeichert!");
   note.className = "sheetNote";
 
   d.items.forEach((it, idx) => {
@@ -1019,7 +1051,6 @@ document.getElementById("closeVictory").addEventListener("click", () => {
   victoryEl.style.display = "none";
 });
 
-// Tastatursteuerung
 const DIRS = {
   ArrowUp: [0, -1], KeyW: [0, -1],
   ArrowDown: [0, 1], KeyS: [0, 1],
@@ -1053,7 +1084,6 @@ window.addEventListener("keydown", e => {
   }
 });
 
-// Touch-Steuerkreuz (Sofort-Schritt + Gedrückthalten)
 document.querySelectorAll(".pb[data-dx]").forEach(b => {
   let iv = null;
   const go = () => tryMove(+b.dataset.dx, +b.dataset.dy);
@@ -1072,15 +1102,8 @@ document.getElementById("bE").addEventListener("pointerdown", e => {
   if (!modalOpen) interact();
 });
 
-// =====================================================================
-// AUTOMATISCHE KI-PRÜFSCHLEIFE (INFORMATIKER-AGENT SELBSTTEST)
-// Prüft: 1. Dorf-BFS · 2. Raum-Geometrie & Raum-BFS zwischen Tür, Infotafel
-// & Aufgaben-Tisch · 3. Klick-Hitboxen & Näherungssensoren · 4. Nachschlagen
-// & Antwort-Persistenz · 5. Fachinhalte & Einfache Sprache
-// =====================================================================
 function selfTest() {
   const errors = [];
-  // 1. Dorfkarte & BFS zu allen 5 Haustüren
   if (MAP.length !== ROWS) errors.push("MAP hat " + MAP.length + " statt " + ROWS + " Zeilen");
   MAP.forEach((l, i) => {
     if (l.length !== COLS) errors.push("Zeile " + i + " hat " + l.length + " statt " + COLS + " Zeichen");
@@ -1112,7 +1135,6 @@ function selfTest() {
     }
   });
 
-  // 2. Innenraum-Begehbarkeit & Raum-BFS zwischen Tür (Spawn), Infotafel und Aufgaben-Tisch
   const spawnPt = [890, 455];
   if (!isInteriorWalkable(spawnPt[0], spawnPt[1])) errors.push("Innenraum-Spawn (890,455) nicht begehbar");
   ROOM_STATIONS.forEach(st => {
@@ -1129,7 +1151,6 @@ function selfTest() {
     }
   });
 
-  // 2D-Raum-BFS (Raster 26×20 px ab Spawn (890,455)): prüft, ob Infotafel & Aufgaben-Tisch umlaufbar sind
   const rSeen = new Set(["890,455"]), rq = [[890, 455]];
   let reachedInfo = false, reachedQuiz = false, reachedExit = false;
   while (rq.length) {
@@ -1157,13 +1178,13 @@ function selfTest() {
     help.textContent = "Selbsttest: " + errors.join(" · ");
     help.className = "err";
   } else {
-    console.log("KI-Prüfschleife (Informatiker-Agent) OK: Dorf-BFS (5 Häuser) + Innenraum-BFS (Infotafel, Aufgaben-Tisch, Ausgang) + Klick-Hitboxen fehlerfrei.");
+    console.log("KI-Prüfschleife (Handyspiel-Agent) OK: Dorf, Innenraum, Portrait & Landscape fehlerfrei.");
   }
   return errors;
 }
 
 // =====================================================================
-// TEIL D – GRAFIK (ECHTE 1280×760 1:1 PER-PIXEL-ENGINE & OFFSCREEN-CACHE)
+// TEIL D – GRAFIK (1280×760 PER-PIXEL-ENGINE & OFFSCREEN-CACHE)
 // =====================================================================
 canvas.width = 1280;
 canvas.height = 760;
@@ -1210,7 +1231,6 @@ function cobbleStone(x, y, w, h, baseCol, lightCol, darkCol, outlineCol) {
   P(x + w - 2, y + 2, 1, h - 3, darkCol);
 }
 
-// ---------- 1. AUSSENWELT (1280×760, 1 Kachel = 40×40 px) ----------
 const TW = 40;
 function isWater(c, r) {
   return (c + r < 4) || (c === 0 && r <= 5) || (c === 31 && r === 0);
@@ -1396,7 +1416,6 @@ function drawTree1280(X, Y, c, r) {
   foliageBall(cx, cy - 6, 13, s + 6);
 }
 
-// ---------- Hilfsobjekte im Dorf (Fässer, Kisten, Markisen, Schindeldächer) ----------
 function barrel1280(x, y) {
   discP(x + 9, y + 25, 10, 4, "rgba(0,0,0,.3)");
   P(x + 1, y, 16, 25, "#1a0f08");
@@ -1465,9 +1484,6 @@ function sideAwningRight1280(x, y) {
   P(x + 170, y + 58, 38, 3, "#1c0f08");
 }
 
-// =====================================================================
-// ECHTES 3D-PARALLELOGRAMM-SATTELDACH (3/4 RPG-Draufsicht)
-// =====================================================================
 function roof3DParallelogram1280(cx, ridgeTopY, ridgeLen, halfW, dropH, opts) {
   const cL = opts.cLight, cM = opts.cMid, cD = opts.cDark, cO = opts.cOutline || "#1a0d07";
   const gridL = opts.gridLeft || cM, gridR = opts.gridRight || cD;
@@ -1531,11 +1547,6 @@ function roof3DParallelogram1280(cx, ridgeTopY, ridgeLen, halfW, dropH, opts) {
   P(cx - rHalf, ridgeTopY, Math.max(2, rHalf), ridgeLen + 1, opts.ridgeHi || cL);
 }
 
-// =====================================================================
-// PARLAMENTS-SÄULENBAU (MODELL FÜR BUNDESTAG & BUNDESRAT)
-// - Bundestag (oben links): Funkelnd Schwarz
-// - Bundesrat (oben rechts): Funkelnd Rot
-// =====================================================================
 function drawParliamentStatic1280(X, Y, roofTheme) {
   P(X - 4, Y + 114, 210, 10, "rgba(0,0,0,.32)");
   P(X + 194, Y + 32, 12, 88, "rgba(0,0,0,.22)");
@@ -1684,7 +1695,6 @@ function drawParliamentAnim1280(X, Y, t, roofTheme) {
   });
 }
 
-// ---------- 04 HAUS 3: GEWALTENTEILUNG & 05 HAUS 4: GESETZGEBUNG ----------
 function drawMerchantStatic1280(X, Y) {
   P(X - 6, Y + 114, 212, 10, "rgba(0,0,0,.32)");
   P(X + 190, Y + 36, 12, 84, "rgba(0,0,0,.22)");
@@ -1765,21 +1775,17 @@ function drawFlipperAnim1280(X, Y, t) {
   });
 }
 
-// ---------- 06 HAUS 5: GRENZHÄUSCHEN WAHLRECHT (OHNE DEUTSCHLANDFAHNEN) ----------
 function drawGrenzhaeuschenStatic1280(X, Y) {
   P(X - 4, Y + 74, 168, 8, "rgba(0,0,0,.32)");
 
-  // Wachhäuschen-Grundkörper links/mittig (X+4..X+104, Y+18..Y+78)
   P(X + 4, Y + 18, 100, 60, "#1a0e07");
   P(X + 8, Y + 22, 92, 52, "#e8d8b8");
-  // Fachwerk-Streben & Steinsockel
   P(X + 8, Y + 66, 92, 8, "#6e6a61");
   P(X + 8, Y + 22, 6, 52, "#3b2010");
   P(X + 94, Y + 22, 6, 52, "#3b2010");
   P(X + 42, Y + 22, 5, 52, "#3b2010");
   P(X + 8, Y + 46, 36, 4, "#3b2010");
 
-  // Schalterfenster links mit neutraler Wahlurne & Stimmzettel (ohne Fahne)
   cobbleStone(X + 14, Y + 26, 26, 22, "#4a2c18", "#754829", "#2b180c", "#140b06");
   P(X + 17, Y + 29, 20, 16, "#171c24");
   P(X + 20, Y + 34, 14, 10, "#ced6e0");
@@ -1787,17 +1793,14 @@ function drawGrenzhaeuschenStatic1280(X, Y) {
   P(X + 24, Y + 31, 6, 3, "#ffffff");
   P(X + 24, Y + 37, 6, 4, "#747d8c");
 
-  // Eingangstür exakt über Türfeld D (c=15, r=4 -> X+40..X+80)
   cobbleStone(X + 47, Y + 28, 28, 48, "#5e361a", "#8a532c", "#3b200e", "#140a05");
   P(X + 51, Y + 32, 20, 42, "#784421");
   P(X + 54, Y + 36, 14, 14, "#9c5c31");
   P(X + 66, Y + 54, 3, 3, "#f5c418");
 
-  // Neutrales Holz-/Messingschild über Tür & Schalter (ohne Schwarz-Rot-Gold)
   cobbleStone(X + 18, Y + 12, 74, 12, "#59381f", "#875934", "#331e0f", "#140b06");
   P(X + 22, Y + 16, 66, 4, "#d4b87a");
 
-  // Schiefer-/Ziegeldach über dem Grenzhäuschen (ohne Fahnenmast/Wimpel)
   roof3DParallelogram1280(X + 54, Y - 30, 20, 54, 24, {
     cHighlight: "#6c7587",
     cLight: "#4b5261",
@@ -1817,7 +1820,6 @@ function drawGrenzhaeuschenStatic1280(X, Y) {
     ridgeHi: "#6c7587"
   });
 
-  // Rechts daneben (X+104..X+156): Klassische rot-weiße Zollschranke mit Standfuß
   cobbleStone(X + 104, Y + 46, 16, 30, "#57606f", "#8395a7", "#2f3542", "#14161c");
   cobbleStone(X + 144, Y + 52, 12, 24, "#57606f", "#8395a7", "#2f3542", "#14161c");
   P(X + 100, Y + 52, 58, 9, "#141418");
@@ -1835,7 +1837,6 @@ function drawGrenzhaeuschenAnim1280(X, Y, t) {
   if (on) P(X + 111, Y + 40, 2, 2, "#ffffff");
 }
 
-// ---------- 01 DEUTSCHLANDFAHNE & BRUNNEN (Mitte: cx=640, cy=394 in 1280×760) ----------
 function drawGermanyFlag1280(cx, cy, t) {
   const x0 = cx + 2, y0 = cy - 76, flagW = 46;
   [0, 10, 20, 29].forEach(ry => P(cx - 2, y0 + ry, 5, 2, "#d49b1a"));
@@ -1984,7 +1985,6 @@ function label1280(lines, cx, cy) {
   activeCtx.restore();
 }
 
-// ---------- Offscreen-Cache für die statische 1280×760 Dorfkarte ----------
 const villageCache = document.createElement("canvas");
 villageCache.width = 1280;
 villageCache.height = 760;
@@ -2046,7 +2046,6 @@ function buildVillageCache() {
   activeCtx = prev;
 }
 
-// ---------- 2. INNENRAUM (1280×760 Isometrische Holzstube über Eck) ----------
 const interiorCache = document.createElement("canvas");
 interiorCache.width = 1280;
 interiorCache.height = 760;
@@ -2172,7 +2171,7 @@ function buildInteriorCache() {
   }
 
   for (let x = 640; x < 1240; x++) {
-    const yTop = Math.round(24 + (x - 640) * 0.5 - 248 + 248);
+    const yTop = Math.round(24 + (x - 640) * 0.5);
     const isPost = (x < 656) || (Math.abs(x - 868) < 10) || (Math.abs(x - 1072) < 10) || (x > 1220);
     if (isPost) {
       const pCol = (x % 9 === 0) ? "#241308" : "#4a2b15";
@@ -2367,17 +2366,13 @@ function buildInteriorCache() {
     P(736 - span, 526 + dy, span * 2, 1, (Math.abs(dy) % 7 === 0) ? "#633b1d" : "#9c6236");
   }
 
-  // 11. Große hölzerne Infotafel (Aufsteller mit Pergament & [i]-Emblem) IM Haus (links-mittig bei x=365..465, y=250..395)
   discP(415, 396, 48, 13, "rgba(0,0,0,.38)");
-  // Zwei kräftige Holzpfosten mit Standfüßen
   cobbleStone(378, 336, 14, 62, "#4f2e16", "#784926", "#2b170b", "#140b06");
   cobbleStone(438, 336, 14, 62, "#4f2e16", "#784926", "#2b170b", "#140b06");
   cobbleStone(368, 386, 32, 12, "#5e361a", "#8a532c", "#331c0c", "#140b06");
   cobbleStone(428, 386, 32, 12, "#5e361a", "#8a532c", "#331c0c", "#140b06");
-  // Großer Holzrahmen mit Pergamentfläche
   cobbleStone(356, 250, 118, 98, "#6e4222", "#9c6236", "#3d2210", "#140b06");
   cobbleStone(364, 258, 102, 82, "#f2e5c2", "#ffffff", "#c9b88f", "#3b2312");
-  // Blaues Kopfschild mit goldenem [i]-Symbol
   P(370, 264, 90, 22, "#1e3a7a");
   P(370, 264, 90, 2, "#5c9ce6");
   discP(384, 275, 7, 7, "#ffe066");
@@ -2385,7 +2380,6 @@ function buildInteriorCache() {
   P(383, 274, 3, 6, "#1e3a7a");
   P(396, 271, 56, 3, "#ffe066");
   P(396, 277, 44, 2, "#e2e8f0");
-  // Gut erkennbare Textzeilen auf der Infotafel
   for (let l = 0; l < 6; l++) {
     P(372, 292 + l * 7, l % 2 === 0 ? 84 : 72, 3, l === 0 || l === 3 ? "#7a251b" : "#5c4932");
   }
@@ -2393,7 +2387,6 @@ function buildInteriorCache() {
   activeCtx = prev;
 }
 
-// ---------- Spielfigur im Dorf ("Model 1" 1:1) ----------
 let lastStepC = player.c, lastStepR = player.r, lastStepTime = -1000;
 function drawPlayer1280(t) {
   if (player.c !== lastStepC || player.r !== lastStepR) {
@@ -2413,7 +2406,6 @@ function drawPlayer1280(t) {
   bitmapP(MODEL1_SPRITE, x, y, 1, MODEL1_PAL, flipLeft);
 }
 
-// ---------- Spielfigur im begehbaren Innenraum (Skalierung 2× = 76×96 px) ----------
 function drawInteriorPlayer1280(t) {
   const moving = (t - intPlayer.stepTick) < 180;
   const bob = (moving && (Math.floor(t / 80) % 2 === 1)) ? -4 : 0;
@@ -2428,7 +2420,6 @@ function drawInteriorPlayer1280(t) {
   bitmapP(MODEL1_SPRITE, px, py, 2, MODEL1_PAL, flipLeft);
 }
 
-// Zeichnet interaktive Bodenringe & Schilder für Infotafel, Aufgaben-Tisch und Ausgang im Raum
 function drawInteriorStations1280(t) {
   const nearSt = nearInteriorStation();
   const pulse = (Math.floor(t / 260) % 2) === 0;
@@ -2439,11 +2430,9 @@ function drawInteriorStations1280(t) {
       ? "rgba(255, 230, 80, 0.55)"
       : (pulse ? "rgba(255, 210, 90, 0.28)" : "rgba(255, 210, 90, 0.18)");
 
-    // Leuchtender Boden-Interaktionskreis am Standpunkt der Station
     discP(st.standX, st.standY, isActive ? 34 : 28, isActive ? 13 : 10, ringCol);
     discP(st.standX, st.standY, isActive ? 22 : 17, isActive ? 8 : 6, isActive ? "rgba(255,250,190,0.65)" : "rgba(255,240,150,0.32)");
 
-    // Schwebendes Schild über der jeweiligen Station
     let bx = st.centerX, by = st.centerY - 95;
     if (st.id === "info") { bx = 415; by = 228; }
     if (st.id === "quiz") { bx = 624; by = 376; }
@@ -2452,7 +2441,7 @@ function drawInteriorStations1280(t) {
     const floatY = by + (pulse ? -2 : 0);
     ctx.save();
     ctx.font = "bold 15px 'Segoe UI', sans-serif";
-    const txt = st.label + (isActive ? " [E / Klick]" : "");
+    const txt = st.label + (isActive ? " [E / Tippen]" : "");
     const tw = Math.ceil(ctx.measureText(txt).width) + 18;
     const bh = 26;
     const rx = Math.round(bx - tw / 2), ry = Math.round(floatY - bh / 2);
@@ -2483,7 +2472,6 @@ function drawParticles1280() {
   }
 }
 
-// ---------- Gesamtbild rendern (60 FPS mit Offscreen-Caches + Live-Animationen) ----------
 let cachesBuilt = false;
 function ensureCaches() {
   if (!cachesBuilt) {
@@ -2513,7 +2501,6 @@ function drawInterior(t) {
   });
   ctx.restore();
 
-  // Interaktive Stationen (📖 Infotafel, 🧩 Aufgaben-Tisch, 🚪 Ausgang) + bewegliche Spielfigur im Raum
   drawInteriorStations1280(t);
   drawInteriorPlayer1280(t);
 
@@ -2551,7 +2538,6 @@ function renderVillage(t) {
     drawStarAt1280(640 + Math.round(Math.cos(a) * 102), 392 + Math.round(Math.sin(a) * 78), i < stars, t, i);
   }
 
-  // Grünes Häkchen über bereits gelösten Häassertüren
   HOUSES.forEach(h => {
     if (solved[h.id]) {
       const dx = h.door.c * TW + 14, dy = h.door.r * TW - 14;
@@ -2592,6 +2578,5 @@ updateStarsHud();
 updatePrompt();
 requestAnimationFrame(loop);
 </script>
-<p style="text-align:center;font-size:12px;margin:16px 0"><a href="../impressum/index.html" style="color:inherit">Impressum &amp; Datenschutz</a></p>
 </body>
 </html>
