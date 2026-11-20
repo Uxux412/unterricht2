@@ -7,7 +7,7 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #16181d; color: #f0f2f5; font-family: 'Segoe UI', Tahoma, sans-serif;
-         display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 8px; }
+         display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; min-height: 100dvh; padding: 8px; }
   #game { width: 100%; max-width: 960px; box-shadow: 0 12px 36px rgba(0,0,0,.75); border-radius: 8px; overflow: hidden; }
   #hud { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; background: #263545;
          padding: 7px 14px; border-bottom: 2px solid #18222c; font-size: 14px; font-weight: bold; }
@@ -60,6 +60,10 @@
   .pb:active { background: #2980b9; }
   #bE { width: 86px; height: 58px; background: #e67e22; border-color: #b85d12; font-weight: bold; font-size: 16px; }
   .err { color: #ff6b6b !important; font-weight: bold !important; }
+  @media (max-width: 780px) { body { padding: 0; justify-content: flex-start; } #game { border-radius: 0; } }
+  @media (orientation: landscape) and (max-height: 520px) { body { padding: 0; } #game { position: relative; max-width: calc((100dvh - 40px) * 640 / 380); }
+    #pad { position: absolute; left: 0; right: 0; bottom: 0; background: transparent; border: 0; pointer-events: none; z-index: 8; }
+    #pad .pb { pointer-events: auto; opacity: .8; } }
 </style>
 <style>
   .mq { font-family: Georgia, serif; color: #2c221e; background: #f4e8c1; border: 6px ridge #8b5a2b; border-radius: 6px;
@@ -125,6 +129,8 @@
   </div>
 </div>
 
+<script src="../assets/quest-intro.js"></script>
+<script>QuestIntro({ key: "euroquest", title: "EURO QUEST", pages: [["Willkommen im Dorf Europa!", "", "Am Brunnen fehlen die 12 Sterne", "von Europa. Hol sie zurück!"], ["DEINE MISSION:", "", "Besuche die 4 Hütten:", "Schmiede, Ratshalle, Markthaus", "und Flipper-Bau.", "In jeder Hütte wartet eine Aufgabe."], ["SO GEHT'S:", "", "Laufen: Steuerkreuz oder Pfeile/WASD", "Hütte betreten: vor die Tür, dann [E]", "Aufgabe richtig = neue Sterne", "", "Alle 12 Sterne = Sieg!"]] });</script>
 <script>
 // Aufruf: MeilensteineModul.open(container, { onSolved: () => {...}, onClose: () => {...} })
 window.MeilensteineModul = (function () {
@@ -2053,6 +2059,6 @@ selfTest();
 updatePrompt();
 requestAnimationFrame(loop);
 </script>
-<p style="text-align:center;font-size:12px;margin:16px 0"><a href="../impressum/index.html" style="color:inherit">Impressum &amp; Datenschutz</a></p>
+<p style="text-align:center;font-size:12px;margin:8px 0"><a href="../impressum/index.html" style="color:inherit;display:inline-block;padding:12px">Impressum &amp; Datenschutz</a></p>
 </body>
 </html>

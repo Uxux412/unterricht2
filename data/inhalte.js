@@ -26,7 +26,7 @@ window.INHALTE = {
     { id: 'gemeinschaftskunde', name: 'Gemeinschaftskunde', ordner: 'gemeinschaftskunde', icon: 'waage',
       kurz: 'Politisches System, Gesellschaft, Recht und internationale Politik.' },
     { id: 'spiele', name: 'Spiele', ordner: 'spiele', icon: 'wuerfel',
-      kurz: 'Hilfen fürs Spielen am echten Brett: würfeln, rechnen, Regeln nachschlagen.' }
+      kurz: 'Lernspiele, Quizze und Hilfen fürs Spielen am echten Brett.' }
   ],
 
   bereiche: [
@@ -38,6 +38,8 @@ window.INHALTE = {
       kurz: 'Ancien Régime, Sturm auf die Bastille und die Proteste von heute.' },
     { id: 'quizze', fach: 'spiele', name: 'Quizze „1, 2, 3 oder 4“',
       kurz: 'Fragen für die Ecken rot, grün, blau – auflösen per Knopfdruck.' },
+    { id: 'lernspiele', fach: 'spiele', name: 'Lernspiele',
+      kurz: 'Pixel-Abenteuer: durchs Dorf laufen und in den Hütten Aufgaben lösen.' },
     { id: 'brettspiele', fach: 'spiele', name: 'Brettspiele',
       kurz: 'Begleiter, die neben dem Spielbrett auf Tablet oder Handy laufen.' }
   ],
@@ -71,6 +73,14 @@ window.INHALTE = {
       bereich: 'quizze', pfad: 'spiele/bach-quiz.html', status: 'aktiv', datum: '2026-10-31',
       kurz: 'Zehn Quizfragen zu Johann Sebastian Bach.',
       merkmale: ['Quiz', '1, 2, 3 oder 4', 'Auflösung'] },
+    { id: 'euroquest', name: 'Euro Quest',
+      bereich: 'lernspiele', pfad: 'euroquest/index.html', status: 'aktiv', datum: '2026-11-20',
+      kurz: 'Vier Hütten, zwölf Sterne: Montanunion, EU-Organe, Gesetzgebung und Binnenmarkt.',
+      merkmale: ['Pixel-Spiel', 'Handy', 'EU'] },
+    { id: 'brdquest', name: 'BRD Quest',
+      bereich: 'lernspiele', pfad: 'brdquest/index.html', status: 'aktiv', datum: '2026-11-20',
+      kurz: 'Fünf Häuser, zwölf Sterne: Bundestag, Bundesrat, Gewaltenteilung, Gesetzgebung, Wahlrecht.',
+      merkmale: ['Pixel-Spiel', 'Handy', 'Politisches System'] },
     { id: 'risiko', name: 'Risiko-Begleiter',
       bereich: 'brettspiele', pfad: 'risiko/index.html', status: 'aktiv', datum: '2026-10-26',
       kurz: 'Würfeln mit automatischer Würfelzahl, Rechner für neue Truppen und Kartentausch, alle Regeln zum Nachlesen.',
