@@ -92,7 +92,7 @@
   /* Dezente Fußzeile für das Impressum UNTER dem Spiel statt daneben */
   #footerBar { width: 100%; max-width: 960px; text-align: center; font-size: 11px; color: #94a3b8;
                padding: 6px 8px 2px; line-height: 1.2; }
-  #footerBar a { color: #cbd5e1; text-decoration: none; display: inline-block; padding: 12px; }
+  #footerBar a { color: #cbd5e1; text-decoration: none; display: inline-block; padding: 12px 8px; }
   #footerBar a:hover { text-decoration: underline; }
 
   /* 1. SMARTPHONE HOCHFORMAT (Portrait) */
@@ -141,14 +141,14 @@
     /* Steuerkreuz schwebt halbtransparent links & rechts unten über dem Spiel */
     #pad { position: absolute; left: 0; right: 0; bottom: 6px; background: transparent;
            border-top: none; padding: 0 10px; pointer-events: none; }
-    .dpad { pointer-events: auto; grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(2, 38px);
+    .dpad { pointer-events: auto; grid-template-columns: repeat(3, 50px); grid-template-rows: repeat(2, 46px);
             gap: 4px; opacity: 0.78; }
     .pb { font-size: 17px; background: rgba(38, 53, 69, 0.85); }
-    #bE { pointer-events: auto; width: 68px; height: 54px; font-size: 14px; border-radius: 14px; opacity: 0.82; }
+    #bE { pointer-events: auto; width: 84px; height: 70px; font-size: 16px; border-radius: 14px; opacity: 0.82; }
     #modal, #victory { position: fixed; inset: 0; padding: 6px; background: rgba(15, 23, 42, 0.9);
                        align-items: center; justify-content: center; }
     #board { max-width: 680px; max-height: 94vh; max-height: 94dvh; padding: 8px 12px; }
-    #footerBar { position: fixed; bottom: 2px; right: 90px; width: auto; padding: 1px 6px;
+    #footerBar { position: fixed; top: 44px; right: 4px; width: auto; padding: 0;
                  font-size: 9.5px; background: rgba(15, 23, 42, 0.65); border-radius: 6px; z-index: 7; }
   }
 </style>
@@ -195,7 +195,7 @@
 </footer>
 
 <script src="../assets/quest-intro.js"></script>
-<script>QuestIntro({ key: "brdquest", title: "BRD QUEST", pages: [["Willkommen im Demokratie-Dorf!", "", "12 Sterne für die Demokratie", "sind erloschen. Bring sie", "wieder zum Leuchten!"], ["DEINE MISSION:", "", "Besuche die 5 Häuser:", "Bundestag, Bundesrat,", "Gewaltenteilung, Gesetzgebung", "und das Grenzhäuschen Wahlrecht."], ["SO GEHT'S:", "", "Im Haus: erst 📖 Infotafel lesen,", "dann 🧩 Aufgaben-Tisch lösen.", "Laufen: Haus antippen, Steuerkreuz", "oder Pfeile. Betreten: [E]", "", "Alle 12 Sterne = Sieg!"]] });</script>
+<script>QuestIntro({ key: "brdquest", title: "BRD QUEST", pages: [["Willkommen im Demokratie-Dorf!", "", "12 Sterne für die Demokratie", "sind erloschen. Bring sie", "wieder zum Leuchten!"], ["DEINE MISSION:", "", "Besuche die 5 Häuser:", "Bundestag, Bundesrat,", "Gewaltenteilung, Gesetzgebung", "und das Grenzhäuschen Wahlrecht."], ["SO GEHT'S:", "", "Im Haus: erst 📖 Infotafel lesen,", "dann 🧩 Aufgaben-Tisch lösen.", "Laufen: Haus antippen, Steuerkreuz", "oder Pfeile. Betreten: [E]", "", "Alle 12 Sterne = Sieg!","","📱 Tipp: Handy quer drehen","= größeres Bild"]] });</script>
 <script>
 // =====================================================================
 // TEIL B – LERNINHALTE & INFOTEXTE IN EINFACHER SPRACHE
