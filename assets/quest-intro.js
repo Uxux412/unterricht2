@@ -26,6 +26,10 @@ window.QuestIntro = function (cfg) {
     "#pad{flex:1;justify-content:space-around!important;align-items:center;padding:12px 10px!important}" +
     ".dpad{grid-template-columns:repeat(3,76px)!important;grid-template-rows:repeat(2,68px)!important;gap:8px!important}" +
     ".pb{font-size:28px!important}#bE{width:112px!important;height:100px!important;font-size:22px!important}}";
+  // iPhone: kein Zoom durch Doppeltippen, keine automatische Schriftvergrößerung
+  css.textContent += "html{-webkit-text-size-adjust:100%;text-size-adjust:100%}" +
+    "button,a,select{touch-action:manipulation}" +
+    "#pad,#pad *,canvas{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}";
   document.head.appendChild(css);
 
   var open = false, page = 0, timer = null, typing = false, full = "";
