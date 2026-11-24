@@ -64,6 +64,8 @@
   @media (orientation: landscape) and (max-height: 520px) { body { padding: 0; } #game { position: relative; max-width: calc((100dvh - 62px) * 640 / 380); }
     #pad { position: absolute; left: 0; right: 0; bottom: 0; background: transparent; border: 0; pointer-events: none; z-index: 8; }
     #pad .pb { pointer-events: auto; opacity: .8; } }
+  @media (max-width: 780px) { #modal, #victory { position: fixed; inset: 0; background: rgba(15,23,42,.88); padding: 8px; align-items: center; justify-content: center; z-index: 30; }
+    #board { max-width: 100%; max-height: 92vh; max-height: 92dvh; margin-top: 0; } }
 </style>
 <style>
   .mq { font-family: Georgia, serif; color: #2c221e; background: #f4e8c1; border: 6px ridge #8b5a2b; border-radius: 6px;
