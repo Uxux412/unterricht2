@@ -1,7 +1,7 @@
-// BRD Quest – sprachsensible Fassung (Berufsschule).
-// Gleicher Spielablauf wie brdquest/, nur sprachlich vereinfacht: kurze Sätze, Fachwörter mit Erklärung,
+// BRD Quest 2J – Fassung für zweijährige Ausbildungsberufe.
+// Gleicher Spielablauf wie brdquest/, eigene Texte: kurze Sätze, Fachwörter mit Erklärung,
 // pro Haus ein Wortspeicher. Wird vor dem Selbsttest aufgerufen und überschreibt nur Texte.
-window.SPRACHE = function (C) {
+window.TEXTE = function (C) {
   var Q = "📖 Infotafel (eigene Darstellung nach bundestag.de, bundesrat.de und HanisauLand)";
   var LEAD = "Lies den Text. Hier findest du alle Antworten.";
   var INTRO = "Wähle für jede Frage die richtige Antwort. Der Text auf der 📖 Infotafel hilft dir.";

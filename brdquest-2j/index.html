@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>BRD Quest – Das Dorf der Demokratie (sprachsensibel)</title>
+<title>BRD Quest 2J – Das Dorf der Demokratie</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { width: 100%; min-height: 100vh; min-height: 100dvh; background: #16181d; color: #f0f2f5;
@@ -196,11 +196,11 @@
 </footer>
 
 <script src="../assets/quest-intro.js"></script>
-<script src="sprache.js"></script>
-<script>QuestIntro({ key: "brdquest-sprache", title: "BRD QUEST", pages: [["Willkommen im Demokratie-Dorf!", "", "12 Sterne sind aus.", "Mach sie wieder an!"], ["DEINE AUFGABE:", "", "Geh in die 5 Häuser:", "Bundestag, Bundesrat,", "Gewaltenteilung, Gesetzgebung", "und Wahlrecht."], ["SO GEHT'S:", "", "1. Lies die 📖 Infotafel.", "2. Löse die 🧩 Aufgabe.", "Laufen: Haus antippen", "oder Pfeile drücken.", "Ins Haus gehen: [E]", "", "12 Sterne = gewonnen!", "", "📱 Tipp: Handy quer drehen", "= größeres Bild"]] });</script>
+<script src="texte.js"></script>
+<script>QuestIntro({ key: "brdquest-2j", title: "BRD QUEST", pages: [["Willkommen im Demokratie-Dorf!", "", "12 Sterne sind aus.", "Mach sie wieder an!"], ["DEINE AUFGABE:", "", "Geh in die 5 Häuser:", "Bundestag, Bundesrat,", "Gewaltenteilung, Gesetzgebung", "und Wahlrecht."], ["SO GEHT'S:", "", "1. Lies die 📖 Infotafel.", "2. Löse die 🧩 Aufgabe.", "Laufen: Haus antippen", "oder Pfeile drücken.", "Ins Haus gehen: [E]", "", "12 Sterne = gewonnen!", "", "📱 Tipp: Handy quer drehen", "= größeres Bild"]] });</script>
 <script>
 // =====================================================================
-// TEIL B – LERNINHALTE & INFOTEXTE IN EINFACHER SPRACHE
+// TEIL B – LERNINHALTE & INFOTEXTE (für 2J in texte.js überschrieben)
 // =====================================================================
 const CONTENT = {
   bundestag: {
@@ -2577,8 +2577,8 @@ function render(t) {
 }
 
 function loop(t) { render(t); requestAnimationFrame(loop); }
-// Sprachsensible Texte aus sprache.js
-if (window.SPRACHE) window.SPRACHE(CONTENT);
+// Texte der Fassung für zweijährige Ausbildungsberufe (texte.js)
+if (window.TEXTE) window.TEXTE(CONTENT);
 selfTest();
 updateStarsHud();
 updatePrompt();
