@@ -136,29 +136,10 @@ window.TEXTE = function (C) {
     C[k].intro = "Wähle für jede Frage die richtige Antwort. Das Symbol zeigt dir die passende Karte auf der 📖 Infotafel.";
   });
 
-  // 3) Wortspeicher mit Übersetzung (Ukrainisch, Englisch)
-  var UE = {
-    "das Parlament": ["парламент", "parliament"], "der/die Abgeordnete": ["депутат / депутатка", "member of parliament"],
-    "die Opposition": ["опозиція", "opposition"], "kontrollieren": ["контролювати", "to control"], "der Haushalt": ["бюджет", "budget"],
-    "das Bundesland": ["федеральна земля", "federal state"], "die Landesregierung": ["уряд землі", "state government"],
-    "zustimmen": ["погоджуватися", "to agree"], "der Einspruch": ["заперечення", "objection"],
-    "überstimmen": ["перемогти голосуванням", "to outvote"], "scheitern": ["зазнати невдачі", "to fail"],
-    "die Gewalt": ["влада", "power"], "ausführen": ["виконувати", "to carry out"], "das Gericht": ["суд", "court"],
-    "das Grundgesetz": ["Основний закон (конституція)", "Basic Law (constitution)"], "verschränkt": ["пов’язані між собою", "interlinked"],
-    "der Entwurf": ["проєкт", "draft"], "die Lesung": ["читання (обговорення)", "reading (debate)"], "der Ausschuss": ["комітет", "committee"],
-    "der Kompromiss": ["компроміс", "compromise"], "das Bundesgesetzblatt": ["Федеральний вісник законів", "Federal Law Gazette"],
-    "der Wahlkreis": ["виборчий округ", "constituency"], "die Partei": ["партія", "party"], "die Hürde": ["бар’єр", "threshold"],
-    "der Sitz": ["місце в парламенті", "seat"], "der Grundsatz": ["принцип", "principle"]
-  };
   Object.keys(C).forEach(function (k) {
     C[k].infoCards.forEach(function (card) {
-      if (card.heading.indexOf("Wichtige Wörter") >= 0) {
-        card.text = card.text.split("<br>").map(function (zeile) {
-          var m = zeile.match(/<strong>(.*?)<\/strong>/), u = m && UE[m[1]];
-          return u ? zeile + "<br><span style=\"color:#6b5a45;font-size:.92em\">🇺🇦 " + u[0] + " · 🇬🇧 " + u[1] + "</span>" : zeile;
-        }).join("<br>");
-      } else {
-        // 4) Ein Satz pro Zeile
+      // Ein Satz pro Zeile (nicht im Wortspeicher)
+      if (card.heading.indexOf("Wichtige Wörter") < 0) {
         card.text = card.text.replace(/([.?!]) (?=(<strong>)?[A-ZÄÖÜ])/g, "$1<br>");
       }
     });
