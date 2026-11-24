@@ -156,4 +156,67 @@ window.J2 = function (C) {
     ]
   };
   C.wahlrecht.summary = "<b>Erststimme:</b> Person im Wahlkreis (299) · <b>Zweitstimme:</b> Partei, entscheidet über die Sitze (630; seit 2025 Zweitstimmendeckung) · <b>5-%-Hürde</b> (oder 3 Wahlkreise). Wahlgrundsätze nach <b>Art. 38 GG</b>: allgemein, unmittelbar, frei, gleich, geheim.";
+
+  // ---------------- Gekürzte Infotafeln und Merksätze (didaktische Reduktion) ----------------
+  // brdquest-j2/j2.js
+
+  // ---------- Haus 1: Bundestag (Rollenspiel Opposition) ----------
+  C.bundestag.infoLead = "Lies die drei Karten. Danach führst du die Opposition.";
+  C.bundestag.infoCards = [
+    { heading: "📜 Gesetzgebung",
+      text: "Der Bundestag <strong>beschließt die Gesetze</strong> nach <strong>3 Lesungen</strong> und jedes Jahr den <strong>Haushalt</strong>. Einen <strong>Gesetzentwurf</strong> einbringen darf auch eine Fraktion der Opposition – „aus der Mitte des Bundestages“." },
+    { heading: "🔍 Kontrolle",
+      text: "Vor allem die <strong>Opposition</strong> kontrolliert die Regierung: mit <strong>Anfragen</strong> und in der <strong>Fragestunde</strong>. Mit <strong>einem Viertel der Sitze</strong> kann sie einen <strong>Untersuchungsausschuss</strong> erzwingen und ein Gesetz vom Bundesverfassungsgericht prüfen lassen: <strong>abstrakte Normenkontrolle</strong>." },
+    { heading: "🗳️ Wahl",
+      text: "Der Bundestag <strong>wählt den Kanzler oder die Kanzlerin</strong>. Abwählen geht nur, wenn er zugleich mit <strong>absoluter Mehrheit</strong> eine neue Person wählt: das <strong>konstruktive Misstrauensvotum</strong>." }
+  ];
+  C.bundestag.summary = "<b>Gesetzgebung:</b> Gesetze in 3 Lesungen, Haushalt · <b>Wahl:</b> Kanzler/in, Abwahl nur per konstruktivem Misstrauensvotum · <b>Kontrolle</b> v. a. durch die Opposition: Anfragen, Fragestunde; mit 1/4 der Sitze Untersuchungsausschuss und Normenkontrolle beim BVerfG.";
+
+  // ---------- Haus 2: Bundesrat (Abstimmung) ----------
+  C.bundesrat.infoLead = "Lies die drei Karten. Danach leitest du die Abstimmung.";
+  C.bundesrat.infoCards = [
+    { heading: "🦁 Wer sitzt im Bundesrat?",
+      text: "Hier sitzen <strong>Mitglieder der 16 Landesregierungen</strong> mit zusammen <strong>69 Stimmen</strong> (BW: 6). Jedes Land stimmt <strong>einheitlich</strong> ab, sonst sind seine Stimmen ungültig. Jeder Beschluss braucht die absolute Mehrheit: <strong>35 Stimmen</strong>." },
+    { heading: "🛑 Zustimmungsgesetz",
+      text: "Der Bundesrat muss nur zustimmen, wenn das <strong>Grundgesetz</strong> es vorschreibt, etwa bei den Finanzen der Länder. Ohne <strong>35 Ja-Stimmen</strong> scheitert das Gesetz. Eine <strong>Enthaltung</strong> wirkt hier also wie ein <strong>Nein</strong>." },
+    { heading: "⚖️ Einspruchsgesetz",
+      text: "Bei allen anderen Gesetzen kann der Bundesrat nur <strong>Einspruch</strong> einlegen – auch dafür braucht er <strong>35 Stimmen</strong>. Der <strong>Bundestag kann ihn überstimmen</strong>: mit absoluter Mehrheit, nach einem 2/3-Einspruch mit 2/3." }
+  ];
+  C.bundesrat.summary = "<b>Bundesrat:</b> Mitglieder der 16 Landesregierungen, <b>69 Stimmen</b>, je Land einheitlich; jeder Beschluss braucht <b>35 Ja</b>. <b>Zustimmungsgesetz:</b> scheitert ohne sie, Enthaltung wirkt wie Nein. <b>Einspruchsgesetz:</b> Bundestag kann den Einspruch überstimmen.";
+
+  // ---------- Haus 3: Gewaltenteilung (Zuordnung, items[].a bleiben unverändert) ----------
+  C.gewaltenteilung.infoLead = "Lies die drei Karten. Danach ordnest du die Gewalten zu.";
+  C.gewaltenteilung.infoCards = [
+    { heading: "📜 Legislative",
+      text: "Damit niemand allein herrscht, ist die Macht geteilt. Die <strong>Legislative</strong> beschließt die Gesetze: der <strong>Bundestag</strong> mit 630 Abgeordneten und der <strong>Bundesrat</strong>, über den die <strong>16 Länder</strong> an Gesetzen mitwirken." },
+    { heading: "🏛️ Exekutive und ⚖️ Judikative",
+      text: "Die <strong>Exekutive</strong> führt Gesetze aus: die <strong>Bundesregierung</strong> aus Kanzler/in und Ministern sowie der/die <strong>Bundespräsident/in</strong> als Staatsoberhaupt, gewählt für 5 Jahre. Die <strong>Judikative</strong> spricht Recht: Das <strong>Bundesverfassungsgericht in Karlsruhe</strong> mit 16 Richter/innen <strong>prüft Gesetze am Grundgesetz</strong>." },
+    { heading: "🔗 Gewaltenverschränkung",
+      text: "Die Gewalten sind <strong>nicht streng getrennt</strong>, sondern verbunden: Der <strong>Bundestag wählt den Kanzler oder die Kanzlerin</strong>, viele <strong>Minister sind zugleich Abgeordnete</strong>, und die <strong>Landesregierungen sitzen im Bundesrat</strong>." }
+  ];
+  C.gewaltenteilung.summary = "<b>Legislative:</b> Bundestag und Bundesrat · <b>Exekutive:</b> Bundesregierung und Bundespräsident/in · <b>Judikative:</b> Bundesverfassungsgericht. <b>Verschränkung:</b> Der Bundestag wählt den Kanzler, Minister sind oft Abgeordnete, Landesregierungen sitzen im Bundesrat.";
+
+  // ---------- Haus 4: Gesetzgebung (Weg eines Gesetzes) ----------
+  C.gesetzgebung.infoLead = "Lies die drei Karten. Danach schickst du das Gesetz los.";
+  C.gesetzgebung.infoCards = [
+    { heading: "💡 Wer bringt Gesetze ein?",
+      text: "Entwürfe kommen von der <strong>Bundesregierung</strong>, aus dem <strong>Bundestag</strong> oder vom <strong>Bundesrat</strong>. Die meisten schreibt ein Ministerium. Entwürfe der Regierung gehen <strong>zuerst an den Bundesrat</strong>: Die Länder nehmen Stellung." },
+    { heading: "🗣️ Beschluss und Vermittlung",
+      text: "Der <strong>Bundestag</strong> berät in <strong>3 Lesungen</strong> und beschließt. Dann entscheidet der <strong>Bundesrat</strong>. Bei Streit sucht der <strong>Vermittlungsausschuss</strong> aus Bundestag und Bundesrat einen Kompromiss. Ändert der das Gesetz, stimmen <strong>Bundestag und Bundesrat neu</strong> ab." },
+    { heading: "✍️ Unterschrift und Verkündung",
+      text: "Zuerst unterschreiben Kanzler/in und Fachminister/in: die <strong>Gegenzeichnung</strong>. Dann <strong>prüft und unterschreibt der/die Bundespräsident/in</strong>. Gelten kann das Gesetz erst nach der Verkündung im <strong>Bundesgesetzblatt</strong>." }
+  ];
+  C.gesetzgebung.summary = "<b>Einbringen:</b> Bundesregierung, Bundestag oder Bundesrat. <b>Weg:</b> Regierung → Bundesrat (Stellungnahme) → <b>Bundestag</b> (3 Lesungen) → <b>Bundesrat</b> → bei Streit <b>Vermittlungsausschuss</b> → Gegenzeichnung → <b>Bundespräsident/in</b> → <b>Bundesgesetzblatt</b>.";
+
+  // ---------- Haus 5: Wahlrecht (Fälle) ----------
+  C.wahlrecht.infoLead = "Lies die drei Karten. Danach prüfst du acht Fälle.";
+  C.wahlrecht.infoCards = [
+    { heading: "🗳️ Erst- und Zweitstimme",
+      text: "Mit der <strong>Erststimme</strong> wählst du eine Person im Wahlkreis, mit der <strong>Zweitstimme</strong> eine Partei. Die Zweitstimmen verteilen die <strong>630 Sitze</strong>. Seit 2025 bekommt ein Wahlkreissieger seinen Sitz nur, wenn die Zweitstimmen seiner Partei reichen." },
+    { heading: "🚧 5-%-Hürde und Wahlalter",
+      text: "Ins Parlament kommt eine Partei mit <strong>5 % der Zweitstimmen</strong> oder <strong>3 gewonnenen Wahlkreisen</strong>. Wählen darf man <strong>ab 18</strong>." },
+    { heading: "📜 Fünf Wahlgrundsätze (Art. 38 GG)",
+      text: "<strong>allgemein:</strong> alle Deutschen ab 18 · <strong>unmittelbar:</strong> direkt, ohne Wahlleute · <strong>frei:</strong> ohne Druck · <strong>gleich:</strong> jede Stimme zählt gleich viel · <strong>geheim:</strong> niemand erfährt, was du wählst." }
+  ];
+  C.wahlrecht.summary = "<b>Erststimme:</b> Person im Wahlkreis (Sitz nur mit Zweitstimmendeckung) · <b>Zweitstimme:</b> Partei, verteilt die 630 Sitze · <b>5-%-Hürde</b> oder 3 Wahlkreise · <b>Wahlgrundsätze</b> (Art. 38 GG): allgemein, unmittelbar, frei, gleich, geheim.";
 };

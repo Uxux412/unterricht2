@@ -101,4 +101,38 @@ window.J2 = function (C) {
       a: "Gescheitert", fb: "Ohne Einigung im Vermittlungsausschuss ist das Gesetz gescheitert (Art. 294 AEUV). Gescheitert ist es auch, wenn Parlament oder Rat den Kompromiss in der 3. Lesung ablehnen." }
   );
   C.flipper.summary = "<b>Ordentliches Gesetzgebungsverfahren:</b> Die <b>Kommission</b> schlägt vor → <b>Parlament</b> (1. Lesung) → <b>Rat der EU</b> billigt oder ändert → bei Uneinigkeit 2. Lesung und notfalls <b>Vermittlungsausschuss</b> → Veröffentlichung im Amtsblatt. Parlament und Rat sind <b>gleichberechtigte Gesetzgeber</b>. Bundestag und Bundesrat können eine <b>Subsidiaritätsrüge</b> erheben (Art. 23 GG).";
+
+  // ---------------- Gekürzte Infotafeln und Merksätze (didaktische Reduktion) ----------------
+  // euroquest-j2/j2.js (Schmiede hat keine Infotafel und bleibt unverändert)
+
+  // ---------- Ratshalle (Wer bin ich?) ----------
+  C.ratshalle.infoCards = [
+    { heading: "🏛️ Kommission und Parlament",
+      text: "Die <strong>Kommission</strong> hat ein Mitglied pro Staat. Sie <strong>schlägt Gesetze vor</strong> und wacht als „Hüterin der Verträge“ über das EU-Recht. Das <strong>Parlament</strong> mit 720 Abgeordneten wird <strong>direkt gewählt</strong>, beschließt Gesetze und wählt die Kommissionspräsidentin." },
+    { heading: "⚖️ Zwei Räte – nicht verwechseln!",
+      text: "Im <strong>Rat der EU</strong> sitzen <strong>Fachminister</strong>, je nach Thema andere; er beschließt Gesetze <strong>mit dem Parlament</strong>. Im <strong>Europäischen Rat</strong> geben die <strong>Staats- und Regierungschefs</strong> bei Gipfeln die Richtung vor – <strong>Gesetze macht er nicht</strong>." },
+    { heading: "🔍 EuGH – und eine Falle",
+      text: "Der <strong>Europäische Gerichtshof</strong> in Luxemburg sorgt dafür, dass EU-Recht überall <strong>gleich ausgelegt</strong> wird. Der <strong>Europarat</strong> in Straßburg ist <strong>kein EU-Organ</strong>, sondern eine eigene Organisation von 46 Staaten für Menschenrechte." }
+  ];
+  C.ratshalle.summary = "<b>Kommission:</b> schlägt Gesetze vor · <b>Parlament</b> (direkt gewählt) und <b>Rat der EU</b> (Fachminister) beschließen sie · <b>Europäischer Rat:</b> Staats- und Regierungschefs, gibt die Richtung vor, keine Gesetze · <b>EuGH:</b> legt EU-Recht aus · <b>Europarat:</b> kein EU-Organ.";
+
+  // ---------- Markthaus (Zollschalter) ----------
+  C.markt.infoCards = [
+    { heading: "🛒 Binnenmarkt: vier Grundfreiheiten",
+      text: "Seit <strong>1993</strong> gilt der <strong>Binnenmarkt</strong>. Frei über die Grenze gehen: <strong>Waren</strong> – ohne Zoll · <strong>Personen</strong> – wohnen, arbeiten, studieren · <strong>Dienstleistungen</strong> – Aufträge wie Handwerk oder Beratung · <strong>Kapital</strong> – Geld anlegen, Aktien oder Wohnungen kaufen." },
+    { heading: "🛂 Schengen",
+      text: "Das <strong>Schengener Abkommen</strong> schafft die regulären <strong>Passkontrollen an den Binnengrenzen</strong> ab – auch mit Nicht-EU-Staaten wie der <strong>Schweiz</strong>. Ausnahme: <strong>befristete Kontrollen</strong>. Deutschland kontrolliert so seit 2015 an der Grenze zu Österreich, seit 2024 an allen Landgrenzen." }
+  ];
+  C.markt.summary = "<b>Binnenmarkt</b> (seit 1993): freier Verkehr von <b>Waren, Personen, Dienstleistungen und Kapital</b>. <b>Schengen:</b> keine regulären Passkontrollen an den Binnengrenzen, auch mit Nicht-EU-Staaten wie der Schweiz; befristete Kontrollen sind erlaubt.";
+
+  // ---------- Flipper-Bau (Wo landet das Gesetz?) ----------
+  C.flipper.infoCards = [
+    { heading: "📜 Wer macht EU-Gesetze?",
+      text: "Die <strong>Kommission schlägt vor</strong>. Das <strong>Parlament</strong> und der <strong>Rat der EU</strong> entscheiden <strong>gleichberechtigt</strong>. Oft einigen sich beide schon vorher mit der Kommission im nicht öffentlichen <strong>Trilog</strong>." },
+    { heading: "🎯 1. und 2. Lesung",
+      text: "<strong>1. Lesung:</strong> Billigt der Rat die Position des Parlaments: <strong>angenommen</strong>. Sonst legt er eine eigene vor. <strong>2. Lesung:</strong> Billigt das Parlament sie: <strong>angenommen</strong>. Lehnt es sie <strong>mit der Mehrheit aller Mitglieder</strong> ab: <strong>gescheitert</strong>." },
+    { heading: "🤝 Vermittlung – und Deutschland",
+      text: "Ändert das Parlament die Rats-Position und der Rat zieht nicht mit, sucht der <strong>Vermittlungsausschuss</strong> einen Kompromiss. Findet er keinen oder lehnt eine Seite ihn ab: <strong>gescheitert</strong>. Eine <strong>Subsidiaritätsrüge</strong> des Bundestags allein stoppt kein Gesetz." }
+  ];
+  C.flipper.summary = "<b>Kommission</b> schlägt vor → <b>Parlament</b> (1. Lesung) → <b>Rat der EU</b> billigt oder ändert → 2. Lesung → notfalls <b>Vermittlungsausschuss</b>. <b>Gescheitert:</b> Parlament lehnt in 2. Lesung mit der Mehrheit aller Mitglieder ab oder Vermittlung scheitert.";
 };
