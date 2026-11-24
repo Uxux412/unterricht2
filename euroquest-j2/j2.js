@@ -135,4 +135,10 @@ window.J2 = function (C) {
       text: "Ändert das Parlament die Rats-Position und der Rat zieht nicht mit, sucht der <strong>Vermittlungsausschuss</strong> einen Kompromiss. Findet er keinen oder lehnt eine Seite ihn ab: <strong>gescheitert</strong>. Eine <strong>Subsidiaritätsrüge</strong> des Bundestags allein stoppt kein Gesetz." }
   ];
   C.flipper.summary = "<b>Kommission</b> schlägt vor → <b>Parlament</b> (1. Lesung) → <b>Rat der EU</b> billigt oder ändert → 2. Lesung → notfalls <b>Vermittlungsausschuss</b>. <b>Gescheitert:</b> Parlament lehnt in 2. Lesung mit der Mehrheit aller Mitglieder ab oder Vermittlung scheitert.";
+
+  // Szenarien 2 und 3 ohne verratene Lösung: Die Regel muss angewendet werden
+  C.flipper.game.scenarios[1].text = "Der Rat ist mit dem Standpunkt des Parlaments nicht einverstanden und legt einen <b>eigenen Standpunkt</b> vor. In der 2. Lesung findet sich im Parlament <b>keine Mehrheit</b>, die ihn ablehnen oder ändern will.";
+  C.flipper.game.scenarios[1].fb = "Lehnt das Parlament den Standpunkt des Rates in der 2. Lesung nicht mit der Mehrheit seiner Mitglieder ab und ändert ihn nicht, gilt das Gesetz als angenommen – in der Fassung des Rates.";
+  C.flipper.game.scenarios[2].text = "Das Parlament ändert in der 2. Lesung den Standpunkt des Rates. Der Rat übernimmt <b>nur einen Teil</b> der Änderungen. Nach zähen Verhandlungen stimmen am Ende <b>beide einem gemeinsamen Text</b> zu.";
+  C.flipper.game.scenarios[2].fb = "Übernimmt der Rat nicht alle Änderungen, tagt der Vermittlungsausschuss. Stimmen Parlament und Rat seinem Kompromiss in der 3. Lesung zu, ist das Gesetz angenommen.";
 };

@@ -219,4 +219,8 @@ window.J2 = function (C) {
       text: "<strong>allgemein:</strong> alle Deutschen ab 18 · <strong>unmittelbar:</strong> direkt, ohne Wahlleute · <strong>frei:</strong> ohne Druck · <strong>gleich:</strong> jede Stimme zählt gleich viel · <strong>geheim:</strong> niemand erfährt, was du wählst." }
   ];
   C.wahlrecht.summary = "<b>Erststimme:</b> Person im Wahlkreis (Sitz nur mit Zweitstimmendeckung) · <b>Zweitstimme:</b> Partei, verteilt die 630 Sitze · <b>5-%-Hürde</b> oder 3 Wahlkreise · <b>Wahlgrundsätze</b> (Art. 38 GG): allgemein, unmittelbar, frei, gleich, geheim.";
+
+  // Fall „Kündigungsdrohung“ (frei) gestrichen: „frei“ steckt schon im Fall „Foto vom Stimmzettel“
+  C.wahlrecht.game.cases = C.wahlrecht.game.cases.filter(function (c) { return c.text.indexOf("droht mit Kündigung") < 0; });
+  C.wahlrecht.infoLead = "Lies die drei Karten. Danach prüfst du sieben Fälle.";
 };
