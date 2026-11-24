@@ -79,7 +79,7 @@ window.INHALTE = {
       merkmale: ['Pixel-Spiel', 'Handy', 'EU'] },
     { id: 'brdquest', name: 'BRD Quest',
       bereich: 'lernspiele', pfad: 'brdquest/index.html', status: 'aktiv', datum: '2026-11-20',
-      kurz: 'Fünf Häuser, zwölf Sterne: Bundestag, Bundesrat, Gewaltenteilung, Gesetzgebung, Wahlrecht.',
+      kurz: 'Fünf Häuser, zwölf Sterne: Bundestag, Bundesrat, Gewaltenteilung und -verschränkung, Gesetzgebung, Wahlrecht.',
       merkmale: ['Pixel-Spiel', 'Handy', 'Politisches System'] },
     { id: 'risiko', name: 'Risiko-Begleiter',
       bereich: 'brettspiele', pfad: 'risiko/index.html', status: 'aktiv', datum: '2026-10-26',

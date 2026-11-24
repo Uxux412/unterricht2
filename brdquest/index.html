@@ -177,7 +177,7 @@
     <div id="victory">
       <div id="victoryBox">
         <h2>🎉 Alle 12 Sterne für die Demokratie leuchten! 🎉</h2>
-        <p>Stark gemacht! Du hast den höchsten Rang <strong>„Demokratie-Meister/in“</strong> erreicht und alle 5 Stationen (Bundestag, Bundesrat, Gewaltenteilung, Gesetzgebung und Grenzhäuschen Wahlrecht) gelöst. Du kannst die Häuser jederzeit erneut betreten, um deine Ergebnisse auf das Arbeitsblatt zu übertragen.</p>
+        <p>Stark gemacht! Du hast den höchsten Rang <strong>„Demokratie-Meister/in“</strong> erreicht und alle 5 Stationen (Bundestag, Bundesrat, Gewaltenteilung und -verschränkung, Gesetzgebung und Grenzhäuschen Wahlrecht) gelöst. Du kannst die Häuser jederzeit erneut betreten, um deine Ergebnisse auf das Arbeitsblatt zu übertragen.</p>
         <button id="closeVictory" type="button">Weiter im Dorf umsehen</button>
       </div>
     </div>
@@ -195,7 +195,7 @@
 </footer>
 
 <script src="../assets/quest-intro.js"></script>
-<script>QuestIntro({ key: "brdquest", title: "BRD QUEST", pages: [["Willkommen im Demokratie-Dorf!", "", "12 Sterne für die Demokratie", "sind erloschen. Bring sie", "wieder zum Leuchten!"], ["DEINE MISSION:", "", "Besuche die 5 Häuser:", "Bundestag, Bundesrat,", "Gewaltenteilung, Gesetzgebung", "und das Grenzhäuschen Wahlrecht."], ["SO GEHT'S:", "", "Im Haus: erst 📖 Infotafel lesen,", "dann 🧩 Aufgaben-Tisch lösen.", "Laufen: Haus antippen, Steuerkreuz", "oder Pfeile. Betreten: [E]", "", "Alle 12 Sterne = Sieg!","","📱 Tipp: Handy quer drehen","= größeres Bild"]] });</script>
+<script>QuestIntro({ key: "brdquest", title: "BRD QUEST", pages: [["Willkommen im Demokratie-Dorf!", "", "12 Sterne für die Demokratie", "sind erloschen. Bring sie", "wieder zum Leuchten!"], ["DEINE MISSION:", "", "Besuche die 5 Häuser:", "Bundestag, Bundesrat,", "Gewaltenteilung und", "-verschränkung, Gesetzgebung", "und das Grenzhäuschen Wahlrecht."], ["SO GEHT'S:", "", "Im Haus: erst 📖 Infotafel lesen,", "dann 🧩 Aufgaben-Tisch lösen.", "Laufen: Haus antippen, Steuerkreuz", "oder Pfeile. Betreten: [E]", "", "Alle 12 Sterne = Sieg!","","📱 Tipp: Handy quer drehen","= größeres Bild"]] });</script>
 <script>
 // =====================================================================
 // TEIL B – LERNINHALTE & INFOTEXTE IN EINFACHER SPRACHE
@@ -288,9 +288,9 @@ const CONTENT = {
     ]
   },
   gewaltenteilung: {
-    title: "04 Haus 3: Gewaltenteilung & Organe (AB 4)",
+    title: "04 Haus 3: Gewaltenteilung und -verschränkung (AB 4)",
     infoSource: "📖 Infotafel (Einfache Sprache · nach helles-koepfchen.de, HanisauLand & AB 4)",
-    infoLead: "Lies zuerst diesen kurzen Infotext. Darin stecken alle Antworten für das Haus Gewaltenteilung:",
+    infoLead: "Lies zuerst diesen kurzen Infotext. Darin stecken alle Antworten für das Haus Gewaltenteilung und -verschränkung:",
     infoCards: [
       {
         heading: "📜 1. Legislative (Gesetzgebende Gewalt)",
@@ -466,7 +466,7 @@ const SOLID = "T#HF";
 const HOUSES = [
   { id: "bundestag",       name: "Haus Bundestag",          c: 5,  r: 2,  door: { c: 7,  r: 5 } },
   { id: "bundesrat",       name: "Haus Bundesrat",          c: 22, r: 2,  door: { c: 24, r: 5 } },
-  { id: "gewaltenteilung", name: "Haus Gewaltenteilung",    c: 22, r: 13, door: { c: 24, r: 16 } },
+  { id: "gewaltenteilung", name: "Haus Gewaltenteilung und -verschränkung", c: 22, r: 13, door: { c: 24, r: 16 } },
   { id: "gesetzgebung",    name: "Haus Gesetzgebung",       c: 5,  r: 13, door: { c: 7,  r: 16 } },
   { id: "wahlrecht",       name: "Grenzhäuschen Wahlrecht", c: 14, r: 2,  door: { c: 15, r: 4 } }
 ];
@@ -2034,7 +2034,7 @@ function buildVillageCache() {
 
   label1280(["02 HAUS 1:", "BUNDESTAG"], 5 * TW + 100, 2 * TW + 152);
   label1280(["03 HAUS 2:", "BUNDESRAT"], 22 * TW + 100, 2 * TW + 152);
-  label1280(["04 HAUS 3:", "GEWALTENTEILUNG"], 22 * TW + 104, 13 * TW + 152);
+  label1280(["04 HAUS 3: GEWALTENTEILUNG", "UND -VERSCHRÄNKUNG"], 22 * TW + 104, 13 * TW + 152);
   label1280(["05 HAUS 4:", "GESETZGEBUNG"], 5 * TW + 86, 13 * TW + 152);
   label1280(["06 GRENZHÄUSCHEN:", "WAHLRECHT"], 14 * TW + 80, 2 * TW + 132);
 
