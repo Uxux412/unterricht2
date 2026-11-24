@@ -150,6 +150,7 @@
     #board { max-width: 680px; max-height: 94vh; max-height: 94dvh; padding: 8px 12px; }
     #footerBar { position: fixed; top: 44px; right: 4px; width: auto; padding: 0;
                  font-size: 9.5px; background: rgba(15, 23, 42, 0.65); border-radius: 6px; z-index: 7; }
+    #footerBar a { padding: 14px 8px; }
   }
 </style>
 </head>
@@ -177,7 +178,7 @@
     <div id="victory">
       <div id="victoryBox">
         <h2>🎉 Alle 16 Länderwappen gesammelt! 🎉</h2>
-        <p><strong>Herzlichen Glückwunsch – du bist super!</strong><br>Du hast alle 5 Häuser gemeistert und den höchsten Rang <strong>„Demokratie-Meister/in“</strong> erreicht. Über dem Dorf weht jetzt die Deutschlandfahne.</p>
+        <p><strong>Herzlichen Glückwunsch – du bist super!</strong><br>Du hast alle 5 Häuser gemeistert und den höchsten Rang <strong>„Demokratie-Meister/in“</strong> erreicht. Die Deutschlandfahne weht für dich!</p>
         <button id="closeVictory" type="button">Weiter im Dorf umsehen</button>
       </div>
     </div>
@@ -191,7 +192,7 @@
   </div>
 </div>
 <footer id="footerBar">
-  <a href="../impressum/index.html">Impressum &amp; Datenschutz</a>
+  <a href="../index.html">🏠 Übersicht</a> · <a href="../impressum/index.html">Impressum &amp; Datenschutz</a>
 </footer>
 
 <script src="../assets/quest-intro.js"></script>
@@ -743,7 +744,7 @@ function updatePrompt() {
   }
   const h = doorHere();
   if (h && !modalOpen) {
-    promptEl.textContent = "[E] Haus betreten: " + h.name + (solved[h.id] ? " (Gelöst ⭐)" : "");
+    promptEl.textContent = "[E] Haus betreten: " + h.name + (solved[h.id] ? " (Gelöst 🛡️)" : "");
     promptEl.style.display = "block";
   } else promptEl.style.display = "none";
 }
@@ -756,7 +757,7 @@ function enterHouse(h) {
   intPlayer.x = 890;
   intPlayer.y = 455;
   intPlayer.dir = "left";
-  roomTitleTxt.textContent = "🏛️ " + h.name + (solved[h.id] ? " ⭐" : "");
+  roomTitleTxt.textContent = "🏛️ " + h.name + (solved[h.id] ? " 🛡️" : "");
   roomHudEl.style.display = "flex";
   updatePrompt();
 }
@@ -776,7 +777,7 @@ function closeStationModalToRoom() {
   modal.style.display = "none";
   modalOpen = false;
   if (current) {
-    roomTitleTxt.textContent = "🏛️ " + current.name + (solved[current.id] ? " ⭐" : "");
+    roomTitleTxt.textContent = "🏛️ " + current.name + (solved[current.id] ? " 🛡️" : "");
   }
   updatePrompt();
 }
@@ -945,8 +946,12 @@ function openStationModal(h, forceReset, startTab) {
   add(quizView, "p", d.intro);
 
   if (d.mode) {
-    const host = add(quizView, "div");
-    QuestModes[d.mode](host, d, isAlreadySolved, () => markSolved(null));
+    // Spielstand bleibt erhalten, wenn man das Haus verlässt und wiederkommt
+    if (forceReset || !d._host) {
+      d._host = document.createElement("div");
+      QuestModes[d.mode](d._host, d, isAlreadySolved, () => markSolved(null));
+    }
+    quizView.appendChild(d._host);
     const mb = add(quizView, "div");
     mb.className = "btns";
     add(mb, "button", "📖 Infotext nachschlagen").addEventListener("click", () => switchTab("info"));

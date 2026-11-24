@@ -117,7 +117,7 @@
     <div id="victory">
       <div id="victoryBox">
         <h2>🎉 Alle 12 Sterne von Europa leuchten! 🎉</h2>
-        <p><strong>Herzlichen Glückwunsch – du bist super!</strong><br>Du hast alle 12 Sterne gefunden und weißt nun einiges über die EU. Über dem Dorf weht jetzt die Europafahne.</p>
+        <p><strong>Herzlichen Glückwunsch – du bist super!</strong><br>Du hast alle 12 Sterne gefunden und weißt nun einiges über die EU. Die Europafahne weht für dich!</p>
         <button id="closeVictory" type="button">Weiter im Dorf umsehen</button>
       </div>
     </div>
@@ -444,8 +444,11 @@ function openHouse(h) {
     board.innerHTML = "";
     add(board, "h2", d.title);
     add(board, "p", d.intro);
-    const host = add(board, "div");
-    QuestModes[d.mode](host, d, !!solved[h.id], () => {
+    QuestModes.info(board, d);
+    // Spielstand bleibt erhalten, wenn man das Haus verlässt und wiederkommt
+    if (!d._host) {
+      d._host = document.createElement("div");
+      QuestModes[d.mode](d._host, d, !!solved[h.id], () => {
       if (!solved[h.id]) { solved[h.id] = true; stars += 3; }
       document.getElementById("stars").textContent = "⭐ Sterne: " + stars + " / 12" + (stars >= 12 ? " 🎉" : "");
       if (stars >= 12 && !victoryShown) {
@@ -453,6 +456,8 @@ function openHouse(h) {
         setTimeout(() => { victoryEl.style.display = "flex"; QuestFlag(document.getElementById("victoryBox"), "eu"); }, 600);
       }
     });
+    }
+    board.appendChild(d._host);
     const mb = add(board, "div");
     mb.className = "btns";
     add(mb, "button", "Haus verlassen").addEventListener("click", closeHouse);
@@ -2084,6 +2089,6 @@ selfTest();
 updatePrompt();
 requestAnimationFrame(loop);
 </script>
-<p style="text-align:center;font-size:12px;margin:8px 0"><a href="../impressum/index.html" style="color:inherit;display:inline-block;padding:12px">Impressum &amp; Datenschutz</a></p>
+<p style="text-align:center;font-size:12px;margin:8px 0"><a href="../index.html" style="color:inherit;display:inline-block;padding:12px">🏠 Übersicht</a> · <a href="../impressum/index.html" style="color:inherit;display:inline-block;padding:12px">Impressum &amp; Datenschutz</a></p>
 </body>
 </html>

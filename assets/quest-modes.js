@@ -25,7 +25,12 @@
     ".qm-sum{background:#fff8d6;border:3px solid #d4ac0d;border-radius:6px;padding:12px 14px;margin-top:10px;font-size:15px;line-height:1.5}" +
     ".qm-sum h4{font-size:15px;color:#1e3a7a;margin-bottom:4px}" +
     ".qm-timer{font:bold 18px 'Courier New',monospace;text-align:center;margin:6px 0}" +
-    ".qm-big{font-size:15px;font-weight:bold;text-align:center;padding:14px 10px}";
+    ".qm-big{font-size:15px;font-weight:bold;text-align:center;padding:14px 10px}" +
+    "#board .btns button{min-height:44px;padding:8px 14px;font-size:14px}" +
+    "#victoryBox{max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px);overflow-y:auto}" +
+    "#victoryBox button{min-height:44px}" +
+    ".qm-info{margin:6px 0 10px}.qm-info summary{cursor:pointer;font-weight:bold;font-size:14px;padding:10px 12px;background:#dec99a;border:2px solid #8a6236;border-radius:6px;min-height:44px}" +
+    ".qm-info .infoCard{margin-top:6px}";
   document.head.appendChild(css);
 
   function el(parent, tag, text, cls) {
@@ -36,6 +41,21 @@
     return e;
   }
   function btn(parent, text, cls) { var b = el(parent, "button", text, cls); b.type = "button"; return b; }
+  // Weiter-/Start-Knöpfe: der zweite Tipp eines Doppeltipps darf nicht auf dem neu aufgebauten Inhalt landen
+  function guard(fn) {
+    return function (e) {
+      var stop = function (ev) { ev.stopImmediatePropagation(); ev.preventDefault(); };
+      document.addEventListener("click", stop, true);
+      setTimeout(function () { document.removeEventListener("click", stop, true); }, 450);
+      fn(e);
+    };
+  }
+  function weiter(parent, text, fn, cls) {
+    var w = el(parent, "div", null, "btns" + (cls ? " " + cls : ""));
+    var b = btn(w, text);
+    b.addEventListener("click", guard(function () { if (b.disabled) return; b.disabled = true; fn(); }));
+    return w;
+  }
 
   // Merksatz fürs Arbeitsblatt (groß, zum Abschreiben)
   function summary(root, d) {
@@ -83,8 +103,8 @@
             fbn.addEventListener("click", function () {
               if (f !== c.fn) { fbn.className = "bad"; fb2.className = "qm-fb bad"; fb2.textContent = "Nicht ganz – überleg, was du gerade getan hast."; return; }
               fbn.className = "ok"; fb2.className = "qm-fb ok"; fb2.textContent = "✔ Richtig: " + f + ".";
-              var w = el(root, "div", null, "btns");
-              btn(w, i < g.cases.length - 1 ? "Nächste Situation ▶" : "Abschließen ⭐").addEventListener("click", function () {
+              [].forEach.call(fo.children, function (x) { x.disabled = true; });
+              weiter(root, i < g.cases.length - 1 ? "Nächste Situation ▶" : "Abschließen ⭐", function () {
                 i++; if (i < g.cases.length) show(); else finish(root, d, onSolved, "✔ Alle Situationen gemeistert!");
               });
             });
@@ -130,7 +150,8 @@
         grid(root, state, true, function () {
           var y = g.lands.reduce(function (s, l) { return s + (state[l[0]] === "ja" ? l[2] : 0); }, 0);
           setBar(y);
-          if (y >= need) { fb.className = "qm-fb ok"; fb.innerHTML = rd.fb; next(root); } else { fb.className = "qm-fb"; fb.textContent = "Noch " + (need - y) + " Stimmen bis zur Mehrheit."; }
+          if (y >= need) { fb.className = "qm-fb ok"; fb.innerHTML = rd.fb; next(root); }
+          else { fb.className = "qm-fb"; fb.textContent = "Noch " + (need - y) + " Stimmen bis zur Mehrheit."; var nx = root.querySelector(".qm-next"); if (nx) nx.remove(); }
         });
       } else {
         if (rd.preset) {
@@ -156,10 +177,9 @@
     }
     function next(parent) {
       if (parent.querySelector(".qm-next")) return;
-      var w = el(parent, "div", null, "btns qm-next");
-      btn(w, r < g.rounds.length - 1 ? "Nächste Abstimmung ▶" : "Abschließen ⭐").addEventListener("click", function () {
+      weiter(parent, r < g.rounds.length - 1 ? "Nächste Abstimmung ▶" : "Abschließen ⭐", function () {
         r++; if (r < g.rounds.length) round(); else finish(root, d, onSolved, "✔ Alle Abstimmungen richtig entschieden!");
-      });
+      }, "qm-next");
     }
     round();
   };
@@ -194,8 +214,7 @@
         if (i < g.steps.length) task.innerHTML = g.steps[i].ask || "Wohin geht der Entwurf jetzt?";
         else {
           gr.style.display = "none";
-          var w = el(root, "div", null, "btns");
-          btn(w, "Abschließen ⭐").addEventListener("click", function () { finish(root, d, onSolved, "✔ Das Gesetz ist in Kraft!"); });
+          weiter(root, "Abschließen ⭐", function () { finish(root, d, onSolved, "✔ Das Gesetz ist beschlossen und verkündet!"); });
         }
       });
     });
@@ -222,9 +241,8 @@
           if (c.a.indexOf(ch) < 0) { fehler++; b.className = "bad"; fb.className = "qm-fb bad"; fb.textContent = c.miss || "Nicht ganz – lies den Fall noch einmal genau."; return; }
           b.className = "ok"; fb.className = "qm-fb ok"; fb.innerHTML = "✔ " + c.fb;
           [].forEach.call(opts.children, function (x) { x.disabled = true; });
-          var w = el(root, "div", null, "btns");
-          btn(w, i < g.cases.length - 1 ? "Nächster Fall ▶" : "Abschließen ⭐").addEventListener("click", function () {
-            i++; if (i < g.cases.length) show(); else finish(root, d, onSolved, "✔ Alle " + g.cases.length + " Fälle richtig beurteilt" + (fehler ? " (" + fehler + " Fehlversuche)." : " – ohne Fehler!"));
+          weiter(root, i < g.cases.length - 1 ? "Nächster Fall ▶" : "Abschließen ⭐", function () {
+            i++; if (i < g.cases.length) show(); else finish(root, d, onSolved, "✔ Alle " + g.cases.length + " Fälle richtig geprüft" + (fehler ? " (" + fehler + (fehler === 1 ? " Fehlversuch)." : " Fehlversuche).") : " – ohne Fehler!"));
           });
         });
       });
@@ -257,14 +275,14 @@
           if (ch !== c.a) {
             b.className = "bad"; fb.className = "qm-fb bad"; fb.innerHTML = (c.wrong && c.wrong[ch]) || "Falsch geraten – hol dir noch einen Hinweis.";
             if (shown < c.hints.length) { shown++; paintHints(); }
+            if (shown >= c.hints.length) more.disabled = true;
             return;
           }
           var p = c.hints.length - shown + 1; punkte += p;
-          b.className = "ok"; fb.className = "qm-fb ok"; fb.innerHTML = "✔ +" + p + " Punkte. " + c.fb;
+          b.className = "ok"; fb.className = "qm-fb ok"; fb.innerHTML = "✔ +" + p + (p === 1 ? " Punkt. " : " Punkte. ") + c.fb;
           [].forEach.call(opts.children, function (x) { x.disabled = true; }); more.disabled = true;
-          var w = el(root, "div", null, "btns");
-          btn(w, i < g.riddles.length - 1 ? "Nächstes Rätsel ▶" : "Abschließen ⭐").addEventListener("click", function () {
-            i++; if (i < g.riddles.length) show(); else finish(root, d, onSolved, "✔ Alle Organe erkannt – " + punkte + " Punkte!");
+          weiter(root, i < g.riddles.length - 1 ? "Nächstes Rätsel ▶" : "Abschließen ⭐", function () {
+            i++; if (i < g.riddles.length) show(); else finish(root, d, onSolved, "✔ Alle Institutionen erkannt – " + punkte + " Punkte!");
           });
         });
       });
@@ -279,13 +297,18 @@
     var g = d.game;
     function start() {
       root.innerHTML = "";
+      root.dataset.running = "1";
       var cards = g.cards.slice().sort(function () { return Math.random() - 0.5; });
       var i = 0, right = 0, left = g.seconds, over = false;
-      var tm = el(root, "div", "⏱ " + left + " s", "qm-timer");
+      var tm = el(root, "div", "⏱ " + left + " s · 0 richtig", "qm-timer");
       var card = el(root, "div", null, "qm-card qm-big");
       var opts = el(root, "div", null, "qm-grid");
       var fb = el(root, "div", "", "qm-fb");
-      var t = setInterval(function () { left--; tm.textContent = "⏱ " + left + " s · " + right + " richtig"; if (left <= 0) end(); }, 1000);
+      var t = setInterval(function () {
+        // Haus verlassen: Runde abbrechen, beim nächsten Betreten startet sie neu
+        if (!root.isConnected || !root.getClientRects().length) { clearInterval(t); over = true; introScreen(); return; }
+        left--; tm.textContent = "⏱ " + left + " s · " + right + " richtig"; if (left <= 0) end();
+      }, 1000);
       function paint() { card.innerHTML = "Karte " + (i + 1) + " / " + cards.length + "<br>" + cards[i].t; }
       g.baskets.forEach(function (bk) {
         var b = btn(opts, bk);
@@ -300,18 +323,20 @@
       });
       paint();
       function end() {
-        if (over) return; over = true; clearInterval(t);
+        if (over) return; over = true; clearInterval(t); delete root.dataset.running;
         opts.style.display = "none";
         card.innerHTML = right + " von " + cards.length + " richtig" + (left <= 0 ? " (Zeit abgelaufen)" : "");
-        var w = el(root, "div", null, "btns");
-        if (right >= g.need) btn(w, "Abschließen ⭐").addEventListener("click", function () { finish(root, d, onSolved, "✔ " + right + " von " + cards.length + " – Zoll-Profi!"); });
-        else { fb.className = "qm-fb bad"; fb.textContent = "Für den Stern brauchst du " + g.need + " richtige. Noch eine Runde!"; btn(w, "🔄 Neue Runde").addEventListener("click", start); }
+        if (right >= g.need) weiter(root, "Abschließen ⭐", function () { finish(root, d, onSolved, "✔ " + right + " von " + cards.length + " – Zoll-Profi!"); });
+        else { fb.className = "qm-fb bad"; fb.textContent = "Für die Sterne brauchst du " + g.need + " Richtige. Noch eine Runde!"; weiter(root, "🔄 Neue Runde", start); }
       }
     }
-    var intro = el(root, "div", null, "qm-card");
-    el(intro, "div", g.intro);
-    var w = el(root, "div", null, "btns");
-    btn(w, "▶ Start (" + g.seconds + " Sekunden)").addEventListener("click", start);
+    function introScreen() {
+      root.innerHTML = ""; delete root.dataset.running;
+      var intro = el(root, "div", null, "qm-card");
+      el(intro, "div", g.intro);
+      weiter(root, "▶ Start (" + g.seconds + " Sekunden)", start);
+    }
+    introScreen();
   };
 
   // ---------- 7. Vorhersage mit Kugel ----------
@@ -326,20 +351,18 @@
       el(card, "div", "Szenario " + (i + 1) + " von " + g.scenarios.length, "qm-step");
       el(card, "div", c.text);
       el(root, "div", "Wo landet die Kugel? Sag den Ausgang voraus:", "qm-step");
+      var ball = el(root, "div", "⚪", "");
+      ball.style.cssText = "font-size:26px;line-height:34px;transition:padding-left .9s cubic-bezier(.3,1.6,.6,1);height:34px;padding-left:calc(50% - 13px)";
       var lanes = el(root, "div", null, "qm-grid");
       var fb = el(root, "div", "", "qm-fb");
-      var ball = el(root, "div", "⚪", "");
-      ball.style.cssText = "font-size:26px;transition:padding-left .9s cubic-bezier(.3,1.6,.6,1);height:34px;padding-left:46%";
       g.ends.forEach(function (e, k) {
         var b = btn(lanes, e);
         b.addEventListener("click", function () {
           if (e !== c.a) { b.className = "bad"; fb.className = "qm-fb bad"; fb.innerHTML = c.miss || "Die Kugel springt woanders hin – überleg noch mal."; return; }
-          var target = g.ends.indexOf(c.a), n = g.ends.length;
-          ball.style.paddingLeft = Math.max(0, (target + 0.5) / n * 100 - 4) + "%";
+          ball.style.paddingLeft = Math.max(0, b.offsetLeft - lanes.offsetLeft + b.offsetWidth / 2 - 13) + "px";
           b.className = "ok"; fb.className = "qm-fb ok"; fb.innerHTML = "✔ " + c.fb;
           [].forEach.call(lanes.children, function (x) { x.disabled = true; });
-          var w = el(root, "div", null, "btns");
-          btn(w, i < g.scenarios.length - 1 ? "Nächste Kugel ▶" : "Abschließen ⭐").addEventListener("click", function () {
+          weiter(root, i < g.scenarios.length - 1 ? "Nächste Kugel ▶" : "Abschließen ⭐", function () {
             i++; if (i < g.scenarios.length) show(); else finish(root, d, onSolved, "✔ Alle Kugeln richtig vorhergesagt!");
           });
         });
@@ -348,13 +371,23 @@
     show();
   };
 
+  // Aufklappbare Infotafel: QuestModes.info(container, d) – nutzt d.infoCards [{heading, text}]
+  M.info = function (root, d) {
+    if (!d.infoCards || !d.infoCards.length) return;
+    var det = el(root, "details", null, "qm-info");
+    el(det, "summary", "📖 Infotafel lesen (" + d.infoCards.length + " Karten)");
+    d.infoCards.forEach(function (ic) { var c = el(det, "div", null, "infoCard"); el(c, "h4", ic.heading); el(c, "div", ic.text); });
+  };
+
   window.QuestModes = M;
 
   // ---------- Wehende Fahne beim Sieg ----------
   // QuestFlag(container, "de" | "eu")
   window.QuestFlag = function (box, typ) {
+    if (box.querySelector("canvas.qm-flag")) return;
     var c = document.createElement("canvas");
-    c.width = 300; c.height = 200; c.style.cssText = "display:block;margin:0 auto 10px;width:100%;max-width:300px;image-rendering:pixelated;background:transparent";
+    c.className = "qm-flag";
+    c.width = 300; c.height = 200; c.style.cssText = "display:block;margin:0 auto 10px;width:auto;max-width:100%;height:200px;max-height:32vh;image-rendering:pixelated;background:transparent";
     box.insertBefore(c, box.firstChild);
     var x = c.getContext("2d"), t = 0;
     var W = 240, H = 144, X0 = 40, Y0 = 20;
@@ -369,6 +402,7 @@
     }
     (function draw() {
       if (!c.isConnected) return;
+      if (!c.getClientRects().length) { setTimeout(draw, 500); return; }
       x.clearRect(0, 0, c.width, c.height);
       x.fillStyle = "#6b4a2b"; x.fillRect(X0 - 8, Y0 - 6, 6, 186);
       x.fillStyle = "#d4ac0d"; x.fillRect(X0 - 10, Y0 - 10, 10, 6);

@@ -19,7 +19,7 @@ window.QuestIntro = function (cfg) {
     "#qiNext:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #c0392b}" +
     "#qiHelp{position:fixed;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:50;width:44px;height:44px;border-radius:0;" +
     "font:bold 22px 'Courier New',monospace;background:#0b1a5c;color:#ffe066;border:3px solid #fff;cursor:pointer;box-shadow:3px 3px 0 #000}" +
-    "#qiHelp.inHud{position:static;width:40px;height:40px;font-size:20px;border-width:2px;box-shadow:2px 2px 0 #000;flex-shrink:0}" +
+    "#qiHelp.inHud{position:static;z-index:auto;width:40px;height:40px;font-size:20px;border-width:2px;box-shadow:2px 2px 0 #000;flex-shrink:0}" +
     // Hochformat-Handy: Spiel füllt den ganzen Bildschirm, Steuerung groß im freien Platz darunter
     "@media (orientation:portrait) and (max-width:780px){html,body{padding:0!important}" +
     "#game{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;border-radius:0!important}" +
