@@ -30,7 +30,7 @@ window.TEXTE = function (C) {
     { heading: "🦁 Was ist der Bundesrat?", text: "Deutschland hat <strong>16 Bundesländer</strong>. Im Bundesrat arbeiten die Länder bei Gesetzen mit. Dort sitzen Mitglieder der <strong>16 Landesregierungen</strong>, zum Beispiel die Ministerpräsidenten. Der Bundesrat hat <strong>69 Stimmen</strong>. <strong>Baden-Württemberg hat 6 Stimmen</strong>." },
     { heading: "🛑 Zustimmungsgesetz", text: "Manche Gesetze sind für die Länder sehr wichtig, zum Beispiel wenn es um das <strong>Geld der Länder</strong> geht. Dann sagt das Grundgesetz: Der Bundesrat muss <strong>Ja sagen</strong>. Sagt er Nein, <strong>scheitert</strong> das Gesetz. Das heißt: <strong>Zustimmungsgesetz</strong>." },
     { heading: "⚖️ Einspruchsgesetz", text: "Bei den anderen Gesetzen kann der Bundesrat <strong>Einspruch</strong> einlegen. Das heißt: Er sagt „Wir sind dagegen“. Aber der <strong>Bundestag kann ihn überstimmen</strong>. Dann gilt das Gesetz trotzdem. Das heißt: <strong>Einspruchsgesetz</strong>." },
-    { heading: "📚 Wichtige Wörter", text: "<strong>das Bundesland</strong> – ein Teil von Deutschland, z. B. Baden-Württemberg<br><strong>die Landesregierung</strong> – die Regierung von einem Bundesland<br><strong>zustimmen</strong> – Ja sagen<br><strong>der Einspruch</strong> – „Wir sind dagegen“<br><strong>überstimmen</strong> – mit mehr Stimmen gewinnen<br><strong>scheitern</strong> – nicht klappen" }
+    { heading: "📚 Wichtige Wörter", text: "<strong>das Bundesland</strong> – ein Teil von Deutschland, zum Beispiel Baden-Württemberg<br><strong>die Landesregierung</strong> – die Regierung von einem Bundesland<br><strong>zustimmen</strong> – Ja sagen<br><strong>der Einspruch</strong> – „Wir sind dagegen“<br><strong>überstimmen</strong> – mit mehr Stimmen gewinnen<br><strong>scheitern</strong> – nicht klappen" }
   ];
   C.bundesrat.tip = "Im Bundesrat: 16 Landesregierungen, 69 Stimmen · Zustimmungsgesetz: Bundesrat muss Ja sagen · Einspruchsgesetz: Bundestag kann überstimmen.";
   C.bundesrat.items = [
@@ -94,4 +94,125 @@ window.TEXTE = function (C) {
     { q: "5. Die 5 Wahlgrundsätze (Art. 38 GG):", a: "allgemein, unmittelbar, frei, gleich, geheim" }
   ];
   C.wahlrecht.distractors = ["Mit der Erststimme wähle ich den Bundeskanzler direkt.", "Jede Partei kommt in den Bundestag, egal wie viele Stimmen sie hat."];
+
+  // ================= Hilfen für Deutsch als Zweitsprache =================
+  // 1) Kurze Antwort-Bausteine statt langer Sätze, 2) gleiches Symbol in Frage und passender Infokarte
+  C.bundestag.items = [
+    { q: "📜 1. Gesetze: Was macht der Bundestag?", a: "3 Lesungen, Gesetze und Haushalt beschließen" },
+    { q: "🔍 2. Kontrolle: Was macht die Opposition?", a: "Fragen stellen, Untersuchungsausschuss (ab 1/4)" },
+    { q: "🗳️ 3. Wahl: Wen wählt der Bundestag?", a: "Kanzler/in und Hälfte der Verfassungsrichter" }
+  ];
+  C.bundestag.distractors = ["16 Länder vertreten, 69 Stimmen", "In Karlsruhe Gesetze prüfen"];
+  C.bundesrat.items = [
+    { q: "🦁 1. Wer sitzt im Bundesrat? Wie viele Stimmen?", a: "16 Landesregierungen, 69 Stimmen (BW: 6)" },
+    { q: "🛑 2. Zustimmungsgesetz: Der Bundesrat sagt Nein. Was passiert?", a: "Das Gesetz scheitert." },
+    { q: "⚖️ 3. Einspruchsgesetz: Was kann der Bundestag tun?", a: "Den Einspruch überstimmen." }
+  ];
+  C.bundesrat.distractors = ["Das Volk wählt ihn alle 4 Jahre.", "Den Kanzler jederzeit abwählen."];
+  C.gewaltenteilung.items = [
+    { q: "📜 1. Legislative (Gesetze machen):", a: "Bundestag und Bundesrat" },
+    { q: "🏛️ 2. Exekutive (regieren):", a: "Bundesregierung und Bundespräsident/in" },
+    { q: "⚖️ 3. Judikative (Recht sprechen):", a: "Bundesverfassungsgericht in Karlsruhe" },
+    { q: "🔗 4. Verschränkung: Wie sind die Gewalten verbunden?", a: "Bundestag wählt Kanzler/in, Minister sind Abgeordnete" }
+  ];
+  C.gewaltenteilung.distractors = ["Alle Gewalten sind ganz getrennt", "Menschenrechtsgericht in Straßburg"];
+  C.gesetzgebung.items = [
+    { q: "💡 Schritt 1: Wer macht den Vorschlag?", a: "Bundesregierung, Bundestag oder Bundesrat" },
+    { q: "🗣️ Schritt 2: Was macht der Bundestag?", a: "3 Lesungen, dann Abstimmung" },
+    { q: "🤝 Schritt 3 und 4: Was passiert dann?", a: "Bundesrat entscheidet, bei Streit Vermittlungsausschuss" },
+    { q: "✍️ Schritt 5: Wie endet der Weg?", a: "Bundespräsident/in unterschreibt, Bundesgesetzblatt" }
+  ];
+  C.gesetzgebung.distractors = ["Verfassungsgericht stimmt jedem Entwurf zu", "Volksabstimmung über jedes Gesetz"];
+  C.wahlrecht.items = [
+    { q: "🗳️ 1. Erststimme (links): Wen wähle ich?", a: "eine Person aus dem Wahlkreis" },
+    { q: "🗳️ 2. Zweitstimme (rechts): Wen wähle ich? Warum ist sie wichtiger?", a: "eine Partei – sie bestimmt die Sitze" },
+    { q: "🚧 3. 5-Prozent-Hürde: Was braucht eine Partei?", a: "5 % der Zweitstimmen oder 3 Wahlkreise" },
+    { q: "🚧 4. Wie viele Sitze hat der Bundestag?", a: "630 Sitze" },
+    { q: "📜 5. Die 5 Wahlgrundsätze:", a: "allgemein, unmittelbar, frei, gleich, geheim" }
+  ];
+  C.wahlrecht.distractors = ["den Bundeskanzler direkt", "jede Partei, egal wie viele Stimmen"];
+  C.gesetzgebung.intro = "Wähle für jeden Schritt die passende Antwort. Das Symbol zeigt dir die passende Karte auf der 📖 Infotafel.";
+  ["bundestag", "bundesrat", "gewaltenteilung", "wahlrecht"].forEach(function (k) {
+    C[k].intro = "Wähle für jede Frage die richtige Antwort. Das Symbol zeigt dir die passende Karte auf der 📖 Infotafel.";
+  });
+
+  // 3) Wortspeicher mit Übersetzung (Ukrainisch, Englisch)
+  var UE = {
+    "das Parlament": ["парламент", "parliament"], "der/die Abgeordnete": ["депутат / депутатка", "member of parliament"],
+    "die Opposition": ["опозиція", "opposition"], "kontrollieren": ["контролювати", "to control"], "der Haushalt": ["бюджет", "budget"],
+    "das Bundesland": ["федеральна земля", "federal state"], "die Landesregierung": ["уряд землі", "state government"],
+    "zustimmen": ["погоджуватися", "to agree"], "der Einspruch": ["заперечення", "objection"],
+    "überstimmen": ["перемогти голосуванням", "to outvote"], "scheitern": ["зазнати невдачі", "to fail"],
+    "die Gewalt": ["влада", "power"], "ausführen": ["виконувати", "to carry out"], "das Gericht": ["суд", "court"],
+    "das Grundgesetz": ["Основний закон (конституція)", "Basic Law (constitution)"], "verschränkt": ["пов’язані між собою", "interlinked"],
+    "der Entwurf": ["проєкт", "draft"], "die Lesung": ["читання (обговорення)", "reading (debate)"], "der Ausschuss": ["комітет", "committee"],
+    "der Kompromiss": ["компроміс", "compromise"], "das Bundesgesetzblatt": ["Федеральний вісник законів", "Federal Law Gazette"],
+    "der Wahlkreis": ["виборчий округ", "constituency"], "die Partei": ["партія", "party"], "die Hürde": ["бар’єр", "threshold"],
+    "der Sitz": ["місце в парламенті", "seat"], "der Grundsatz": ["принцип", "principle"]
+  };
+  Object.keys(C).forEach(function (k) {
+    C[k].infoCards.forEach(function (card) {
+      if (card.heading.indexOf("Wichtige Wörter") >= 0) {
+        card.text = card.text.split("<br>").map(function (zeile) {
+          var m = zeile.match(/<strong>(.*?)<\/strong>/), u = m && UE[m[1]];
+          return u ? zeile + "<br><span style=\"color:#6b5a45;font-size:.92em\">🇺🇦 " + u[0] + " · 🇬🇧 " + u[1] + "</span>" : zeile;
+        }).join("<br>");
+      } else {
+        // 4) Ein Satz pro Zeile
+        card.text = card.text.replace(/([.?!]) (?=(<strong>)?[A-ZÄÖÜ])/g, "$1<br>");
+      }
+    });
+  });
 };
+
+// ================= 🔊 Vorlesen (Sprachausgabe des Browsers, Deutsch) =================
+(function () {
+  if (!("speechSynthesis" in window) || !window.SpeechSynthesisUtterance) return;
+  var css = document.createElement("style");
+  css.textContent = ".vl{float:right;margin:0 0 4px 8px;min-width:44px;min-height:40px;font-size:20px;background:#dec99a;border:2px solid #8a6236;border-radius:8px;cursor:pointer;line-height:1}" +
+    ".vl.alle{float:none;display:block;width:100%;margin:6px 0 0;font-size:15px;font-weight:bold;font-family:Georgia,serif}";
+  document.head.appendChild(css);
+  function sprich(text) {
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text.replace(/[←-⯿️]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|\uD83E[\uDC00-\uDFFF]/g, " ").replace(/🔊/g, ""));
+    u.lang = "de-DE"; u.rate = 0.85;
+    var v = window.speechSynthesis.getVoices().filter(function (x) { return /^de/i.test(x.lang); })[0];
+    if (v) u.voice = v;
+    window.speechSynthesis.speak(u);
+  }
+  function knopf(text, cls) {
+    var b = document.createElement("button"); b.type = "button"; b.className = "vl" + (cls ? " " + cls : "");
+    b.textContent = text; b.setAttribute("aria-label", "Vorlesen"); return b;
+  }
+  function ausstatten(board) {
+    board.querySelectorAll(".infoCard:not([data-vl])").forEach(function (el) {
+      el.setAttribute("data-vl", "1");
+      var b = knopf("🔊");
+      b.addEventListener("click", function (e) { e.stopPropagation(); sprich(el.innerText); });
+      el.insertBefore(b, el.firstChild);
+    });
+    board.querySelectorAll(".row:not([data-vl])").forEach(function (row) {
+      row.setAttribute("data-vl", "1");
+      var lab = row.querySelector("label"); if (!lab) return;
+      var b = knopf("🔊");
+      b.addEventListener("click", function (e) { e.stopPropagation(); e.preventDefault(); sprich(lab.innerText); });
+      row.insertBefore(b, lab);
+    });
+    var note = board.querySelector(".sheetNote:not([data-vl])");
+    var sel = board.querySelector("select");
+    if (note && sel) {
+      note.setAttribute("data-vl", "1");
+      var b = knopf("🔊 Alle Antworten vorlesen", "alle");
+      b.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var opts = [].slice.call(sel.options).filter(function (o) { return o.value; }).map(function (o, i) { return "Antwort " + (i + 1) + ": " + o.textContent + "."; });
+        sprich(opts.join(" "));
+      });
+      note.appendChild(b);
+    }
+  }
+  document.addEventListener("DOMContentLoaded", function () {
+    var board = document.getElementById("board"); if (!board) return;
+    new MutationObserver(function () { ausstatten(board); }).observe(board, { childList: true, subtree: true });
+  });
+})();
