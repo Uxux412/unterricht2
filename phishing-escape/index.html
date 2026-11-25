@@ -29,7 +29,7 @@ a{color:var(--red2)}
 .svgmono{font-family:var(--mono)}
 
 /* ---------- Effekte über allem ---------- */
-#app{position:fixed;inset:0;will-change:transform}
+#app{position:fixed;inset:0}
 #ghost{position:fixed;left:50%;top:50%;z-index:88;width:min(80vh,90vw);height:min(80vh,90vw);transform:translate(-50%,-50%);pointer-events:none;opacity:0;filter:drop-shadow(0 0 30px rgba(255,20,40,.8))}
 #ghost .ava{width:100%;height:100%}
 #ghost.go{animation:ghost .6s steps(6)}
@@ -53,6 +53,31 @@ body.hit #app,body.hit .modal-box{animation:shake .45s}
 /* Herzschlag in der letzten Minute */
 body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(140,0,18,.8) 100%);animation:heart 1.05s infinite}
 @keyframes heart{0%,100%{opacity:.55}10%{opacity:1}22%{opacity:.65}34%{opacity:1}60%{opacity:.55}}
+
+/* ---------- Pixelschrift ---------- */
+.sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.px{display:inline-block;width:auto;height:1em;fill:currentColor;vertical-align:middle;overflow:visible}
+.px.neon{color:#ff4d5c;filter:drop-shadow(0 0 2px rgba(255,43,58,.95)) drop-shadow(0 0 11px rgba(255,20,40,.65));animation:neonflick 7s infinite;-webkit-text-stroke:0}
+.px.ice{color:#effdff;filter:drop-shadow(0 0 2px rgba(159,244,255,.9)) drop-shadow(0 0 12px rgba(120,230,255,.55))}
+.pxi{display:block;width:auto;height:22px}
+.walkie{flex:none;width:12px;height:19px;margin-right:8px}
+/* Einsatzakte im Intro */
+.akte{position:absolute;z-index:4;left:50%;top:50%;width:min(560px,calc(100vw - 28px));max-height:calc(100% - 24px);overflow:auto;opacity:0;transform:translate(-50%,-38%) rotate(-3deg);transition:transform .65s cubic-bezier(.2,.9,.2,1),opacity .45s}
+.akte.in{opacity:1;transform:translate(-50%,-50%) rotate(-1deg)}
+.akte-tab{display:inline-block;margin-left:22px;padding:6px 14px 4px;background:#b68d45;border:3px solid #6e4f1f;border-bottom:0;color:#3a2708}
+.akte-tab .px{height:12px}
+.akte-body{position:relative;padding:16px;background:#c9a35e;border:3px solid #6e4f1f;box-shadow:8px 8px 0 rgba(0,0,0,.55)}
+.akte-paper{padding:16px 18px;background:#f1e8d2;border:2px solid #b9a77f;color:#2b2418;font:15px/1.55 var(--mono)}
+.akte-paper p{margin:0 0 8px}
+.akte-h{font-weight:700;letter-spacing:.06em}
+.akte-stamp{position:absolute;right:12px;top:-16px;padding:4px 6px;border:3px solid #c8102e;background:rgba(241,232,210,.75);color:#c8102e;opacity:0;transform:rotate(-9deg) scale(2.6)}
+.akte-stamp .px{display:block;height:16px}
+.akte.stamped .akte-stamp{animation:stampin .38s cubic-bezier(.3,1.6,.5,1) forwards}
+@keyframes stampin{to{opacity:.95;transform:rotate(-9deg) scale(1)}}
+.akte .btn{width:100%;margin-top:14px}
+.stamp{display:block;height:20px;margin:2px auto 6px}
+.stamp.bad{color:#ff2b3a;filter:drop-shadow(0 0 6px rgba(255,43,58,.7));animation:alarmf .35s steps(1) 4}
+.stamp.ok{color:var(--ice);filter:drop-shadow(0 0 6px rgba(159,244,255,.7))}
 
 /* ---------- Neon-Schrift ---------- */
 .neon{font-family:var(--serif);font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:transparent;-webkit-text-stroke:2px var(--red2);text-shadow:var(--glow);animation:neonflick 7s infinite}
@@ -81,7 +106,8 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
 .start{overflow-y:auto;background:radial-gradient(ellipse at 50% 120%,rgba(255,30,50,.32),transparent 60%),radial-gradient(ellipse at 50% -20%,#1d0a14,#060203 65%)}
 .start-inner{max-width:920px;width:100%;margin:auto;padding:max(30px,env(safe-area-inset-top)) 20px 18px;text-align:center}
 .kicker{margin:0 0 10px;font:600 13px var(--mono);letter-spacing:.24em;color:var(--red2);text-transform:uppercase}
-.title{font-size:min(92px,calc((100vw - 48px) / 10.2));line-height:1.05;margin:0 0 6px;white-space:nowrap}
+.title{margin:0 0 10px;line-height:1;white-space:nowrap}
+.title .px{height:min(74px,calc((100vw - 48px) / 8.9))}
 .rule-line{height:2px;width:min(520px,80%);margin:4px auto 20px;background:var(--red);box-shadow:var(--glow);border-radius:2px}
 .lead{font-size:clamp(17px,2.4vw,20px);color:#ecd6d9;max-width:580px;margin:0 auto 18px}
 .facts{list-style:none;padding:0;margin:0 0 26px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
@@ -118,7 +144,8 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
 .ready{position:relative;z-index:2;margin-top:20px}
 .skip{z-index:3;position:absolute;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));background:transparent;border:1px solid #3a2a2e;color:#a08a8e;border-radius:10px;padding:10px 14px;min-height:44px;font:14px var(--mono)}
 .bigclock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .3s,transform 1s cubic-bezier(.6,0,.3,1)}
-.bigclock span{font:800 clamp(84px,26vw,250px)/1 var(--mono);color:#ffd9dc;text-shadow:var(--glow)}
+.bigclock span{color:#ffd9dc;filter:drop-shadow(0 0 3px rgba(255,43,58,.95)) drop-shadow(0 0 18px rgba(255,20,40,.6))}
+.bigclock .px{height:clamp(70px,19vw,180px)}
 .bigclock.on{opacity:1}
 .bigclock.fly{transform:translateY(-44vh) scale(.18);opacity:0}
 
@@ -142,7 +169,8 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
 .meter i{width:15px;height:6px;border-radius:2px;background:var(--red);box-shadow:0 0 6px var(--red);transition:all .6s}
 .meter i.off{background:#2e2226;box-shadow:none}
 .hud-c{position:relative;text-align:center}
-.clock{font:700 clamp(28px,7vw,40px)/1 var(--mono);color:#ffd9dc;text-shadow:var(--glow);letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.clock{font:700 clamp(28px,7vw,40px)/1 var(--mono);color:#ffd9dc;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.clock .px{height:clamp(22px,5.2vw,30px);filter:drop-shadow(0 0 2px rgba(255,43,58,.9)) drop-shadow(0 0 9px rgba(255,20,40,.6))}
 .clock.warn{color:var(--amber);text-shadow:0 0 10px rgba(255,193,99,.7)}
 .clock.low{color:#fff;animation:lowp 1s infinite}
 @keyframes lowp{50%{color:var(--red);opacity:.65}}
@@ -174,6 +202,12 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
 .ob.ready{border-color:var(--ice);animation:ready 1.3s infinite}
 @keyframes ready{50%{box-shadow:0 0 22px rgba(159,244,255,.6)}}
 .ico svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ico .pxi,.pxi{stroke:none}
+.ob .ico .pxi{width:auto;height:20px}
+.wstrip span .px{height:40px}
+.wheel.ok .wstrip .px{filter:drop-shadow(0 0 6px rgba(159,244,255,.85))}
+.wico .pxi{height:20px;width:auto}
+.msg.sys{display:flex;align-items:flex-start}
 @media (max-width:380px){.hh b{display:none}.hc b{width:24px}.ob{font-size:12px}}
 @media (max-height:540px) and (min-aspect-ratio:4/3){
   .room.on{grid-template-rows:auto 1fr;grid-template-columns:1fr auto}
@@ -220,15 +254,21 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
 #monGlowOk,#deskGlowOk{opacity:0;transition:opacity 1s}
 #scene.s-monitor #monGlow,#scene.s-monitor #deskGlow{opacity:0}
 #scene.s-monitor #monGlowOk,#scene.s-monitor #deskGlowOk{opacity:1}
-.dslot rect{fill:#120609;stroke:#3a1a22;stroke-width:2}
-.dslot text{font-family:var(--mono);font-weight:700;font-size:30px;fill:#4a2a30;text-anchor:middle;dominant-baseline:central;transform-box:fill-box;transform-origin:center}
+.dslot rect{fill:#120609;stroke:#3a1a22;stroke-width:3}
+.dslot .dgi{fill:#4a2a30;transform-box:fill-box;transform-origin:center}
 .dslot.lit rect{fill:rgba(159,244,255,.1);stroke:var(--ice)}
-.dslot.lit text{fill:#fff;filter:url(#fGlow)}
-.dslot.pop text{animation:dpop 1s ease-out}
+.dslot.lit .dgi{fill:#fff;filter:url(#fGlow)}
+.dslot.pop .dgi{animation:dpop 1s ease-out}
+#scene.alarm .exitbox{fill:#2a0208;stroke:#ff2b3a}
+#scene.alarm .exit{fill:#ff4d5c;animation:alarmf .5s steps(1) infinite}
+@keyframes alarmf{50%{opacity:.25}}
+.camled{animation:camled 1.2s steps(1) infinite}
+@keyframes camled{50%{opacity:.2}}
+#cam.dead .camled{animation:none;fill:#3a3e48}
 @keyframes dpop{0%{opacity:0;transform:scale(2.6)}35%{opacity:1}50%{opacity:.25}65%{opacity:1}100%{transform:none}}
-.burst{fill:none;stroke:var(--ice);stroke-width:3;opacity:0;transform-box:fill-box;transform-origin:center}
-.burst.go{animation:burst 1s ease-out}
-@keyframes burst{0%{opacity:1;transform:scale(.3)}100%{opacity:0;transform:scale(3)}}
+.dburst{fill:none;stroke:var(--ice);stroke-width:3;opacity:0;transform-box:fill-box;transform-origin:center}
+.dburst.go{animation:dburst 1s ease-out}
+@keyframes dburst{0%{opacity:1;transform:scale(.3)}100%{opacity:0;transform:scale(3)}}
 .neonframe{fill:none;stroke:var(--red);stroke-width:4;filter:url(#fGlow);animation:nf 2.4s ease-in-out infinite;transition:stroke .8s}
 @keyframes nf{0%,100%{opacity:.95}50%{opacity:.55}}
 #scene.ready .neonframe{stroke:var(--ice);animation-duration:1s}
@@ -540,7 +580,10 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
 .end-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
 .over{z-index:25;overflow-y:auto;background:radial-gradient(ellipse at center,#40050f,#0a0204 70%)}
 .over-inner{margin:auto;max-width:620px;padding:30px 20px;text-align:center}
-.over h1{font-size:clamp(36px,10vw,76px);line-height:1.05;margin:0 0 14px}
+.over h1{margin:0 0 18px;line-height:1}
+.over h1 .px{height:min(52px,calc((100vw - 40px) / 10.5))}
+.end h1 .px{display:block;margin:0 auto;height:min(52px,calc((100vw - 40px) / 7.5))}
+.end h1 .px + .px{margin-top:12px}
 .over .said{font:600 18px var(--mono);color:#ff8e9b;margin:0 0 16px}
 .over p{color:#f0d6da}
 .over .btns{display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:22px}
@@ -602,7 +645,7 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
   <div class="start-fx" aria-hidden="true"><div class="fog"></div><div id="embers"></div></div>
   <div class="start-inner">
     <p class="kicker">Escape Room · Phishing erkennen</p>
-    <h1 id="t1" class="title neon">Nachtschicht</h1>
+    <h1 id="t1" class="title"><span class="sr">Nachtschicht</span><span id="titlePx"></span></h1>
     <div class="rule-line"></div>
     <div class="start-agent" id="startAgent" aria-hidden="true"></div>
     <p class="lead">23:47 Uhr, Geheimeinsatz im Büro der Hafenlicht Logistik. Du sollst den Arbeitsplatz von Kim Weber überprüfen. Da flackern plötzlich alle Bildschirme: Ein Hacker hat das System übernommen und die Tür verriegelt.</p>
@@ -629,7 +672,19 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
 <section id="sIntro" class="screen intro" aria-live="polite">
   <div class="intro-ava ava-slot" aria-hidden="true"></div>
   <div class="term" id="term"></div>
-  <button id="btnReady" class="btn btn-big ready" hidden>Herausforderung annehmen</button>
+  <div class="akte" id="akte" hidden>
+    <div class="akte-tab" id="akteTab"></div>
+    <div class="akte-body">
+      <div class="akte-stamp" id="akteStamp"></div>
+      <div class="akte-paper">
+        <p class="akte-h">EINSATZ „NACHTSCHICHT“ · VON: ZENTRALE</p>
+        <p>N0X hat drei Geräte manipuliert: Monitor, Diensthandy und Laptop.</p>
+        <p>Entlarve jede Falle. Dann gibt das System eine Ziffer des Türcodes frei.</p>
+        <p>Achtung: Jeder Fehler kostet 10 Sekunden.</p>
+      </div>
+      <button id="btnReady" class="btn btn-big">Auftrag annehmen</button>
+    </div>
+  </div>
   <button id="btnSkip" class="skip">Überspringen ⏭</button>
   <div id="bigClock" class="bigclock" aria-hidden="true"><span>10:00</span></div>
 </section>
@@ -734,25 +789,42 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
 <!-- Tür -->
 <g class="hot" data-obj="door" tabindex="0" role="button" aria-label="Tür mit Zahlenschloss">
   <rect x="1178" y="60" width="262" height="652" fill="transparent" pointer-events="all"/>
-  <rect x="1250" y="70" width="115" height="30" rx="4" fill="#04170d" stroke="#1d6b45" stroke-width="2"/>
-  <text class="exit svgmono" x="1307.5" y="91" text-anchor="middle" font-size="16" font-weight="700" fill="#3dffa8">AUSGANG</text>
+  <rect class="exitbox" x="1250" y="70" width="115" height="30" fill="#04170d" stroke="#1d6b45" stroke-width="3"/>
+  <g class="exit" id="exitSign" fill="#3dffa8"></g>
   <rect x="1212" y="108" width="190" height="54" rx="8" fill="#0a0407" stroke="#3a1a22" stroke-width="3"/>
-  <g class="dslot" data-k="monitor"><rect x="1224" y="116" width="50" height="38" rx="5"/><text x="1249" y="136">–</text></g>
-  <g class="dslot" data-k="phone"><rect x="1282" y="116" width="50" height="38" rx="5"/><text x="1307" y="136">–</text></g>
-  <g class="dslot" data-k="laptop"><rect x="1340" y="116" width="50" height="38" rx="5"/><text x="1365" y="136">–</text></g>
-  <circle class="burst" cx="1249" cy="135" r="28"/><circle class="burst" cx="1307" cy="135" r="28"/><circle class="burst" cx="1365" cy="135" r="28"/>
+  <g class="dslot" data-k="monitor" data-cx="1249"><rect x="1224" y="116" width="50" height="38"/></g>
+  <g class="dslot" data-k="phone" data-cx="1307"><rect x="1282" y="116" width="50" height="38"/></g>
+  <g class="dslot" data-k="laptop" data-cx="1365"><rect x="1340" y="116" width="50" height="38"/></g>
+  <circle class="dburst" cx="1249" cy="135" r="28"/><circle class="dburst" cx="1307" cy="135" r="28"/><circle class="dburst" cx="1365" cy="135" r="28"/>
   <rect x="1195" y="170" width="225" height="530" fill="#0f070b" stroke="#3a1a22" stroke-width="5"/>
   <rect class="neonframe" x="1189" y="164" width="237" height="538" rx="5"/>
   <rect x="1210" y="185" width="195" height="515" fill="#010001"/>
   <rect id="doorLight" x="1210" y="185" width="195" height="515" fill="url(#gLight)"/>
-  <g id="doorPanel">
-    <rect x="1210" y="185" width="195" height="515" fill="url(#gDoor)" stroke="#3a1e28" stroke-width="2"/>
-    <rect x="1232" y="212" width="151" height="170" rx="4" fill="none" stroke="#33192a" stroke-width="3"/>
-    <rect x="1232" y="500" width="151" height="172" rx="4" fill="none" stroke="#33192a" stroke-width="3"/>
-    <rect x="1250" y="404" width="104" height="64" rx="8" fill="#0a0407" stroke="#4a2a34" stroke-width="3"/>
-    <rect x="1260" y="418" width="20" height="32" rx="3" fill="#1e1016"/><rect x="1286" y="418" width="20" height="32" rx="3" fill="#1e1016"/><rect x="1312" y="418" width="20" height="32" rx="3" fill="#1e1016"/>
-    <circle id="doorLed" cx="1342" cy="424" r="5" fill="#ff2b3a"/>
-    <rect x="1372" y="424" width="10" height="36" rx="4" fill="#6d5a62"/><rect x="1360" y="434" width="28" height="8" rx="4" fill="#8f7b84"/>
+  <g id="doorPanel" shape-rendering="crispEdges">
+    <!-- Stahltür im Pixelstil: Platten, Nieten, Sichtfenster, Tastenfeld -->
+    <rect x="1210" y="185" width="195" height="515" fill="#2b2f3b"/>
+    <rect x="1210" y="185" width="5" height="515" fill="#3d4352"/><rect x="1400" y="185" width="5" height="515" fill="#1b1e26"/>
+    <rect x="1220" y="195" width="175" height="5" fill="#1f232c"/><rect x="1220" y="690" width="175" height="5" fill="#1f232c"/>
+    <rect x="1220" y="335" width="175" height="5" fill="#1f232c"/><rect x="1220" y="340" width="175" height="5" fill="#3a404e"/>
+    <rect x="1220" y="560" width="175" height="5" fill="#1f232c"/><rect x="1220" y="565" width="175" height="5" fill="#3a404e"/>
+    <g id="rivets" fill="#5d6577"></g>
+    <rect x="1245" y="215" width="125" height="95" fill="#555c6d"/>
+    <rect x="1250" y="220" width="115" height="85" fill="#0b0e15"/>
+    <path d="M1250 245h115M1250 270h115M1288 220v85M1327 220v85" stroke="#151b27" stroke-width="2"/>
+    <polygon points="1300,220 1315,220 1265,305 1250,305" fill="#ff2b3a" opacity=".18"/>
+    <polygon points="1335,220 1342,220 1292,305 1285,305" fill="#9ff4ff" opacity=".12"/>
+    <rect x="1240" y="395" width="110" height="100" fill="#3a404e"/>
+    <rect x="1245" y="400" width="100" height="90" fill="#12151c"/>
+    <rect x="1255" y="408" width="60" height="16" fill="#1a0306"/>
+    <path d="M1260 414h8M1274 414h8M1288 414h8M1302 414h8" stroke="#ff2b3a" stroke-width="4"/>
+    <rect id="doorLed" x="1325" y="410" width="12" height="12" fill="#ff2b3a"/>
+    <g fill="#2f3542"><rect x="1257" y="432" width="20" height="12"/><rect x="1283" y="432" width="20" height="12"/><rect x="1309" y="432" width="20" height="12"/>
+      <rect x="1257" y="450" width="20" height="12"/><rect x="1283" y="450" width="20" height="12"/><rect x="1309" y="450" width="20" height="12"/>
+      <rect x="1257" y="468" width="20" height="12"/><rect x="1283" y="468" width="20" height="12"/><rect x="1309" y="468" width="20" height="12"/></g>
+    <g fill="#4a5262"><rect x="1257" y="432" width="20" height="3"/><rect x="1283" y="432" width="20" height="3"/><rect x="1309" y="432" width="20" height="3"/>
+      <rect x="1257" y="450" width="20" height="3"/><rect x="1283" y="450" width="20" height="3"/><rect x="1309" y="450" width="20" height="3"/>
+      <rect x="1257" y="468" width="20" height="3"/><rect x="1283" y="468" width="20" height="3"/><rect x="1309" y="468" width="20" height="3"/></g>
+    <rect x="1365" y="410" width="20" height="80" fill="#1b1e26"/><rect x="1370" y="415" width="10" height="70" fill="#8c94a6"/><rect x="1370" y="415" width="4" height="70" fill="#b9c0cf"/>
   </g>
   <rect class="hl" x="1188" y="64" width="240" height="640" rx="10"/>
 </g>
@@ -842,6 +914,13 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
   <circle cx="640" cy="818" r="8" fill="#070305"/><circle cx="790" cy="818" r="8" fill="#070305"/><circle cx="715" cy="824" r="8" fill="#070305"/>
 </g>
 
+<!-- Überwachungskamera: das Auge des Hackers -->
+<g id="cam" class="deco" shape-rendering="crispEdges">
+  <rect x="878" y="30" width="44" height="8" fill="#2a2d36"/>
+  <rect x="895" y="38" width="10" height="20" fill="#3a3e4a"/><rect x="895" y="38" width="3" height="20" fill="#555b69"/>
+  <g id="camBody"></g>
+</g>
+
 <!-- Agent (Spielfigur) -->
 <g id="agent" transform="translate(860 868)">
   <ellipse cx="0" cy="-2" rx="74" ry="13" fill="#000" opacity=".55"/>
@@ -879,12 +958,12 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
   <div class="end-inner">
     <p class="kicker">Verbindung getrennt · N0X entfernt</p>
     <div class="end-agent" id="endAgent" aria-hidden="true"></div>
-    <h1 id="t2">Ihr seid draußen!</h1>
+    <h1 id="t2"><span class="sr">Ihr seid draußen!</span><span id="endPx"></span></h1>
     <div class="stats">
       <div><b id="eTime">–</b><span>Restzeit</span></div>
       <div><b id="eErr">0</b><span>Fehler</span></div>
       <div><b id="eHint">0</b><span>Tipps</span></div>
-      <div><b id="eRank">–</b><span>Rang</span></div>
+      <div><b id="eRank">–</b><span id="eRankTxt">Sicherheitsstufe</span></div>
     </div>
     <h2>Die 3 wichtigsten Regeln gegen Phishing</h2>
     <ol class="rules">
@@ -900,7 +979,7 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
 
 <section id="sOver" class="screen over" aria-labelledby="t3">
   <div class="over-inner">
-    <h1 id="t3" class="neon">Zeit abgelaufen</h1>
+    <h1 id="t3"><span class="sr">Zeit abgelaufen</span><span id="overPx"></span></h1>
     <p class="said">N0X: „Euer System gehört jetzt mir.“</p>
     <p>Gib nicht auf: Du kannst ohne Zeitlimit weiterspielen und die restlichen Fallen entlarven.</p>
     <div class="btns">
@@ -1111,6 +1190,78 @@ const SPR = {
   win: ["......kkkkkkkk......","....kkhhhhhhhhkk....","...khhhHHHHhhhhhk...","..khhhhhhHHHHhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhkkk.","..khhsssssssssskSsSk","..khskkksssskkkksssk",".kSssseesssseesksssk",".kSssssssssSsssskJk.","..kssssssmmsssskkjk.","....kSssssssssSkkjk.",".......kSSSSk...kjk.","....kjjJwttwJjjkjjk.","...kjjjJwttwJjjjjk..","..kjqjjJwttwJjjqk...","..kjqjjjJttJjjjk....","..kjqjjjjttjjjjk....","..kjqjjjjJjjjjjk....","..kjqjjjjjjjjjjk....",".kssqjjjjjjjjjjk....",".kSSkqqqqqqqqqqk....",".....kppppppppk..fk.",".....kpppkkpppk..Fk.",".....kpPpkkpPpk..L..",".....kpPpkkpPpk.....",".....kpPpkkpPpk.....",".....kpppkkpppk.....","....kbbbbkkbbbbk....","....kbBbbkkbBbbk....",".....kkkk..kkkk....."],
 };
 
+/* ---------------- Pixelschrift 5 x 7 (eigene Zeichnung) ---------------- */
+const PXF = {
+  A: '.###.|#...#|#...#|#####|#...#|#...#|#...#', B: '####.|#...#|#...#|####.|#...#|#...#|####.',
+  C: '.###.|#...#|#....|#....|#....|#...#|.###.', D: '####.|#...#|#...#|#...#|#...#|#...#|####.',
+  E: '#####|#....|#....|####.|#....|#....|#####', F: '#####|#....|#....|####.|#....|#....|#....',
+  G: '.###.|#...#|#....|#.###|#...#|#...#|.###.', H: '#...#|#...#|#...#|#####|#...#|#...#|#...#',
+  I: '###|.#.|.#.|.#.|.#.|.#.|###', J: '..###|...#.|...#.|...#.|...#.|#..#.|.##..',
+  K: '#...#|#..#.|#.#..|##...|#.#..|#..#.|#...#', L: '#....|#....|#....|#....|#....|#....|#####',
+  M: '#...#|##.##|#.#.#|#.#.#|#...#|#...#|#...#', N: '#...#|#...#|##..#|#.#.#|#..##|#...#|#...#',
+  O: '.###.|#...#|#...#|#...#|#...#|#...#|.###.', P: '####.|#...#|#...#|####.|#....|#....|#....',
+  Q: '.###.|#...#|#...#|#...#|#.#.#|#..#.|.##.#', R: '####.|#...#|#...#|####.|#.#..|#..#.|#...#',
+  S: '.####|#....|#....|.###.|....#|....#|####.', T: '#####|..#..|..#..|..#..|..#..|..#..|..#..',
+  U: '#...#|#...#|#...#|#...#|#...#|#...#|.###.', V: '#...#|#...#|#...#|#...#|#...#|.#.#.|..#..',
+  W: '#...#|#...#|#...#|#.#.#|#.#.#|#.#.#|.#.#.', X: '#...#|#...#|.#.#.|..#..|.#.#.|#...#|#...#',
+  Y: '#...#|#...#|.#.#.|..#..|..#..|..#..|..#..', Z: '#####|....#|...#.|..#..|.#...|#....|#####',
+  'Ä': '.#.#.|.....|.###.|#...#|#####|#...#|#...#|#...#', 'Ö': '.#.#.|.....|.###.|#...#|#...#|#...#|#...#|.###.',
+  'Ü': '.#.#.|.....|#...#|#...#|#...#|#...#|#...#|.###.',
+  0: '.###.|#...#|#..##|#.#.#|##..#|#...#|.###.', 1: '..#..|.##..|..#..|..#..|..#..|..#..|.###.',
+  2: '.###.|#...#|....#|...#.|..#..|.#...|#####', 3: '#####|...#.|..#..|...#.|....#|#...#|.###.',
+  4: '...#.|..##.|.#.#.|#..#.|#####|...#.|...#.', 5: '#####|#....|####.|....#|....#|#...#|.###.',
+  6: '..##.|.#...|#....|####.|#...#|#...#|.###.', 7: '#####|....#|...#.|..#..|.#...|.#...|.#...',
+  8: '.###.|#...#|#...#|.###.|#...#|#...#|.###.', 9: '.###.|#...#|#...#|.####|....#|...#.|.##..',
+  ':': '..|##|##|..|##|##|..', '.': '..|..|..|..|..|##|##', '!': '##|##|##|##|##|..|##', ',': '..|..|..|..|.#|.#|#.',
+  '?': '.###.|#...#|....#|...#.|..#..|.....|..#..', '-': '....|....|....|####|....|....|....',
+  '/': '....#|....#|...#.|..#..|.#...|#....|#....', '·': '..|..|..|##|##|..|..', ' ': '...|...|...|...|...|...|...',
+  '∞': '........|.##..##.|#..##..#|#..##..#|.##..##.|........|........'
+};
+function pxPath(text) {
+  let x = 0; const parts = [];
+  for (const ch of String(text).toUpperCase()) {
+    const g = (PXF[ch] || PXF['?']).split('|');
+    const rows = g.length === 8 ? g : [''].concat(g);
+    rows.forEach((r, y) => {
+      for (let i = 0; i < r.length; i++) {
+        if (r[i] !== '#') continue;
+        let n = 1; while (r[i + n] === '#') n++;
+        parts.push(`M${x + i} ${y}h${n}v1h-${n}z`); i += n - 1;
+      }
+    });
+    x += g[0].length + 1;
+  }
+  return { d: parts.join(''), w: Math.max(1, x - 1) };
+}
+function pxText(text, cls) {
+  const p = pxPath(text);
+  return `<svg class="px${cls ? ' ' + cls : ''}" viewBox="0 0 ${p.w} 8" shape-rendering="crispEdges" aria-hidden="true"><path d="${p.d}"/></svg>`;
+}
+/* Pixel-Symbole (einfarbig) */
+const PXI = {
+  monitor: ['############', '#..........#', '#.########.#', '#.########.#', '#.########.#', '#.########.#', '#..........#', '############', '.....##.....', '...######...'],
+  phone: ['...######...', '..#......#..', '..#.####.#..', '..#.####.#..', '..#.####.#..', '..#.####.#..', '..#......#..', '..#..##..#..', '...######...'],
+  laptop: ['..########..', '..#......#..', '..#.####.#..', '..#.####.#..', '..#......#..', '..########..', '############', '.##########.'],
+  board: ['############', '#.###..###.#', '#.###..###.#', '#..........#', '#.##.####..#', '#.##.####..#', '############', '..#......#..', '.#........#.'],
+  door: ['..########..', '..#......#..', '..#.####.#..', '..#.####.#..', '..#......#..', '..#....#.#..', '..#......#..', '..#......#..', '############']
+};
+function pxIcon(name) {
+  const rows = PXI[name], w = rows[0].length, h = rows.length, parts = [];
+  rows.forEach((r, y) => { for (let i = 0; i < w; i++) { if (r[i] !== '#') continue; let n = 1; while (r[i + n] === '#') n++; parts.push(`M${i} ${y}h${n}v1h-${n}z`); i += n - 1; } });
+  return `<svg class="pxi" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="${parts.join('')}"/></svg>`;
+}
+/* Funkgerät der Zentrale und Überwachungskamera als kleine Pixelbilder */
+const WALKIE = ['...k...', '...k...', '.kkkkk.', '.kdddk.', '.kdddk.', '.kgggk.', '.klglk.', '.kgggk.', '.klglk.', '.krgrk.', '.kkkkk.'];
+const WALKIE_PAL = { k: '#0c0b10', d: '#6dffb0', g: '#3a3e48', l: '#23262e', r: '#ff2b3a' };
+const CAM_BODY = ['.kkkkkkkkkkkk...', 'kHHHHHHHHHHHHk..', 'kccrcccccccccakk', 'kcccccccccccakLk', 'kCCCCCCCCCCCCkLk', 'kCCCCCCCCCCCCkkk', '.kkkkkkkkkkkkk..'];
+const CAM_PAL = { k: '#0c0b10', H: '#e9ecf2', c: '#c3c8d3', C: '#8d93a1', a: '#5a6070', L: '#3f8cff', r: '#ff2b3a' };
+function pxSprite(rows, pal, cls) {
+  const by = {};
+  rows.forEach((r, y) => { for (let x = 0; x < r.length;) { const c = r[x]; if (!pal[c]) { x++; continue; } let n = 1; while (r[x + n] === c) n++; (by[c] = by[c] || []).push(`M${x} ${y}h${n}v1h-${n}z`); x += n; } });
+  return Object.keys(by).map(c => `<path${cls && c === 'r' ? ' class="' + cls + '"' : ''} fill="${pal[c]}" d="${by[c].join('')}"/>`).join('');
+}
+const walkieSVG = () => `<svg class="walkie" viewBox="0 0 7 11" shape-rendering="crispEdges" aria-hidden="true">${pxSprite(WALKIE, WALKIE_PAL)}</svg>`;
+
 /* ---------------- Spielstand ---------------- */
 const S = {
   digits: KEYS.map(() => 1 + Math.floor(Math.random() * 9)),
@@ -1257,6 +1408,14 @@ function agFrame(n) {
 function agPlace() {
   agentEl.setAttribute('transform', `translate(${AG.x.toFixed(1)} ${AG.y.toFixed(1)}) scale(${AG.s.toFixed(3)})`);
   agentFlip.setAttribute('transform', AG.dir < 0 ? 'scale(-1 1)' : 'scale(1 1)');
+  camTrack();
+}
+/* Die Überwachungskamera des Hackers folgt dem Agenten */
+function camTrack() {
+  const cam = $('#cam'); if (!cam || cam.classList.contains('dead')) return;
+  const dx = AG.x - 900, dy = (AG.y - 240 * AG.s) - 58;
+  const ang = Math.max(12, Math.min(72, Math.atan2(dy, Math.abs(dx)) * 180 / Math.PI));
+  $('#camBody').setAttribute('transform', `translate(900 58) scale(${dx < 0 ? -1 : 1} 1) rotate(${ang.toFixed(1)})`);
 }
 /* Lichtkegel der Taschenlampe: seitlich beim Laufen, nach unten im Stehen, auf den Gegenstand beim Untersuchen */
 function beam(kind, target) {
@@ -1344,14 +1503,32 @@ setInterval(() => {
 /* ---------------- Uhr ---------------- */
 const remaining = () => S.practice ? Infinity : Math.max(0, S.deadline - Date.now());
 const fmt = ms => { const s = Math.ceil(ms / 1000); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
+function setPx(el, text, cls) { if (el.dataset.t === text) return; el.dataset.t = text; el.innerHTML = pxText(text, cls); }
+function setExit(text) {
+  const g = $('#exitSign'); if (g.dataset.t === text) return; g.dataset.t = text;
+  const p = pxPath(text), s = 2.2;
+  g.setAttribute('transform', `translate(${(1307.5 - p.w * s / 2).toFixed(1)} ${(85 - 4.5 * s).toFixed(1)}) scale(${s})`);
+  g.innerHTML = `<path d="${p.d}"/>`;
+}
+function setSlot(g, ch) {
+  const o = $('.dgo', g), p = pxPath(ch), s = 3.4, cx = +g.dataset.cx;
+  o.setAttribute('transform', `translate(${(cx - p.w * s / 2).toFixed(1)} ${(135 - 4.5 * s).toFixed(1)}) scale(${s})`);
+  $('.dgi', g).innerHTML = `<path d="${p.d}"/>`;
+}
 function renderClock() {
   const c = $('#clock');
-  if (S.practice) { c.textContent = '∞'; c.className = 'clock'; c.setAttribute('aria-label', 'ohne Zeitlimit'); document.body.classList.remove('low'); return; }
-  const ms = remaining(); c.textContent = fmt(ms);
+  if (S.practice) {
+    setPx(c, '∞'); c.className = 'clock'; c.setAttribute('aria-label', 'ohne Zeitlimit');
+    document.body.classList.remove('low'); scene.classList.remove('alarm'); setExit('AUSGANG'); return;
+  }
+  const ms = remaining(), t = fmt(ms);
+  setPx(c, t); c.setAttribute('aria-label', 'Restzeit ' + t);
   c.classList.toggle('warn', ms <= 120000 && ms > 60000);
   c.classList.toggle('low', ms <= 60000);
-  document.body.classList.toggle('low', ms <= 60000 && ms > 0 && S.inRoom && !S.ended);
-  const bc = $('#bigClock span'); if (bc) bc.textContent = fmt(ms);
+  const low = ms <= 60000 && ms > 0 && S.inRoom && !S.ended;
+  document.body.classList.toggle('low', low);
+  scene.classList.toggle('alarm', low); setExit(low ? 'ALARM' : 'AUSGANG');
+  const bc = $('#bigClock span'); if (bc) setPx(bc, t);
 }
 function startClock() { S.deadline = Date.now() + TOTAL * 1000; clearInterval(S.tick); S.tick = setInterval(tick, 250); renderClock(); }
 function tick() {
@@ -1400,7 +1577,10 @@ function addMsg(m) {
   const who = m.who || 'hack';
   const d = document.createElement('div');
   d.className = 'msg ' + who + (m.cls ? ' ' + m.cls : '');
-  d.textContent = m.text;
+  if (who === 'sys') {   // Funkspruch der Zentrale mit Funkgerät
+    d.innerHTML = walkieSVG();
+    const sp = document.createElement('span'); sp.textContent = m.text; d.appendChild(sp);
+  } else d.textContent = m.text;
   chatBody.appendChild(d); scrollChat(); peek(); toTicker(m);
   if (who === 'hack') { chatBtn.classList.remove('ping'); void chatBtn.offsetWidth; chatBtn.classList.add('ping'); }
 }
@@ -1412,7 +1592,7 @@ function toTicker(m) {
   const who = m.who || 'hack';
   ticker.className = 'm-ticker ' + who + (m.cls ? ' ' + m.cls : '');
   tickerT.textContent = '';
-  const b = document.createElement('b'); b.textContent = who === 'sys' ? 'SYSTEM' : 'N0X';
+  const b = document.createElement('b'); b.textContent = who === 'sys' ? 'ZENTRALE' : 'N0X';
   tickerT.append(b, document.createTextNode(m.text));
   void ticker.offsetWidth; ticker.classList.add('new');
 }
@@ -1422,7 +1602,7 @@ function subtitle(text, who) {
   if (!text) return;
   const d = document.createElement('div');
   d.className = 'sub ' + (who === 'sys' ? 'sys' : 'hack glitchy');
-  const b = document.createElement('b'); b.textContent = who === 'sys' ? 'SYSTEM' : 'N0X';
+  const b = document.createElement('b'); b.textContent = who === 'sys' ? 'ZENTRALE' : 'N0X';
   d.append(b, document.createTextNode(text)); s.appendChild(d);
 }
 function finalLine(text, who) {
@@ -1548,9 +1728,9 @@ async function lightPending() {
 }
 function lightDigit(k, i) {
   const g = $(`.dslot[data-k="${k}"]`);
-  $('text', g).textContent = S.digits[i];
+  setSlot(g, String(S.digits[i]));
   g.classList.remove('pop'); void g.getBoundingClientRect(); g.classList.add('lit', 'pop');
-  const b = $$('.burst')[i]; b.classList.remove('go'); void b.getBoundingClientRect(); b.classList.add('go');
+  const b = $$('.dburst')[i]; b.classList.remove('go'); void b.getBoundingClientRect(); b.classList.add('go');
   const hb = $$('#hudCode b')[i]; hb.textContent = S.digits[i]; hb.classList.add('lit');
   if (KEYS.every(x => S.lit[x])) {
     $('.mk[data-k="door"]').classList.add('ready');
@@ -1754,9 +1934,9 @@ function renderLock() {
     <p class="ltext">${n < 3 ? `Gefundene Ziffern: <b>${n} von 3</b>. Befreie erst alle Geräte – oder rate. 😈` : 'Alle Ziffern leuchten über der Tür. Stell den Code ein!'}</p>
     <div class="lpanel" id="lpanel"><span class="scr a"></span><span class="scr b"></span><span class="scr c"></span><span class="scr d"></span><span class="led" id="led"></span>
       <div class="wheels">${KEYS.map((k, i) => `<div class="wheel" data-i="${i}">
-        <div class="wico ico">${ICON[k]}<span>${k === 'phone' ? 'Handy' : LABEL[k]}</span></div>
+        <div class="wico ico">${pxIcon(k)}<span>${k === 'phone' ? 'Handy' : LABEL[k]}</span></div>
         <button class="wbtn" data-act="wup" data-v="${i}" aria-label="${LABEL[k]}: Ziffer hoch">▲</button>
-        <div class="wwin" tabindex="0" role="spinbutton" aria-valuemin="0" aria-valuemax="9" aria-valuenow="${S.wheels[i]}" aria-label="Ziffer ${LABEL[k]}" data-i="${i}"><div class="wstrip">${Array.from({ length: 30 }, (_, j) => `<span>${j % 10}</span>`).join('')}</div></div>
+        <div class="wwin" tabindex="0" role="spinbutton" aria-valuemin="0" aria-valuemax="9" aria-valuenow="${S.wheels[i]}" aria-label="Ziffer ${LABEL[k]}" data-i="${i}"><div class="wstrip">${Array.from({ length: 30 }, (_, j) => `<span>${pxText(String(j % 10))}</span>`).join('')}</div></div>
         <button class="wbtn" data-act="wdn" data-v="${i}" aria-label="${LABEL[k]}: Ziffer runter">▼</button>
       </div>`).join('')}</div>
       <button class="btn" data-act="open">🔓 Entriegeln</button>
@@ -1804,7 +1984,7 @@ function tryOpen() {
   const ok = S.wheels.every((v, i) => v === S.digits[i]);
   if (ok) { finale(); return; }
   const p = $('#lpanel'); p.classList.remove('shake'); void p.offsetWidth; p.classList.add('shake');
-  $('#lstat').textContent = '✖ Falscher Code.' + (solvedCount() < 3 ? ' Dir fehlen noch Ziffern.' : ' Vergleiche mit den Ziffern über der Tür.');
+  $('#lstat').innerHTML = pxText('ZUGANG VERWEIGERT', 'stamp bad') + '✖ Falscher Code.' + (solvedCount() < 3 ? ' Dir fehlen noch Ziffern.' : ' Vergleiche mit den Ziffern über der Tür.');
   fail(rnd(['Falsch. Ich könnte das den ganzen Tag machen. 😏', 'Daneben. Die Tür mag dich nicht.', 'Raten? Echt jetzt? 😈']));
 }
 
@@ -1814,7 +1994,7 @@ async function finale() {
   C.q.length = 0; document.body.classList.remove('low');
   $('#led').classList.add('ok'); $$('button', mBody).forEach(b => { b.disabled = true; });
   for (const w of $$('.wheel', mBody)) { w.classList.add('ok'); await wait(RM ? 0 : 230); }
-  $('#lstat').innerHTML = '<span class="ok">ENTRIEGELT</span>';
+  $('#lstat').innerHTML = pxText('ZUGANG GEWÄHRT', 'stamp ok');
   addMsg({ who: 'hack', text: 'Was…? Woher habt ihr den Code?!', cls: 'nervous' });
   await wait(RM ? 300 : 1300);
   closeModal(true);
@@ -1845,6 +2025,7 @@ async function finale() {
   finalLine('⚡ N0X wurde aus dem System geworfen.', 'sys');
   S.kicked = true; scene.classList.add('free');
   chatBtn.classList.add('kicked');
+  $('#cam').classList.add('dead'); $('#camBody').setAttribute('transform', 'translate(900 58) rotate(84)');
   if (chatEl.classList.contains('open')) chatEl.classList.add('kicked');
   await wait(RM ? 200 : 1900);
   white.classList.add('on');
@@ -1855,13 +2036,15 @@ async function finale() {
   white.classList.remove('on');
 }
 function rank() {
-  if (S.practice) return 'Geschafft!';
+  if (S.practice) return ['Geschafft', 'ohne Zeitlimit'];
   const m = S.mistakes + S.hintCount;
-  return m === 0 ? 'Phishing-Profi' : m <= 3 ? 'Wachsames Auge' : m <= 6 ? 'Auf gutem Weg' : 'Weiter üben';
+  return m === 0 ? ['Stufe Alpha', 'Phishing-Profi'] : m <= 3 ? ['Stufe Beta', 'Wachsames Auge'] : m <= 6 ? ['Stufe Gamma', 'Auf gutem Weg'] : ['Stufe Delta', 'Weiter üben'];
 }
 function showEnd() {
+  const [lv, txt] = rank();
   $('#eTime').textContent = S.practice ? '—' : fmt(S.endRemain);
-  $('#eErr').textContent = S.mistakes; $('#eHint').textContent = S.hintCount; $('#eRank').textContent = rank();
+  $('#eErr').textContent = S.mistakes; $('#eHint').textContent = S.hintCount;
+  $('#eRank').textContent = lv; $('#eRankTxt').textContent = 'Sicherheitsstufe · ' + txt;
   S.inRoom = false; show('sEnd'); $('#sEnd').scrollTop = 0;
   setTimeout(() => $('#btnAgain').focus({ preventScroll: true }), 400);
 }
@@ -1910,13 +2093,19 @@ async function runIntro() {
   await typeLine('> Ihr kommt hier nicht raus.', 't-hack', 62);
   burst(650);
   await iw(1200);
-  await typeLine('[NOTFALL-PROTOKOLL] Restzugriff aktiv.', 't-ok', 16);
-  await typeLine('Drei Geräte sind manipuliert: Monitor, Diensthandy, Laptop. Entlarvt jede Falle – dann gibt das System eine Ziffer des Türcodes frei.', 't-ok', 13);
-  await typeLine('Achtung: Jeder Fehler kostet Zeit.', 't-ok', 16);
+  await typeLine('[ZENTRALE] Funkverbindung steht. Einsatzakte wird übertragen …', 't-ok', 16);
+  await iw(300);
   $('#btnSkip').hidden = true;
-  const rb = $('#btnReady'); rb.hidden = false; rb.focus({ preventScroll: true });
-  await new Promise(r => rb.addEventListener('click', r, { once: true }));
-  rb.hidden = true; FAST = false;
+  // Die Einsatzakte gleitet herein, der Stempel „KLASSIFIZIERT“ knallt drauf
+  const ak = $('#akte'), rb = $('#btnReady');
+  const accepted = new Promise(r => rb.addEventListener('click', r, { once: true }));
+  ak.hidden = false; void ak.offsetWidth; ak.classList.add('in');
+  $('#term').style.opacity = '.2';
+  await Promise.race([wait(RM ? 50 : 750), accepted]); ak.classList.add('stamped'); burst(200);
+  rb.focus({ preventScroll: true });
+  await accepted;
+  ak.classList.remove('in'); FAST = false;
+  await wait(RM ? 50 : 450); ak.hidden = true; $('#term').style.opacity = '';
   await typeLine('> Wie ihr wollt. Ihr habt 10 Minuten.', 't-hack', 42);
   await wait(RM ? 100 : 500);
   $('#term').style.opacity = '.15';
@@ -2063,7 +2252,25 @@ function embers() {
   }
 }
 
+/* Pixel-Elemente einsetzen */
+function buildPixel() {
+  $('#titlePx').innerHTML = pxText('NACHTSCHICHT', 'neon');
+  $('#overPx').innerHTML = pxText('ZEIT ABGELAUFEN', 'neon');
+  $('#endPx').innerHTML = pxText('IHR SEID', 'ice') + pxText('DRAUSSEN!', 'ice');
+  $('#akteTab').innerHTML = pxText('AKTE NR. 23-47');
+  $('#akteStamp').innerHTML = pxText('KLASSIFIZIERT');
+  setPx($('#bigClock span'), '10:00');
+  setPx($('#clock'), '10:00');
+  setExit('AUSGANG');
+  $$('.dslot').forEach(g => { const o = el('g', { class: 'dgo' }, g); el('g', { class: 'dgi' }, o); setSlot(g, '-'); });
+  const rv = $('#rivets');
+  [207, 352, 577, 680].forEach(y => { for (let x = 1224; x <= 1388; x += 27) el('rect', { x, y, width: 5, height: 5 }, rv); });
+  $('#camBody').innerHTML = `<g transform="scale(5) translate(-5.5 0)">${pxSprite(CAM_BODY, CAM_PAL, 'camled')}</g>`;
+  $$('#objbar .ob').forEach(b => { $('.ico', b).innerHTML = pxIcon(b.dataset.obj); });
+}
+
 buildScene();
+buildPixel();
 buildAgent();
 fitScene();
 if (!RM) { storm(); embers(); }
