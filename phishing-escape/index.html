@@ -75,7 +75,7 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
 .akte.stamped .akte-stamp{animation:stampin .38s cubic-bezier(.3,1.6,.5,1) forwards}
 @keyframes stampin{to{opacity:.95;transform:rotate(-9deg) scale(1)}}
 .akte .btn{width:100%;margin-top:14px}
-.stamp{display:block;height:20px;margin:2px auto 6px}
+.stamp{display:block;height:20px;max-width:100%;margin:2px auto 6px}
 .stamp.bad{color:#ff2b3a;filter:drop-shadow(0 0 6px rgba(255,43,58,.7));animation:alarmf .35s steps(1) 4}
 .stamp.ok{color:var(--ice);filter:drop-shadow(0 0 6px rgba(159,244,255,.7))}
 
@@ -582,6 +582,22 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
 .reflect{background:rgba(255,43,58,.1);border:1px solid rgba(255,43,58,.45);color:#ffe4e8}
 .defi{background:rgba(159,244,255,.07);border:1px solid rgba(159,244,255,.3);color:#e3f7fa}
 .sos{max-width:760px;margin:0 auto 24px;text-align:left;padding:14px 16px;border-radius:14px;background:#1d1406;border:1px solid #5a4210;color:#ffe9b8;font-size:15px}
+.beta{max-width:760px;margin:0 auto 24px;padding:18px 16px;border:1px solid rgba(159,244,255,.3);border-radius:16px;background:linear-gradient(180deg,#0c1c24,#081118)}
+.beta-head{margin:0}
+.beta-head .px{height:min(26px,calc((100vw - 90px) / 11.5))}
+.beta-lead{margin:10px 0 14px;color:#d4e6ea}
+.beta-box{margin-top:6px;text-align:left}
+.bcount{margin:0 0 6px;font:700 13px var(--mono);letter-spacing:.14em;color:var(--ice)}
+.bfrom{margin:0 0 6px;font:13px var(--mono);color:#a9c3ca}
+.bmsg{padding:12px 14px;border-radius:14px;background:#f4f6fb;color:#172033;font-size:16px}
+.bnote{margin:8px 0 0;font-size:14px;color:#ffe9b8}
+.bbtns{display:flex;gap:10px;margin-top:12px}
+.bbtns button{flex:1;min-height:52px;border-radius:12px;border:2px solid;font-weight:800;font-size:17px}
+.bres{margin:12px 0;padding:12px 14px;border-radius:12px;font-size:15px}
+.bres.ok{background:#0b2a22;border:1px solid #2bbf8a;color:#dcfff1}
+.bres.bad{background:#2a0b12;border:1px solid var(--red);color:#ffe1e6}
+.bres p{margin:8px 0 0}
+.beta-box .btn{width:100%}
 .end-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
 .over{z-index:25;overflow-y:auto;background:radial-gradient(ellipse at center,#40050f,#0a0204 70%)}
 .over-inner{margin:auto;max-width:620px;padding:30px 20px;text-align:center}
@@ -664,7 +680,8 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
           <li><b>Ziel:</b> Phishing an Absender, Link, Druck und Datenabfrage erkennen und richtig reagieren.</li>
           <li><b>Ablauf:</b> 10 Minuten spielen, danach ca. 10 Minuten Besprechung der drei Regeln vom Schlussbildschirm.</li>
           <li>Die Ziffern des Türcodes werden bei jedem Spiel neu ausgelost. Abschreiben zwischen Gruppen hilft nicht.</li>
-          <li>Ein Fehler kostet 10 Sekunden, ein Tipp 20 Sekunden. Läuft die Zeit ab, kann man ohne Zeitlimit weiterspielen.</li>
+          <li>Fehler kosten zunehmend Zeit (10, 20, 30 … höchstens 60 Sekunden), ein Tipp 20 Sekunden. Wer nur rät, schafft es nicht. Läuft die Zeit ab, kann man ohne Zeitlimit weiterspielen.</li>
+          <li>Für Schnelle: Nach dem Ausbruch wartet der Bonus <b>„Level Beta“</b> mit vier kniffligen Fällen (Messenger, QR-Code, gefälschter Firmen-Absender, echter Bestätigungscode).</li>
           <li>Alle Firmen, Namen, Adressen und Nummern sind erfunden, außer dem Sperr-Notruf 116 116. Keine Anmeldung, es wird nichts gespeichert, keine Töne.</li>
           <li><b>Fragen fürs Gespräch:</b> Hast du unter Zeitdruck schlechter geprüft – und warum setzen Betrüger genau darauf? Welche Falle war am schwersten? Woran erkennt man die echte Adresse in einem Link? Was tust du, wenn du schon geklickt hast? Welche Phishing-Nachrichten kennst du selbst (Spielkonto, Messenger, Gewinnspiel)?</li>
           <li>Für langsam Lesende oder Kinder mit Deutsch als Zweitsprache: <b>„Ohne Zeitlimit spielen“</b> unter dem Startknopf.</li>
@@ -687,7 +704,7 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
         <p class="akte-h">EINSATZ „NACHTSCHICHT“ · VON: ZENTRALE</p>
         <p>N0X ist ein Phisher: Er „fischt“ mit gefälschten Nachrichten nach Passwörtern, Bankdaten und Geld. Er hat drei Geräte manipuliert: Monitor, Diensthandy und Laptop.</p>
         <p><b>Deine Leitfrage:</b> Woran erkennst du Phishing – und was tust du dann?</p>
-        <p>Jede entlarvte Falle gibt eine Ziffer des Türcodes frei. <span id="akteZeit">Achtung: Jeder Fehler kostet 10 Sekunden.</span></p>
+        <p>Jede entlarvte Falle gibt eine Ziffer des Türcodes frei. <span id="akteZeit">Achtung: Jeder Fehler kostet Zeit, jeder weitere noch mehr. Raten lohnt sich nicht.</span></p>
       </div>
       <button id="btnReady" class="btn btn-big">Auftrag annehmen</button>
     </div>
@@ -981,6 +998,12 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
       <li><div class="rn">3</div><h3>Nie Passwort, PIN oder TAN über einen Link</h3><p>Echte Banken, Firmen und Chefs fragen so etwas nie per Mail oder SMS. Im Zweifel selbst die echte App öffnen oder über eine bekannte Nummer anrufen.</p></li>
     </ol>
     <div class="sos"><b>Schon draufgeklickt oder Daten eingegeben?</b> Kein Grund, sich zu schämen, aber schnell handeln: Passwort ändern, die Bank anrufen, Karte und Online-Banking sperren lassen (Sperr-Notruf <b>116 116</b>). Im Betrieb sofort die IT informieren.</div>
+    <section class="beta" aria-labelledby="betaT">
+      <h2 class="beta-head"><span class="sr" id="betaT">Bonus: Level Beta</span><span id="betaPx"></span></h2>
+      <p class="beta-lead">Bonus für Profis: fünf gut getarnte Fälle, ohne Zeitdruck. Echt oder Falle?</p>
+      <button class="btn btn-ice" id="btnBeta">▶ Level Beta starten</button>
+      <div class="beta-box" id="betaBox" hidden aria-live="polite"></div>
+    </section>
     <div class="end-actions"><button class="btn btn-ice" id="btnAgain">↻ Nochmal spielen</button></div>
   </div>
   <footer class="foot"><a href="../index.html">🏠 Übersicht</a> · <a href="../impressum/index.html">Impressum &amp; Datenschutz</a></footer>
@@ -1108,12 +1131,12 @@ const MAILS = [
     body: ['Hallo Kim,',
       'am Samstag spielen wir zwischen 8 und 12 Uhr Updates auf die Server. In dieser Zeit sind E-Mail und Laufwerke nicht erreichbar.',
       'Du musst nichts tun. Speichere am Freitag vor Feierabend einfach deine Dateien.',
-      'Fragen? Ruf an: Durchwahl 240.',
+      'Fragen? Ruf an: Telefon 240.',
       'Viele Grüße<br>Jonas vom IT-Service'],
     why: ['Absender: <code>@hafenlicht-logistik.de</code> – die Firmenadresse von der Pinnwand.',
       'Persönliche Anrede, kein Link, kein Anhang.',
       'Du sollst nichts eingeben und nichts bezahlen.',
-      'Mit Durchwahl zum Nachfragen. Betrüger wollen genau das verhindern.'] },
+      'Mit Telefonnummer zum Nachfragen. Betrüger wollen genau das verhindern.'] },
   { id: 'm6', phish: false, name: 'FilmFlut', addr: 'rechnung@filmflut.de', time: '08:30',
     subj: 'Deine Rechnung für November',
     body: ['Hallo Kim,',
@@ -1637,8 +1660,10 @@ function flash() {
   clearTimeout(S.hitT); S.hitT = setTimeout(() => document.body.classList.remove('hit'), 480);
 }
 function burst(ms) { if (RM) return; document.body.classList.add('burst'); clearTimeout(S.bT); S.bT = setTimeout(() => document.body.classList.remove('burst'), ms || 420); }
+/* Jeder weitere Fehler kostet mehr Zeit (10, 20, 30 … höchstens 60 s): Raten lohnt sich nicht. */
 function fail(line) {
-  S.mistakes++; penalty(PEN); flash();
+  S.mistakes++; penalty(Math.min(60, PEN * S.mistakes)); flash();
+  if (S.mistakes === 3) setTimeout(() => say('Merkt ihr was? Jeder Fehler kostet jetzt mehr Zeit. Ratet ruhig weiter. 😈', { cls: 'evil' }), 900);
   if (!RM) { const g = $('#ghost'); g.classList.remove('go'); void g.offsetWidth; g.classList.add('go'); }
   let t = line;
   if (!t) { do { t = rnd(H.taunt); } while (t === S.lastTaunt); S.lastTaunt = t; }
@@ -1933,7 +1958,7 @@ function renderBoard() {
   mBody.innerHTML = `<div class="board">
     <div class="note" style="--r:-3deg">Unsere Bank:<b>www.talbank.de</b></div>
     <div class="note p" style="--r:2deg">Firmen-Mails enden immer auf<b>@hafenlicht-logistik.de</b></div>
-    <div class="note g" style="--r:-1.5deg">IT-Service:<b>Durchwahl 240</b></div>
+    <div class="note g" style="--r:-1.5deg">IT-Service:<b>Telefon 240</b></div>
     <div class="note b" style="--r:3deg">Karte weg? Sperr-Notruf<b>116 116</b></div>
     <div class="note" style="--r:-4deg">KAFFEE KAUFEN!!! ☕</div>
   </div><p class="board-cap">Merk dir, was hier hängt. Es könnte nützlich sein.</p>`;
@@ -2080,6 +2105,37 @@ function practice() {
   say('Ohne Zeitlimit? Na gut. Ich habe alle Zeit der Welt. 😏');
 }
 
+/* ---------------- Bonus: Level Beta ---------------- */
+const BETA = [
+  { from: 'WhatsApp · unbekannte Nummer', msg: 'Hallo Mama, das ist meine neue Nummer. Mein Handy ist kaputt. Kannst du mir schnell 480 € überweisen? Ich erkläre dir alles später. ❤️', falle: true,
+    x: 'Der „Hallo Mama“-Trick: neue Nummer, Geldnot, Eile. Immer zuerst über die alte, bekannte Nummer anrufen und nachfragen.' },
+  { from: 'benachrichtigung@flinkpaket.de', msg: 'Hallo Kim Weber, deine Sendung FP 4471 2290 DE wurde bei deinem Nachbarn in Hausnummer 12 abgegeben. Du musst nichts tun.', falle: false,
+    x: 'Echt: richtige Adresse, dein Name, die bekannte Sendungsnummer. Und du sollst nichts eingeben, nichts bezahlen, nichts anklicken.' },
+  { from: 'Brief mit QR-Code', msg: 'Talbank: Bitte bestätigen Sie Ihre Kontodaten bis Freitag. Scannen Sie dazu einfach diesen QR-Code mit Ihrem Handy. ▦', falle: true,
+    x: '„Quishing“, also Phishing per QR-Code: Hinter dem Code steckt ein Link, den du vorher nicht siehst. Banken schicken keine QR-Codes zum Daten-Bestätigen.' },
+  { from: 'SMS · FilmFlut', msg: 'Dein Bestätigungscode für FilmFlut: 482913. Gib diesen Code niemals weiter.', note: 'Du hast dich gerade selbst bei FilmFlut angemeldet.', falle: false,
+    x: 'Echt: Du hast den Code gerade selbst angefordert. Aber: So einen Code gibst du niemandem, auch nicht am Telefon. Wer danach fragt, ist ein Betrüger.' },
+  { from: 'it-service@hafenlicht-logistik.de', msg: 'Hallo Kim, bitte installiere heute noch das Sicherheits-Update im Anhang: update.exe. Danke! Jonas vom IT-Service', falle: true,
+    x: 'Falle, obwohl die Adresse stimmt! Absender lassen sich fälschen, oder ein echtes Konto wurde gehackt. Ein Programm im Anhang ist verdächtig. Im Zweifel kurz beim IT-Service anrufen.' }
+];
+const BT = { i: 0, ok: 0, done: false };
+function betaStart() { BT.i = 0; BT.ok = 0; $('#btnBeta').hidden = true; $('#betaBox').hidden = false; betaShow(); }
+function betaShow() {
+  const c = BETA[BT.i]; BT.done = false;
+  $('#betaBox').innerHTML = `<p class="bcount">FALL ${BT.i + 1} VON ${BETA.length}</p><p class="bfrom">${c.from}</p><div class="bmsg">${c.msg}</div>${c.note ? `<p class="bnote">${c.note}</p>` : ''}<div class="bbtns"><button class="bok" data-b="0">✔ Echt</button><button class="bph" data-b="1">🎣 Falle</button></div><div id="bres"></div>`;
+}
+function betaAnswer(falle) {
+  if (BT.done) return; BT.done = true;
+  const c = BETA[BT.i], ok = falle === c.falle; if (ok) BT.ok++;
+  $$('#betaBox .bbtns button').forEach(b => { b.disabled = true; });
+  const last = BT.i === BETA.length - 1;
+  $('#bres').innerHTML = `<div class="bres ${ok ? 'ok' : 'bad'}"><b>${ok ? '✔ Richtig!' : '✖ Daneben!'}</b> ${c.x}</div><button class="btn btn-ice" data-bn="1">${last ? 'Auswertung' : 'Nächster Fall →'}</button>`;
+}
+function betaEnd() {
+  const gut = BT.ok >= 4;
+  $('#betaBox').innerHTML = `<div class="bres ${gut ? 'ok' : 'bad'}">${pxText(gut ? 'LEVEL BETA GESCHAFFT' : 'LEVEL BETA: NOCHMAL', 'stamp ' + (gut ? 'ok' : 'bad'))}<p>${BT.ok} von ${BETA.length} Fällen richtig. ${gut ? 'Du erkennst auch gut getarnte Fallen.' : 'Lies die Erklärungen nochmal: Die Tricks werden immer raffinierter.'}</p></div><button class="btn btn-ghost" data-br="1">↻ Level Beta nochmal</button>`;
+}
+
 /* ---------------- Intro ---------------- */
 let FAST = false;
 const iw = ms => wait(FAST ? 0 : ms);
@@ -2159,6 +2215,13 @@ $('#btnStart').addEventListener('click', () => startGame(false));
 $('#btnStartFree').addEventListener('click', () => startGame(true));
 $('#btnSkip').addEventListener('click', () => { FAST = true; });
 $('#btnAgain').addEventListener('click', () => location.reload());
+$('#btnBeta').addEventListener('click', betaStart);
+$('#betaBox').addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t || t.disabled) return;
+  if (t.dataset.b) betaAnswer(t.dataset.b === '1');
+  else if (t.dataset.bn) { if (BT.i < BETA.length - 1) { BT.i++; betaShow(); } else betaEnd(); }
+  else if (t.dataset.br) betaStart();
+});
 $('#btnRestart').addEventListener('click', () => location.reload());
 $('#btnPractice').addEventListener('click', practice);
 $('#closeBtn').addEventListener('click', () => { if (!S.ended) closeModal(); });
@@ -2276,6 +2339,7 @@ function buildPixel() {
   $('#titlePx').innerHTML = pxText('NACHTSCHICHT', 'neon');
   $('#overPx').innerHTML = pxText('ZEIT ABGELAUFEN', 'neon');
   $('#endPx').innerHTML = pxText('IHR SEID', 'ice') + pxText('DRAUSSEN!', 'ice');
+  $('#betaPx').innerHTML = pxText('BONUS: LEVEL BETA', 'ice');
   $('#akteTab').innerHTML = pxText('AKTE NR. 23-47');
   $('#akteStamp').innerHTML = pxText('KLASSIFIZIERT');
   setPx($('#bigClock span'), '10:00');
