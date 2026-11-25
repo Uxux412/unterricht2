@@ -112,7 +112,9 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
 .lead{font-size:clamp(17px,2.4vw,20px);color:#ecd6d9;max-width:580px;margin:0 auto 18px}
 .facts{list-style:none;padding:0;margin:0 0 26px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 .facts li{border:1px solid var(--line);background:#12060a;border-radius:999px;padding:6px 13px;font-size:15px;color:var(--muted)}
-.teacher{margin:28px auto 0;text-align:left;max-width:640px;border:1px solid var(--line);border-radius:12px;background:#0d0407}
+.linkbtn{display:block;margin:10px auto 0;min-height:44px;padding:8px 14px;border:0;background:none;color:var(--muted);font-size:15px;text-decoration:underline;text-underline-offset:3px}
+.linkbtn:hover{color:#fff}
+.teacher{margin:22px auto 0;text-align:left;max-width:640px;border:1px solid var(--line);border-radius:12px;background:#0d0407}
 .teacher summary{cursor:pointer;padding:12px 16px;font-weight:700;color:var(--muted);min-height:44px}
 .teacher div{padding:0 18px 14px;font-size:15px;color:#e5cfd2}
 .teacher li{margin-bottom:6px}
@@ -576,6 +578,9 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
 .rn{font:800 38px/1 var(--mono);color:var(--ice);text-shadow:var(--iceglow)}
 .rules h3{margin:8px 0 6px;font-size:19px;color:#fff}
 .rules p{margin:0;color:#d4e6ea;font-size:16px}
+.reflect,.defi{max-width:760px;margin:0 auto 18px;padding:12px 16px;border-radius:14px;font-size:16px;text-align:left}
+.reflect{background:rgba(255,43,58,.1);border:1px solid rgba(255,43,58,.45);color:#ffe4e8}
+.defi{background:rgba(159,244,255,.07);border:1px solid rgba(159,244,255,.3);color:#e3f7fa}
 .sos{max-width:760px;margin:0 auto 24px;text-align:left;padding:14px 16px;border-radius:14px;background:#1d1406;border:1px solid #5a4210;color:#ffe9b8;font-size:15px}
 .end-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
 .over{z-index:25;overflow-y:auto;background:radial-gradient(ellipse at center,#40050f,#0a0204 70%)}
@@ -651,6 +656,7 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
     <p class="lead">23:47 Uhr, Geheimeinsatz im Büro der Hafenlicht Logistik. Du sollst den Arbeitsplatz von Kim Weber überprüfen. Da flackern plötzlich alle Bildschirme: Ein Hacker hat das System übernommen und die Tür verriegelt.</p>
     <ul class="facts"><li>⏱ 10 Minuten</li><li>👥 allein oder zu zweit</li><li>📱 Handy, Tablet, PC</li></ul>
     <button id="btnStart" class="btn btn-big">▶ System starten</button>
+    <button id="btnStartFree" class="linkbtn">Ohne Zeitlimit spielen</button>
     <details class="teacher">
       <summary>Für Lehrkräfte</summary>
       <div>
@@ -660,7 +666,8 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
           <li>Die Ziffern des Türcodes werden bei jedem Spiel neu ausgelost. Abschreiben zwischen Gruppen hilft nicht.</li>
           <li>Ein Fehler kostet 10 Sekunden, ein Tipp 20 Sekunden. Läuft die Zeit ab, kann man ohne Zeitlimit weiterspielen.</li>
           <li>Alle Firmen, Namen, Adressen und Nummern sind erfunden, außer dem Sperr-Notruf 116 116. Keine Anmeldung, es wird nichts gespeichert, keine Töne.</li>
-          <li><b>Fragen fürs Gespräch:</b> Welche Falle war am schwersten – und warum? Woran erkennt man die echte Adresse in einem Link? Was tust du, wenn du schon geklickt hast?</li>
+          <li><b>Fragen fürs Gespräch:</b> Hast du unter Zeitdruck schlechter geprüft – und warum setzen Betrüger genau darauf? Welche Falle war am schwersten? Woran erkennt man die echte Adresse in einem Link? Was tust du, wenn du schon geklickt hast? Welche Phishing-Nachrichten kennst du selbst (Spielkonto, Messenger, Gewinnspiel)?</li>
+          <li>Für langsam Lesende oder Kinder mit Deutsch als Zweitsprache: <b>„Ohne Zeitlimit spielen“</b> unter dem Startknopf.</li>
         </ul>
       </div>
     </details>
@@ -678,9 +685,9 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
       <div class="akte-stamp" id="akteStamp"></div>
       <div class="akte-paper">
         <p class="akte-h">EINSATZ „NACHTSCHICHT“ · VON: ZENTRALE</p>
-        <p>N0X hat drei Geräte manipuliert: Monitor, Diensthandy und Laptop.</p>
-        <p>Entlarve jede Falle. Dann gibt das System eine Ziffer des Türcodes frei.</p>
-        <p>Achtung: Jeder Fehler kostet 10 Sekunden.</p>
+        <p>N0X ist ein Phisher: Er „fischt“ mit gefälschten Nachrichten nach Passwörtern, Bankdaten und Geld. Er hat drei Geräte manipuliert: Monitor, Diensthandy und Laptop.</p>
+        <p><b>Deine Leitfrage:</b> Woran erkennst du Phishing – und was tust du dann?</p>
+        <p>Jede entlarvte Falle gibt eine Ziffer des Türcodes frei. <span id="akteZeit">Achtung: Jeder Fehler kostet 10 Sekunden.</span></p>
       </div>
       <button id="btnReady" class="btn btn-big">Auftrag annehmen</button>
     </div>
@@ -965,9 +972,11 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
       <div><b id="eHint">0</b><span>Tipps</span></div>
       <div><b id="eRank">–</b><span id="eRankTxt">Sicherheitsstufe</span></div>
     </div>
+    <p class="reflect"><b>Gemerkt?</b> Der Countdown hat dich gehetzt. Genau so arbeiten Betrüger: Wer unter Druck steht, prüft schlechter.</p>
     <h2>Die 3 wichtigsten Regeln gegen Phishing</h2>
+    <p class="defi"><b>Phishing</b> (sprich: Fisching) heißt „Passwort-Fischen“: Betrüger angeln mit gefälschten Mails, SMS oder Nachrichten nach Passwörtern, Bankdaten oder Geld.</p>
     <ol class="rules">
-      <li><div class="rn">1</div><h3>Absender und Link prüfen</h3><p>Der Name „FlinkPaket“ lässt sich leicht fälschen, die Adresse dahinter nicht. Lies jede Adresse bis zum ersten „/“: Direkt vor .de oder .com muss genau der echte Name stehen.</p></li>
+      <li><div class="rn">1</div><h3>Absender und Link prüfen</h3><p>Ein Name wie „FlinkPaket“ ist schnell gefälscht. Schau auf die Adresse dahinter: Passt sie nicht, ist es Betrug. Passt sie, ist das noch kein Beweis. Bei Links zählt der Teil zwischen „https://“ und dem nächsten „/“: Ganz am Ende muss genau der echte Name stehen, zum Beispiel <b>talbank.de</b>.</p></li>
       <li><div class="rn">2</div><h3>Druck ist ein Alarmsignal</h3><p>Drohung, kurze Frist, Gewinn oder „sag es niemandem“: Wer dich hetzt, will, dass du nicht nachdenkst. Erst einmal nichts tun.</p></li>
       <li><div class="rn">3</div><h3>Nie Passwort, PIN oder TAN über einen Link</h3><p>Echte Banken, Firmen und Chefs fragen so etwas nie per Mail oder SMS. Im Zweifel selbst die echte App öffnen oder über eine bekannte Nummer anrufen.</p></li>
     </ol>
@@ -1042,19 +1051,20 @@ const AVA = '<svg class="ava" viewBox="0 0 40 40" aria-hidden="true"><path d="M2
 
 /* ---------------- Inhalte ---------------- */
 const MAILS = [
-  { id: 'm1', phish: true, name: 'Talbank Sicherheit', addr: 'sicherheit@talbank-kontoschutz.info', time: '23:41',
-    subj: '⚠ Ihr Konto wurde vorübergehend gesperrt',
-    body: ['Sehr geehrter Kunde,',
-      'bei einer Routineprüfung haben wir ungewöhnliche Aktivitäten auf Ihrem Konto festgestellt. Ihr Konto wurde deshalb vorübergehend gesperrt.',
-      'Bestätigen Sie <b>innerhalb von 24 Stunden</b> Ihre Identität mit Online-Banking-PIN und Kartennummer. Andernfalls wird Ihr Konto endgültig geschlossen.',
+  { id: 'm1', phish: true, name: 'Spielwolke Support', addr: 'support@spielwolke-sicherheit.net', time: '23:41',
+    subj: '⚠ Dein Spielkonto wird in 24 Stunden gesperrt',
+    body: ['Hallo Spieler,',
+      'dein Spielwolke-Konto wurde wegen Betrugsverdacht gemeldet. Wenn du nicht reagierst, sperren wir es <b>in 24 Stunden</b>. Alle Spiele, Skins und Coins sind dann weg.',
+      'Bestätige jetzt mit Benutzername und Passwort, dass du es bist. Als Dankeschön bekommst du <b>500 Gratis-Coins</b>.',
       '{LINK}',
-      'Mit freundlichen Grüßen<br>Ihr Talbank-Sicherheitsteam'],
-    link: { t: 'Konto jetzt entsperren', url: 'http://talbank-entsperren.ru/login', btn: true },
-    why: ['Absender: <code>talbank-kontoschutz.info</code>. Die echte Bank schreibt von <code>talbank.de</code>.',
-      '„Sehr geehrter Kunde“ statt deines Namens.',
-      'Drohung und Frist: „innerhalb von 24 Stunden … endgültig geschlossen“.',
-      'Fragt nach PIN und Kartennummer. Das macht keine Bank per Mail.',
-      'Der Link führt zu <code>talbank-entsperren.ru</code>, nicht zur Bank.'] },
+      'Dein Spielwolke-Team'],
+    link: { t: 'Konto jetzt retten', url: 'http://spielwolke-konto-check.com/login', btn: true },
+    why: ['Absender: <code>spielwolke-sicherheit.net</code>. Angehängte Wörter wie „-sicherheit“ sind ein typischer Trick.',
+      '„Hallo Spieler“ statt deines Namens.',
+      'Drohung und Frist: „in 24 Stunden … alles weg“.',
+      'Fragt nach deinem Passwort. Das macht kein seriöser Anbieter per Mail.',
+      'Köder: „500 Gratis-Coins“. Geschenke gegen Passwörter sind immer eine Falle.',
+      'Der Link führt zu <code>spielwolke-konto-check.com</code>.'] },
   { id: 'm5', phish: true, name: 'FlinkPaket', addr: 'service@flinkpaket-zustellung.com', time: '23:12',
     subj: 'Zustellung fehlgeschlagen – Gebühr offen',
     body: ['Lieber Kunde,',
@@ -1065,7 +1075,7 @@ const MAILS = [
     link: { t: 'Gebühr jetzt bezahlen', url: 'https://flinkpaket.de.flinkpaket-zahlung.com/karte', btn: true },
     why: ['Absender: <code>flinkpaket-zustellung.com</code>. Echt wäre <code>flinkpaket.de</code> – vergleiche mit der echten Paket-Mail!',
       'Unpersönlich: „Lieber Kunde“.',
-      'Fehler im Text: „zugestelt“, „zahlen sie“.',
+      'Fehler im Text: „zugestelt“, „zahlen sie“. Aber Vorsicht: Viele Betrugsmails sind inzwischen fehlerfrei. Fehler sind ein Hinweis, kein Beweis.',
       'Zeitdruck: „innerhalb von 12 Stunden“.',
       'Der Link führt zu <code>flinkpaket-zahlung.com</code>. Die 1,99 € sind nur der Köder – abgefischt werden deine Kreditkartendaten.'] },
   { id: 'm3', phish: true, name: 'Petra Hansen (Geschäftsführung)', addr: 'petra.hansen.chefin@blitzmail.net', time: '22:58',
@@ -1089,7 +1099,7 @@ const MAILS = [
       'Dein FlinkPaket-Team'],
     link: { t: 'Sendung verfolgen', url: 'https://www.flinkpaket.de/sendung/FP44712290DE', btn: false },
     why: ['Absender passt: <code>flinkpaket.de</code>.',
-      'Der Link führt zu <code>flinkpaket.de</code>, direkt vor dem ersten „/“.',
+      'Der Link führt zu <code>flinkpaket.de</code>: Das steht ganz am Ende vor dem nächsten „/“.',
       'Dein voller Name und eine Sendungsnummer.',
       'Kein Druck, keine Zahlung, keine Daten.',
       'Ganz sicher gehst du, wenn du die Nummer selbst in der App eingibst.'] },
@@ -1130,20 +1140,20 @@ const SMS = [
 ];
 const CH = {}; [SENDER].concat(SMS).forEach(c => { CH[c.id] = c; });
 const ACT = [
-  { t: 'Auf den Link tippen und nachsehen, ob die Seite echt aussieht.', ok: false,
+  { t: 'Den Link öffnen und die Seite genau ansehen. Sieht sie echt aus, ist alles gut.', ok: false,
     x: 'Schon das Öffnen kann schaden: Die Seite kann Schadsoftware laden. Und gefälschte Seiten sehen oft täuschend echt aus.',
     h: 'Ja! Klick drauf! 😈' },
-  { t: 'Zurückschreiben: „Sind Sie wirklich die Talbank?“', ok: false,
+  { t: 'Der Nummer zurückschreiben und fragen, ob die SMS wirklich von der Bank ist.', ok: false,
     x: 'Dann weiß der Betrüger, dass deine Nummer aktiv ist, und lügt dich weiter an.',
     h: 'Oh ja, schreib mir! Ich antworte immer. 😏' },
-  { t: 'Nichts antippen, Nummer blockieren, SMS löschen. Im Zweifel die Bank selbst anrufen – über die bekannte Nummer.', ok: true,
-    x: 'Genau. Der sichere Weg führt nie über den Link in der Nachricht, sondern über die echte App oder eine Nummer, die du selbst nachschaust.' }
+  { t: 'Nichts antippen, die SMS löschen und die Bank über die bekannte Nummer anrufen.', ok: true,
+    x: 'Genau. Der sichere Weg führt nie über den Link in der Nachricht, sondern über die echte App oder eine Nummer, die du selbst nachschaust. Die fremde Nummer kannst du außerdem blockieren.' }
 ];
 const LINKS = [
   { id: 'a', ok: false, pre: 'https://talbank.de.', dom: 'konto-talbank.com', post: '/anmelden',
-    x: '✖ Fälschung! „talbank.de“ steht hier nur vorne als Tarnung. Entscheidend ist, was direkt vor dem ersten einzelnen „/“ steht: <b>konto-talbank.com</b>. Übrigens hat auch diese Seite ein Schloss 🔒. Das heißt nur „verschlüsselt“, nicht „echt“.' },
+    x: '✖ Fälschung! „talbank.de“ steht hier nur vorne als Tarnung. Entscheidend ist, was ganz am Ende vor dem nächsten „/“ steht: <b>konto-talbank.com</b>. Übrigens hat auch diese Seite ein Schloss 🔒. Das heißt nur „verschlüsselt“, nicht „echt“.' },
   { id: 'b', ok: true, pre: 'https://www.', dom: 'talbank.de', post: '/anmelden',
-    x: '✔ Richtig! Direkt vor dem ersten „/“ steht genau <b>talbank.de</b>, die Adresse von der Pinnwand. Noch sicherer: die Adresse selbst eintippen oder die echte Banking-App nutzen.' },
+    x: '✔ Richtig! Ganz am Ende vor dem „/“ steht genau <b>talbank.de</b>, die Adresse von der Pinnwand. Noch sicherer: die Adresse selbst eintippen oder die echte Banking-App nutzen.' },
   { id: 'c', ok: false, pre: 'https://www.', dom: 'ta1bank.de', post: '/anmelden',
     x: '✖ Fälschung! Schau genau hin: eine <b>Ziffer 1</b> statt des Buchstabens l. „ta1bank.de“ ist eine völlig andere Adresse und sieht nur fast gleich aus.' }
 ];
@@ -1152,7 +1162,7 @@ const LK = {}; LINKS.forEach(l => { LK[l.id] = l; });
 const HINTS = {
   monitor: 'Tippe in jeder Mail auf den Absender: Erst die Adresse hinter dem Namen verrät, wer wirklich schreibt. Die Firmenadresse steht an der Pinnwand. Misstrauisch machen außerdem: Drohung, Eile, Geheimhaltung und Fragen nach Daten oder Geld.',
   phone: 'Fünf Fragen helfen: Wer schreibt? Wie wirst du angesprochen? Wie viel Zeit bleibt dir? Was sollst du verraten? Wohin führt der Link?',
-  laptop: 'Die echte Adresse ist www.talbank.de (Pinnwand). Lies jede Adresse bis zum ersten einzelnen „/“. Direkt davor muss genau talbank.de stehen, Buchstabe für Buchstabe.',
+  laptop: 'Die echte Adresse ist www.talbank.de (Pinnwand). Schau auf den Teil zwischen „https://“ und dem nächsten „/“. Ganz am Ende davon muss genau talbank.de stehen, Buchstabe für Buchstabe.',
   door: 'Jedes befreite Gerät lässt eine Ziffer über der Tür aufleuchten. Reihenfolge am Schloss: Monitor – Handy – Laptop.'
 };
 
@@ -1553,7 +1563,7 @@ function penalty(sec) {
 
 /* ---------------- Chat des Hackers ---------------- */
 const C = { q: [], busy: false, pinned: false, t: null };
-function say(text, o) { if (S.kicked) return; C.q.push(Object.assign({ text, who: 'hack' }, o || {})); S.lastSay = Date.now(); if (!C.busy) pump(); }
+function say(text, o) { if (S.kicked || S.over) return; C.q.push(Object.assign({ text, who: 'hack' }, o || {})); S.lastSay = Date.now(); if (!C.busy) pump(); }
 function sys(text) { say(text, { who: 'sys', fast: true }); }
 function sayMaybe(text, gap, o) { if (Date.now() - S.lastSay > gap) say(text, o); }
 const wide = () => innerWidth >= 1100;
@@ -1568,6 +1578,7 @@ async function pump() {
       await wait(RM ? 150 : Math.min(1300, 380 + m.text.length * 15));
       ty.remove();
     }
+    if (S.over || S.kicked) continue;   // nach „Zeit abgelaufen“ oder dem Rauswurf schweigt der Chat
     addMsg(m);
     await wait(m.fast ? 120 : 450);
   }
@@ -1654,7 +1665,8 @@ function openObj(key, from) {
   if (!wide() && !C.pinned) closeChat();
   const canHint = HINTS[key] && !(KEYS.includes(key) && S.solved[key]);
   hintBtn.hidden = !canHint;
-  hintBtn.textContent = S.hints[key] ? '💡 Tipp' : '💡 Tipp (−20 s)';
+  hintBtn.textContent = S.hints[key] || S.practice ? '💡 Tipp' : '💡 Tipp (−20 s)';
+  hintBtn.disabled = false; $('#closeBtn').disabled = false;
   mBody.scrollTop = 0;
   RENDER[key]();
   if (S.hints[key] && canHint) showHint(key, false);
@@ -1992,9 +2004,11 @@ function tryOpen() {
 async function finale() {
   S.ended = true; S.endRemain = remaining(); clearInterval(S.tick);
   C.q.length = 0; document.body.classList.remove('low');
-  $('#led').classList.add('ok'); $$('button', mBody).forEach(b => { b.disabled = true; });
+  $('#closeBtn').disabled = true; hintBtn.disabled = true;   // ab jetzt nichts mehr dazwischenfunken
+  const led = $('#led'); if (led) led.classList.add('ok');
+  $$('button', mBody).forEach(b => { b.disabled = true; });
   for (const w of $$('.wheel', mBody)) { w.classList.add('ok'); await wait(RM ? 0 : 230); }
-  $('#lstat').innerHTML = pxText('ZUGANG GEWÄHRT', 'stamp ok');
+  const ls = $('#lstat'); if (ls) ls.innerHTML = pxText('ZUGANG GEWÄHRT', 'stamp ok');
   addMsg({ who: 'hack', text: 'Was…? Woher habt ihr den Code?!', cls: 'nervous' });
   await wait(RM ? 300 : 1300);
   closeModal(true);
@@ -2045,6 +2059,7 @@ function showEnd() {
   $('#eTime').textContent = S.practice ? '—' : fmt(S.endRemain);
   $('#eErr').textContent = S.mistakes; $('#eHint').textContent = S.hintCount;
   $('#eRank').textContent = lv; $('#eRankTxt').textContent = 'Sicherheitsstufe · ' + txt;
+  if (S.practice) $('.reflect').innerHTML = '<b>Übrigens:</b> Im echten Leben läuft fast immer ein Countdown mit: „nur noch 24 Stunden!“ Betrüger setzen auf Zeitdruck, denn wer gehetzt ist, prüft schlechter.';
   S.inRoom = false; show('sEnd'); $('#sEnd').scrollTop = 0;
   setTimeout(() => $('#btnAgain').focus({ preventScroll: true }), 400);
 }
@@ -2098,6 +2113,7 @@ async function runIntro() {
   $('#btnSkip').hidden = true;
   // Die Einsatzakte gleitet herein, der Stempel „KLASSIFIZIERT“ knallt drauf
   const ak = $('#akte'), rb = $('#btnReady');
+  if (S.practice) $('#akteZeit').textContent = 'Ohne Zeitlimit: Lies alles in Ruhe.';
   const accepted = new Promise(r => rb.addEventListener('click', r, { once: true }));
   ak.hidden = false; void ak.offsetWidth; ak.classList.add('in');
   $('#term').style.opacity = '.2';
@@ -2106,7 +2122,7 @@ async function runIntro() {
   await accepted;
   ak.classList.remove('in'); FAST = false;
   await wait(RM ? 50 : 450); ak.hidden = true; $('#term').style.opacity = '';
-  await typeLine('> Wie ihr wollt. Ihr habt 10 Minuten.', 't-hack', 42);
+  await typeLine(S.practice ? '> Wie ihr wollt. Lasst euch Zeit. Ich habe alle Zeit der Welt.' : '> Wie ihr wollt. Ihr habt 10 Minuten.', 't-hack', 42);
   await wait(RM ? 100 : 500);
   $('#term').style.opacity = '.15';
   $('#bigClock').classList.add('on'); startClock(); burst(420);
@@ -2127,7 +2143,7 @@ function enterRoom() {
   });
   addMsg({ who: 'hack', text: 'Ich habe euer System übernommen. Ihr kommt hier nicht raus.' });
   setTimeout(() => {
-    say('Tick, tack. Zehn Minuten. Mehr gebe ich euch nicht.', { cls: 'evil' });
+    say(S.practice ? 'Lasst euch ruhig Zeit. Ich beobachte euch. 👁' : 'Tick, tack. Zehn Minuten. Mehr gebe ich euch nicht.', { cls: 'evil' });
     sys('Untersuche Monitor, Diensthandy und Laptop. Die Pinnwand kann helfen. Jede entlarvte Falle gibt eine Ziffer für die Tür frei.');
     if (CAM.pan) sys('Tippe auf einen Gegenstand, dann geht dein Agent hin. Wische über den Raum, um dich umzusehen.');
     else if (matchMedia('(max-height:540px) and (min-aspect-ratio:4/3)').matches) sys('Tipp: Im Hochformat ist auf dem Handy mehr Platz zum Lesen.');
@@ -2137,13 +2153,16 @@ function enterRoom() {
 }
 
 /* ---------------- Ereignisse ---------------- */
-$('#btnStart').addEventListener('click', runIntro);
+let started = false;
+function startGame(frei) { if (started) return; started = true; if (frei) S.practice = true; runIntro(); }
+$('#btnStart').addEventListener('click', () => startGame(false));
+$('#btnStartFree').addEventListener('click', () => startGame(true));
 $('#btnSkip').addEventListener('click', () => { FAST = true; });
 $('#btnAgain').addEventListener('click', () => location.reload());
 $('#btnRestart').addEventListener('click', () => location.reload());
 $('#btnPractice').addEventListener('click', practice);
-$('#closeBtn').addEventListener('click', () => closeModal());
-hintBtn.addEventListener('click', () => { if (cur && HINTS[cur]) showHint(cur, true); });
+$('#closeBtn').addEventListener('click', () => { if (!S.ended) closeModal(); });
+hintBtn.addEventListener('click', () => { if (cur && HINTS[cur] && !S.ended && !S.over) showHint(cur, true); });
 chatBtn.addEventListener('click', () => { if (chatEl.classList.contains('open')) closeChat(); else { openChat(); C.pinned = true; clearTimeout(C.t); scrollChat(); } });
 $('#chatX').addEventListener('click', closeChat);
 modal.addEventListener('click', e => { if (e.target === modal && !S.ended) closeModal(); });
