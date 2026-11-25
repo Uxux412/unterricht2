@@ -589,6 +589,7 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
 .beta-box{margin-top:6px;text-align:left}
 .bcount{margin:0 0 6px;font:700 13px var(--mono);letter-spacing:.14em;color:var(--ice)}
 .bfrom{margin:0 0 6px;font:13px var(--mono);color:#a9c3ca}
+.bmsg:focus{outline:none}
 .bmsg{padding:12px 14px;border-radius:14px;background:#f4f6fb;color:#172033;font-size:16px}
 .bnote{margin:8px 0 0;font-size:14px;color:#ffe9b8}
 .bbtns{display:flex;gap:10px;margin-top:12px}
@@ -680,7 +681,7 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
           <li><b>Ziel:</b> Phishing an Absender, Link, Druck und Datenabfrage erkennen und richtig reagieren.</li>
           <li><b>Ablauf:</b> 10 Minuten spielen, danach ca. 10 Minuten Besprechung der drei Regeln vom Schlussbildschirm.</li>
           <li>Die Ziffern des Türcodes werden bei jedem Spiel neu ausgelost. Abschreiben zwischen Gruppen hilft nicht.</li>
-          <li>Fehler in den Rätseln kosten zunehmend Zeit (der erste 10 Sekunden, der zweite 20, der dritte 30 … höchstens 90), ein falscher Türcode 10 Sekunden, ein Tipp 20 Sekunden. Wer nur rät, schafft es nicht. Läuft die Zeit ab, kann man ohne Zeitlimit weiterspielen.</li>
+          <li>Fehler in den Rätseln kosten zunehmend Zeit (der erste 10 Sekunden, der zweite 20, der dritte 30 … höchstens 90), ein Vertipper am Schloss 10 Sekunden, ein Tipp 20 Sekunden. Das Schloss öffnet erst, wenn alle drei Geräte gelöst sind. Wer nur rät, schafft es nicht. Läuft die Zeit ab, kann man ohne Zeitlimit weiterspielen.</li>
           <li>Für Schnelle: Nach dem Ausbruch wartet das <b>„Profi-Level“</b> mit fünf kniffligen Fällen (Messenger-Trick, echte Paketnachricht, QR-Code-Betrug, echter Bestätigungscode, gefälschter Firmen-Absender).</li>
           <li>Alle Firmen, Namen, Adressen und Nummern sind erfunden, außer dem Sperr-Notruf 116 116. Keine Anmeldung, es wird nichts gespeichert, keine Töne.</li>
           <li><b>Fragen fürs Gespräch:</b> Hast du unter Zeitdruck schlechter geprüft – und warum setzen Betrüger genau darauf? Welche Falle war am schwersten? Woran erkennt man die echte Adresse in einem Link? Was tust du, wenn du schon geklickt hast? Welche Phishing-Nachrichten kennst du selbst (Spielkonto, Messenger, Gewinnspiel)?</li>
@@ -1176,7 +1177,7 @@ const LINKS = [
   { id: 'a', ok: false, pre: 'https://talbank.de.', dom: 'konto-talbank.com', post: '/anmelden',
     x: '✖ Fälschung! „talbank.de“ steht hier nur vorne als Tarnung. Entscheidend ist, worauf der Teil vor dem nächsten „/“ endet: <b>konto-talbank.com</b>. Übrigens hat auch diese Seite ein Schloss 🔒. Das heißt nur „verschlüsselt“, nicht „echt“.' },
   { id: 'b', ok: true, pre: 'https://www.', dom: 'talbank.de', post: '/anmelden',
-    x: '✔ Richtig! Vor dem „/“ steht genau <b>www.talbank.de</b>: am Ende talbank.de, davor nur „www.“. Das ist die Adresse von der Pinnwand. Noch sicherer: die Adresse selbst eintippen oder die echte Banking-App nutzen.' },
+    x: '✔ Richtig! Vor dem „/“ steht <b>www.talbank.de</b>: Es endet genau auf talbank.de, direkt davor steht ein Punkt. Das ist die Adresse von der Pinnwand. Noch sicherer: die Adresse selbst eintippen oder die echte Banking-App nutzen.' },
   { id: 'c', ok: false, pre: 'https://www.', dom: 'ta1bank.de', post: '/anmelden',
     x: '✖ Fälschung! Schau genau hin: eine <b>Ziffer 1</b> statt des Buchstabens l. „ta1bank.de“ ist eine völlig andere Adresse und sieht nur fast gleich aus.' }
 ];
@@ -1204,7 +1205,7 @@ const H = {
     phone: 'Oh, eine SMS! Lies sie lieber schnell. Ganz schnell.',
     laptop: 'Ich habe deine Lesezeichen ein bisschen… umgebaut.',
     board: 'Zettel an der Pinnwand? Wie altmodisch.',
-    door: 'Ohne Code? Es gibt tausend Möglichkeiten. Viel Glück. 😈'
+    door: 'Ohne alle drei Ziffern geht diese Tür nie auf. Pech. 😈'
   }
 };
 
@@ -1663,10 +1664,9 @@ function burst(ms) { if (RM) return; document.body.classList.add('burst'); clear
 /* Jeder weitere Rätsel-Fehler kostet mehr Zeit (10, 20, 30 … höchstens 90 s): Wer nur rät, schafft es nicht.
    Ein falscher Türcode kostet pauschal 10 s. */
 function fail(line, flat) {
-  S.mistakes++;
-  if (flat) penalty(PEN); else { S.esc = (S.esc || 0) + 1; penalty(Math.min(90, PEN * S.esc)); }
+  if (flat) penalty(PEN); else { S.mistakes++; penalty(Math.min(90, PEN * S.mistakes)); }
   flash();
-  if (!flat && S.esc === 3 && !S.practice) setTimeout(() => say('Merkt ihr was? Jeder Fehler kostet jetzt mehr Zeit. Ratet ruhig weiter. 😈', { cls: 'evil' }), 900);
+  if (!flat && S.mistakes === 3 && !S.practice) setTimeout(() => say('Merkt ihr was? Jeder Fehler in den Rätseln kostet jetzt mehr Zeit. Ratet ruhig weiter. 😈', { cls: 'evil' }), 900);
   if (!RM) { const g = $('#ghost'); g.classList.remove('go'); void g.offsetWidth; g.classList.add('go'); }
   let t = line;
   if (!t) { const pool = S.practice ? H.taunt.filter(x => !/Zeit|Tick/.test(x)) : H.taunt; do { t = rnd(pool); } while (t === S.lastTaunt && pool.length > 1); S.lastTaunt = t; }
@@ -1971,7 +1971,7 @@ function renderBoard() {
 function renderLock() {
   const n = solvedCount();
   mBody.innerHTML = `<div class="lockwrap">
-    <p class="ltext">${n < 3 ? `Gefundene Ziffern: <b>${n} von 3</b>. Befreie erst alle Geräte – oder rate. 😈` : 'Alle Ziffern leuchten über der Tür. Stell den Code ein!'}</p>
+    <p class="ltext">${n < 3 ? `Gefundene Ziffern: <b>${n} von 3</b>. Das Schloss öffnet erst, wenn alle drei Geräte befreit sind.` : 'Alle Ziffern leuchten über der Tür. Stell den Code ein!'}</p>
     <div class="lpanel" id="lpanel"><span class="scr a"></span><span class="scr b"></span><span class="scr c"></span><span class="scr d"></span><span class="led" id="led"></span>
       <div class="wheels">${KEYS.map((k, i) => `<div class="wheel" data-i="${i}">
         <div class="wico ico">${pxIcon(k)}<span>${k === 'phone' ? 'Handy' : LABEL[k]}</span></div>
@@ -2021,6 +2021,12 @@ function bindWheel(w) {
 }
 function tryOpen() {
   if (S.ended) return;
+  if (solvedCount() < 3) {   // ohne alle drei Ziffern gibt es nichts zu raten
+    const pl = $('#lpanel'); pl.classList.remove('shake'); void pl.offsetWidth; pl.classList.add('shake');
+    $('#lstat').innerHTML = pxText('ZUGANG VERWEIGERT', 'stamp bad') + 'Das Schloss bleibt gesperrt, bis alle drei Geräte befreit sind (' + solvedCount() + '/3).';
+    say(rnd(['Ohne alle Ziffern? Niedlich. 😏', 'Erst die Geräte, dann die Tür. So leicht mache ich es euch nicht. 😈']));
+    return;
+  }
   const ok = S.wheels.every((v, i) => v === S.digits[i]);
   if (ok) { finale(); return; }
   const p = $('#lpanel'); p.classList.remove('shake'); void p.offsetWidth; p.classList.add('shake');
@@ -2126,8 +2132,8 @@ function showFocus(el) { if (!el) return; el.focus({ preventScroll: true }); el.
 function betaStart() { BT.i = 0; BT.ok = 0; $('#btnBeta').hidden = true; $('#betaBox').hidden = false; betaShow(); }
 function betaShow() {
   const c = BETA[BT.i]; BT.done = false;
-  $('#betaBox').innerHTML = `<p class="bcount" tabindex="-1">FALL ${BT.i + 1} VON ${BETA.length}</p><p class="bfrom">${c.from}</p><div class="bmsg">${c.msg}</div>${c.note ? `<p class="bnote">${c.note}</p>` : ''}<div class="bbtns"><button class="bph" data-b="1">🎣 Falle</button><button class="bok" data-b="0">✔ Echt</button></div><div id="bres"></div>`;
-  showFocus($('#betaBox .bcount'));
+  $('#betaBox').innerHTML = `<p class="bcount">FALL ${BT.i + 1} VON ${BETA.length}</p><p class="bfrom">${c.from}</p><div class="bmsg" tabindex="-1">${c.msg}</div>${c.note ? `<p class="bnote">${c.note}</p>` : ''}<div class="bbtns"><button class="bph" data-b="1">🎣 Falle</button><button class="bok" data-b="0">✔ Echt</button></div><div id="bres"></div>`;
+  showFocus($('#betaBox .bmsg'));
 }
 function betaAnswer(falle) {
   if (BT.done) return; BT.done = true;
