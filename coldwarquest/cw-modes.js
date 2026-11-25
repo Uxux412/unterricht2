@@ -235,19 +235,20 @@
     const ob = btn(row, "Öffnen");
     const fb = el(box, "div", "", "qm-fb");
     const tip = el(box, "div", "", "cw-tipp");
-    let wrong = 0, revealed = 1;
+    let wrong = 0, tipsShown = 0, revealed = 1;
     function pattern() {
       const c = t.code; let s = "";
       for (let i = 0; i < c.length; i++) s += (i < revealed || i === c.length - 1) ? c[i] : "_";
       return s.split("").join(" ");
     }
+    // Textuelle Tipps gibt es auf Knopfdruck; Buchstaben des Codes erst nach drei echten Fehlversuchen.
     function showTip() {
-      if (wrong === 1) tip.innerHTML = "💡 Tipp: " + t.tipps[0];
-      else if (wrong === 2) tip.innerHTML = "💡 Tipp: " + t.tipps[1];
-      else if (wrong >= 3) { tip.innerHTML = "💡 Teillösung: <b class='cw-mono'>" + pattern() + "</b>"; revealed = Math.min(t.code.length - 1, revealed + 1); }
+      if (tipsShown < t.tipps.length) { tip.innerHTML = "💡 Tipp: " + t.tipps[tipsShown]; tipsShown++; return; }
+      if (wrong >= 3) { tip.innerHTML = "💡 Teillösung: <b class='cw-mono'>" + pattern() + "</b>"; revealed = Math.min(t.code.length - 1, revealed + 1); }
+      else tip.innerHTML = "💡 Tipp: " + t.tipps[t.tipps.length - 1] + "<br><small>Mehr Hilfe gibt es, wenn du ein paar Codes ausprobiert hast.</small>";
     }
     const tb = el(box, "div", null, "btns");
-    btn(tb, "💡 Tipp").addEventListener("click", () => { wrong++; showTip(); });
+    btn(tb, "💡 Tipp").addEventListener("click", () => showTip());
     function tryOpen() {
       const v = norm(inp.value);
       if (!v) { fb.className = "qm-fb bad"; fb.textContent = "Gib zuerst einen Code ein."; return; }
@@ -257,7 +258,7 @@
         onOpen();
       } else {
         wrong++; fb.className = "qm-fb bad"; fb.textContent = "✘ Der Tresor bleibt zu. Lies die Quelle noch einmal.";
-        showTip();
+        if (wrong >= 3 || tipsShown < wrong) showTip();
       }
     }
     ob.addEventListener("click", tryOpen);

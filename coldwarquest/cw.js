@@ -92,8 +92,8 @@ window.CW = {
         text: "Beide Reden wurden für ein Publikum gehalten: Truman sprach vor dem Kongress, Schdanow vor den kommunistischen Parteien.",
         frage: "Wessen Rede ist Propaganda?",
         options: [
-          { t: "Nur Schdanows – er verzerrt die USA.", ok: false, fb: "Auch Truman zeichnet ein Schwarz-Weiß-Bild – und er will Geld vom Kongress." },
-          { t: "Nur Trumans – er übertreibt die Gefahr.", ok: false, fb: "Auch Schdanow malt ein Feindbild: die USA als Kriegstreiber." },
+          { t: "Nur Schdanows – er macht die USA zu Kriegstreibern, Truman bleibt sachlich.", ok: false, fb: "Auch Truman zeichnet ein Schwarz-Weiß-Bild – und er will Geld vom Kongress." },
+          { t: "Nur Trumans – er übertreibt die Gefahr, um vom Kongress Geld zu bekommen.", ok: false, fb: "Auch Schdanow malt ein Feindbild: die USA als Kriegstreiber." },
           { t: "Beide – jede Rede wirbt für die eigene Seite und braucht dafür einen Feind.", ok: true, fb: "Richtig: Beide Reden sind politische Werbung. Sie wollen überzeugen, nicht neutral informieren." }
         ]
       }
@@ -122,17 +122,17 @@ window.CW = {
         akten: [
           { name: "Korea 1950–1953", antworten: [
             [{ t: "Nordkorea gegen Südkorea", ok: true }, { t: "Vietnam gegen Frankreich", fb: "Das ist die Vorgeschichte von Vietnam." }, { t: "Regierung gegen Mudschaheddin", fb: "Das gehört zu Afghanistan." }],
-            [{ t: "Die USA (mit UN-Truppen) und China mit Soldaten, die UdSSR lieferte Waffen", ok: true }, { t: "Die UdSSR mit Soldaten, die USA lieferten Waffen", fb: "Andersherum: In Korea führten die USA die UN-Truppen, die UdSSR lieferte Waffen." }, { t: "Keine Supermacht war beteiligt", fb: "Doch – lies die Akte noch einmal." }],
-            [{ t: "Waffenstillstand 1953, Korea bleibt geteilt", ok: true }, { t: "Abzug der USA, Sieg des Nordens", fb: "Das war Vietnam." }, { t: "Abzug der UdSSR", fb: "Das war Afghanistan." }]
+            [{ t: "Die USA (mit UN-Truppen) und China mit Soldaten, die UdSSR lieferte Waffen", ok: true }, { t: "Die UdSSR mit eigenen Soldaten, die USA und China lieferten nur Waffen", fb: "Andersherum: In Korea führten die USA die UN-Truppen, die UdSSR lieferte Waffen." }, { t: "Keine Supermacht schickte Soldaten, beide lieferten nur Geld und Waffen", fb: "Doch – lies die Akte noch einmal." }],
+            [{ t: "Waffenstillstand 1953, Korea bleibt geteilt", ok: true }, { t: "Abzug der USA 1953, Sieg des Nordens, Korea wird vereint", fb: "Das war Vietnam." }, { t: "Abzug der UdSSR 1953, der Süden übernimmt ganz Korea", fb: "Das war Afghanistan." }]
           ] },
           { name: "Vietnam 1946–1975", antworten: [
             [{ t: "Nordvietnam gegen Südvietnam", ok: true }, { t: "Nordkorea gegen Südkorea", fb: "Das war Korea." }, { t: "Regierung gegen Mudschaheddin", fb: "Das gehört zu Afghanistan." }],
-            [{ t: "Die USA mit eigenen Soldaten, UdSSR und China lieferten Waffen", ok: true }, { t: "Die UdSSR mit eigenen Soldaten, die USA lieferten Waffen", fb: "Andersherum – wer schickt ab 1965 eigene Soldaten?" }, { t: "Nur Frankreich kämpfte", fb: "Frankreich kämpfte bis 1954 – danach kamen die USA." }],
-            [{ t: "Abzug der USA 1973, Sieg des Nordens 1975", ok: true }, { t: "Waffenstillstand, das Land bleibt geteilt", fb: "Das war Korea." }, { t: "Abzug der UdSSR", fb: "Das war Afghanistan." }]
+            [{ t: "Die USA mit eigenen Soldaten, UdSSR und China lieferten Waffen", ok: true }, { t: "Die UdSSR mit eigenen Soldaten, die USA und China lieferten Waffen", fb: "Andersherum – wer schickt ab 1965 eigene Soldaten?" }, { t: "Nur Frankreich kämpfte, die Supermächte hielten sich ganz heraus", fb: "Frankreich kämpfte bis 1954 – danach kamen die USA." }],
+            [{ t: "Abzug der USA 1973, Sieg des Nordens 1975", ok: true }, { t: "Waffenstillstand, das Land bleibt geteilt", fb: "Das war Korea." }, { t: "Abzug der UdSSR 1975, das Land bleibt bis heute geteilt", fb: "Das war Afghanistan." }]
           ] },
           { name: "Afghanistan 1979–1989", antworten: [
-            [{ t: "Kommunistische Regierung gegen Aufständische (Mudschaheddin)", ok: true }, { t: "Nordkorea gegen Südkorea", fb: "Das war Korea." }, { t: "Nordvietnam gegen Südvietnam", fb: "Das war Vietnam." }],
-            [{ t: "Die UdSSR mit eigener Armee, die USA lieferten Geld und Waffen", ok: true }, { t: "Die USA mit eigenen Soldaten, die UdSSR lieferte Waffen", fb: "Andersherum: Hier marschiert die UdSSR selbst ein." }, { t: "China mit eigenen Soldaten", fb: "China schickte Soldaten nach Korea, nicht nach Afghanistan." }],
+            [{ t: "Kommunistische Regierung gegen Aufständische (Mudschaheddin)", ok: true }, { t: "Nordkorea gegen Südkorea, geteilt am 38. Breitengrad", fb: "Das war Korea." }, { t: "Nordvietnam gegen Südvietnam nach dem Abzug Frankreichs", fb: "Das war Vietnam." }],
+            [{ t: "Die UdSSR mit eigener Armee, die USA lieferten Geld und Waffen", ok: true }, { t: "Die USA mit eigenen Soldaten, die UdSSR lieferte Geld und Waffen", fb: "Andersherum: Hier marschiert die UdSSR selbst ein." }, { t: "China mit eigenen Soldaten, die UdSSR lieferte nur Waffen", fb: "China schickte Soldaten nach Korea, nicht nach Afghanistan." }],
             [{ t: "Abzug der UdSSR 1989", ok: true }, { t: "Waffenstillstand, das Land bleibt geteilt", fb: "Das war Korea." }, { t: "Abzug der USA, Sieg des Nordens", fb: "Das war Vietnam." }]
           ] }
         ]
@@ -155,8 +155,8 @@ window.CW = {
         frage: "Warum schwiegen beide Seiten?",
         options: [
           { t: "Ein offener Kampf USA gegen UdSSR hätte einen großen Krieg auslösen können.", ok: true, fb: "Richtig: Beide Seiten hielten den Krieg absichtlich „kalt“ – sogar, als ihre Piloten schon gegeneinander flogen." },
-          { t: "Die Einsätze waren unwichtig.", ok: false, fb: "Im Gegenteil – gerade weil sie brisant waren, blieben sie geheim." },
-          { t: "Die UNO hatte es so beschlossen.", ok: false, fb: "Nein – das Schweigen war eine Entscheidung der beiden Supermächte selbst." }
+          { t: "Die Einsätze waren militärisch unwichtig und deshalb keine Meldung wert.", ok: false, fb: "Im Gegenteil – gerade weil sie brisant waren, blieben sie geheim." },
+          { t: "Die UNO hatte beiden Seiten verboten, über Kampfeinsätze zu sprechen.", ok: false, fb: "Nein – das Schweigen war eine Entscheidung der beiden Supermächte selbst." }
         ]
       }
     },
@@ -190,30 +190,30 @@ window.CW = {
             frage: "Worauf stützt Kennedy seine Anklage?",
             options: [
               { t: "Auf Beweise aus der Luftaufklärung („eindeutige Beweise“).", ok: true, fb: "Richtig: Am 14.10.1962 fotografierte ein U-2-Flugzeug die Raketenstellungen. Kennedy spricht von „eindeutigen Beweisen“." },
-              { t: "Auf eine Rede Chruschtschows.", ok: false, fb: "Nein – Kennedy beruft sich auf eigene Beweise, nicht auf Moskau." },
-              { t: "Auf Gerüchte aus Kuba.", ok: false, fb: "Kennedy betont gerade das Gegenteil: „eindeutige Beweise“." }
+              { t: "Auf eine Rede Chruschtschows, in der er die Raketen ankündigt.", ok: false, fb: "Nein – Kennedy beruft sich auf eigene Beweise, nicht auf Moskau." },
+              { t: "Auf Gerüchte von Flüchtlingen aus Kuba („zuverlässige Hinweise“).", ok: false, fb: "Kennedy betont gerade das Gegenteil: „eindeutige Beweise“." }
             ] },
           { x: 270, y: 186, r: 42, label: "Schiffskette",
             frage: "Welchen Schritt wählt Kennedy – zwischen Nichtstun und Angriff?",
             options: [
               { t: "Eine „Quarantäne“: Kriegsschiffe kontrollieren die Schiffe auf dem Weg nach Kuba.", ok: true, fb: "Richtig: Washington spricht bewusst von „Quarantäne“, nicht von Blockade – eine Blockade wäre rechtlich eine Kriegshandlung." },
-              { t: "Einen sofortigen Luftangriff auf die Raketen.", ok: false, fb: "Den gab es nicht. Kennedy wählt bewusst einen Mittelweg." },
-              { t: "Er wartet ab und tut nichts.", ok: false, fb: "Nein – er handelt, aber ohne zu schießen." }
+              { t: "Einen sofortigen Luftangriff auf die Raketenstellungen, danach eine Landung auf Kuba.", ok: false, fb: "Den gab es nicht. Kennedy wählt bewusst einen Mittelweg." },
+              { t: "Er wartet ab und tut nichts, bis die UNO über die Raketen entschieden hat.", ok: false, fb: "Nein – er handelt, aber ohne zu schießen." }
             ] },
           { x: 50, y: 194, r: 26, label: "Roter Knopf",
             frage: "Womit droht Kennedy, falls von Kuba aus eine Atomrakete abgefeuert wird?",
             options: [
               { t: "Mit einem vollen Gegenschlag gegen die Sowjetunion.", ok: true, fb: "Richtig: Jede Rakete von Kuba gilt als Angriff der Sowjetunion – Moskau würde selbst getroffen." },
-              { t: "Mit einem Angriff nur auf Kuba.", ok: false, fb: "Nein – Kennedy macht Moskau verantwortlich, nicht nur Kuba." },
-              { t: "Mit Wirtschaftssanktionen.", ok: false, fb: "Lies Maßnahme „Drittens“ auf Karte 2 noch einmal." }
+              { t: "Mit einem Angriff nur auf Kuba, von wo die Rakete kam.", ok: false, fb: "Nein – Kennedy macht Moskau verantwortlich, nicht nur Kuba." },
+              { t: "Mit Wirtschaftssanktionen gegen die Sowjetunion und Kuba.", ok: false, fb: "Lies Maßnahme „Drittens“ auf Karte 2 noch einmal." }
             ] }
         ],
         schluss: {
           frage: "Und jetzt Quellenkritik: Was verschweigt Kennedy in seiner Rede?",
           options: [
-            { t: "Dass die USA selbst Atomraketen in der Türkei aufgestellt haben – direkt an der sowjetischen Grenze.", ok: true, fb: "Richtig: Die Türkei kommt in der ganzen Rede nicht vor. Genau dieses Argument wird Moskau anführen – auf nach Haus 4!" },
-            { t: "Dass auf Kuba Raketen stehen.", ok: false, fb: "Das sagt er ja gerade." },
-            { t: "Dass er die UNO einschaltet.", ok: false, fb: "Die UNO erwähnt er sogar mehrmals – er ruft den Sicherheitsrat an." }
+            { t: "Dass die USA selbst Atomraketen in der Türkei haben – direkt an der sowjetischen Grenze.", ok: true, fb: "Richtig: Die Türkei kommt in der ganzen Rede nicht vor. Genau dieses Argument wird Moskau anführen – auf nach Haus 4!" },
+            { t: "Dass auf Kuba sowjetische Raketen aufgebaut werden – nur 90 Meilen vor der Küste der USA.", ok: false, fb: "Das sagt er ja gerade." },
+            { t: "Dass er den UN-Sicherheitsrat einschaltet und Moskau vor der Weltöffentlichkeit anklagt.", ok: false, fb: "Die UNO erwähnt er sogar mehrmals – er ruft den Sicherheitsrat an." }
           ]
         }
       },
@@ -233,9 +233,9 @@ window.CW = {
         link: { href: "https://commons.wikimedia.org/wiki/File:MRBM_Field_Launch_Site_San_Cristobal_No._2_14_October_1962_-_NARA_-_193927.tif", t: "Originalfoto ansehen (Wikimedia Commons)" },
         frage: "Wer macht aus einem Luftbild einen Beweis?",
         options: [
-          { t: "Fachleute, die es auswerten und beschriften – ohne ihre Deutung sieht man vor allem Wege und Flecken.", ok: true, fb: "Richtig: Erst die Auswertung macht aus dem Foto „eindeutige Beweise“. Quellenkritik heißt auch: Wer deutet das Bild – und mit welchem Ziel?" },
-          { t: "Niemand – ein Foto spricht für sich.", ok: false, fb: "Ein Foto zeigt nur einen Ausschnitt. Gedeutet wird es von Menschen mit Interessen." },
-          { t: "Der Pilot allein.", ok: false, fb: "Der Pilot flog nur – ausgewertet haben andere." }
+          { t: "Fachleute, die es auswerten – ohne ihre Deutung sieht man nur Wege und Flecken.", ok: true, fb: "Richtig: Erst die Auswertung macht aus dem Foto „eindeutige Beweise“. Quellenkritik heißt auch: Wer deutet das Bild – und mit welchem Ziel?" },
+          { t: "Niemand – ein Luftbild ist objektiv und spricht ganz für sich selbst.", ok: false, fb: "Ein Foto zeigt nur einen Ausschnitt. Gedeutet wird es von Menschen mit Interessen." },
+          { t: "Der Pilot allein, denn er hat die Stellungen mit eigenen Augen gesehen.", ok: false, fb: "Der Pilot flog nur – ausgewertet haben andere." }
         ]
       }
     },
@@ -269,30 +269,30 @@ window.CW = {
             frage: "Welches Argument steckt hinter dem Raketenzaun mit den beiden Wachposten?",
             options: [
               { t: "Die USA haben selbst Raketen direkt an der sowjetischen Grenze – in der Türkei.", ok: true, fb: "Richtig: „Die Türkei grenzt an uns; unsere Wachposten … sehen einander.“ (Karte 3)" },
-              { t: "Die UNO kreist die Sowjetunion ein.", ok: false, fb: "Von der UNO ist hier keine Rede – lies Karte 3." },
-              { t: "Die Raketen im Zaun gehören der Sowjetunion.", ok: false, fb: "Schau auf die Schilder: Türkei, Italien – das sind US-Raketen." }
+              { t: "Die UNO kreist die Sowjetunion mit Truppen ein – die Wachposten sind Blauhelme.", ok: false, fb: "Von der UNO ist hier keine Rede – lies Karte 3." },
+              { t: "Die Raketen im Zaun gehören der Sowjetunion und schützen sie vor der Türkei.", ok: false, fb: "Schau auf die Schilder: Türkei, Italien – das sind US-Raketen." }
             ] },
           { x: 436, y: 178, r: 32, label: "Pfote über der Insel",
             frage: "Wie stellt Moskau seine Rolle auf Kuba dar?",
             options: [
-              { t: "Als Beschützer Kubas vor einem US-Angriff – 1961 gab es die Landung in der Schweinebucht.", ok: true, fb: "Richtig: Moskau sieht sich als Schutzmacht Kubas (Karte 1)." },
-              { t: "Als Angreifer.", ok: false, fb: "So sieht es Washington – nicht Moskau." },
-              { t: "Als neutraler Beobachter.", ok: false, fb: "Neutral ist hier niemand." }
+              { t: "Als Beschützer Kubas vor einem US-Angriff wie 1961 in der Schweinebucht.", ok: true, fb: "Richtig: Moskau sieht sich als Schutzmacht Kubas (Karte 1)." },
+              { t: "Als Angreifer, der die USA mit Raketen vor ihrer Küste bedrohen will.", ok: false, fb: "So sieht es Washington – nicht Moskau." },
+              { t: "Als neutraler Beobachter, der zwischen Kuba und den USA vermitteln will.", ok: false, fb: "Neutral ist hier niemand." }
             ] },
           { x: 105, y: 156, r: 24, label: "Knoten",
             frage: "Wovor warnt Chruschtschow mit dem Bild vom Knoten?",
             options: [
               { t: "Dass der Konflikt außer Kontrolle gerät, bis ihn niemand mehr lösen kann.", ok: true, fb: "Richtig. Am Ende des Briefs bietet er an: „Lassen Sie uns Maßnahmen ergreifen, um diesen Knoten zu lösen. Wir sind dazu bereit.“" },
-              { t: "Dass die USA schwächer sind.", ok: false, fb: "Davon spricht er nicht – lies Karte 2." },
-              { t: "Dass Kuba den Knoten geknüpft hat.", ok: false, fb: "Er schreibt: Sie – also die USA – haben den Knoten geknüpft." }
+              { t: "Dass die USA schwächer sind und den Knoten deshalb bald lösen müssen.", ok: false, fb: "Davon spricht er nicht – lies Karte 2." },
+              { t: "Dass Kuba den Knoten geknüpft hat und nur Kuba ihn wieder lösen kann.", ok: false, fb: "Er schreibt: Sie – also die USA – haben den Knoten geknüpft." }
             ] }
         ],
         schluss: {
           frage: "Und jetzt Quellenkritik: Am 27.10. bietet Chruschtschow an, „die Mittel, die Sie für offensiv halten“, aus Kuba abzuziehen. Was verschweigt diese Formulierung?",
           options: [
             { t: "Dass es Atomraketen sind, die US-Städte erreichen können.", ok: true, fb: "Richtig: Er nennt sie nicht offensiv – so wie Kennedy die Türkei-Raketen nicht erwähnt. Jede Seite verschweigt die eigene Bedrohung." },
-            { t: "Dass überhaupt Waffen auf Kuba stehen.", ok: false, fb: "Das gibt er ja zu – er bietet ihren Abzug an." },
-            { t: "Dass die Türkei zur NATO gehört.", ok: false, fb: "Das verschweigt er nicht – er spricht die Türkei sogar direkt an." }
+            { t: "Dass überhaupt sowjetische Waffen und Soldaten auf Kuba stehen.", ok: false, fb: "Das gibt er ja zu – er bietet ihren Abzug an." },
+            { t: "Dass die Türkei ein NATO-Staat und damit ein Gegner der UdSSR ist.", ok: false, fb: "Das verschweigt er nicht – er spricht die Türkei sogar direkt an." }
           ]
         }
       },
@@ -311,9 +311,9 @@ window.CW = {
         text: "Am selben Tag wird über Kuba ein US-Aufklärungsflugzeug (U-2) abgeschossen. Auf See werfen US-Zerstörer Übungs-Wasserbomben neben das sowjetische U-Boot B-59. Kapitän und Politoffizier glauben, der Krieg habe begonnen, und wollen einen Atomtorpedo abfeuern. Dafür müssen drei Offiziere zustimmen – Wassili Archipow sagt Nein.",
         frage: "Was zeigt der „Schwarze Samstag“?",
         options: [
-          { t: "Selbst wenn beide Regierungen keinen Krieg wollten, hätte ein Zwischenfall ihn auslösen können – es brauchte auch Glück.", ok: true, fb: "Richtig: Abschreckung allein garantierte nichts. Am 27.10.1962 hing viel an einzelnen Menschen." },
-          { t: "Kennedy wollte den Krieg.", ok: false, fb: "Nein – er suchte gerade an diesem Tag nach einer diplomatischen Lösung." },
-          { t: "Die Krise war da schon vorbei.", ok: false, fb: "Im Gegenteil: Der 27.10. war einer ihrer gefährlichsten Tage." }
+          { t: "Ein einziger Zwischenfall hätte den Krieg auslösen können, auch wenn ihn keine Regierung wollte.", ok: true, fb: "Richtig: Abschreckung allein garantierte nichts. Am 27.10.1962 hing viel an einzelnen Menschen." },
+          { t: "Kennedy wollte den Krieg und suchte nur noch einen Anlass für den Angriff.", ok: false, fb: "Nein – er suchte gerade an diesem Tag nach einer diplomatischen Lösung." },
+          { t: "Die Krise war an diesem Tag schon beigelegt; die Zwischenfälle waren bloß Missverständnisse ohne Gefahr.", ok: false, fb: "Im Gegenteil: Der 27.10. war einer ihrer gefährlichsten Tage." }
         ]
       }
     },
@@ -342,10 +342,10 @@ window.CW = {
           { t: "… ein Atomkrieg beide Seiten vernichtet hätte – wer angreift, wird selbst getroffen.", ok: true, beleg: "Haus 3 (Vergeltung) und Haus 4 (Knoten)" },
           { t: "… beide Seiten in der Kubakrise am Ende verhandelten und einen Kompromiss fanden.", ok: true, beleg: "Haus 4 (Angebot, den Knoten zu lösen)" },
           { t: "… sie ihre Gegnerschaft indirekt in Stellvertreterkriegen austrugen.", ok: true, beleg: "Haus 2 (indirekt)" },
-          { t: "… die UNO den Krieg verhindert hat.", ok: false, fb: "Nicht ganz: Die UNO war Bühne – Kennedy ruft den Sicherheitsrat an – und sollte den Abzug der Raketen überwachen. Verhindert haben den Krieg aber Abschreckung und Verhandlungen der beiden Regierungen." },
-          { t: "… sie sich eigentlich einig waren.", ok: false, fb: "Haus 1 zeigt das Gegenteil: zwei Lager, zwei Weltbilder." },
-          { t: "… nur eine Seite Atomwaffen besaß.", ok: false, fb: "Seit 1949 hatten beide Atombomben – gerade deshalb war ein Krieg so gefährlich." },
-          { t: "… Kuba den Konflikt beendet hat.", ok: false, fb: "Kuba saß nicht am Verhandlungstisch – Washington und Moskau einigten sich direkt." }
+          { t: "… die UNO den Krieg verhindert hat, weil sie beide Seiten zum Abrüsten zwang.", ok: false, fb: "Nicht ganz: Die UNO war Bühne – Kennedy ruft den Sicherheitsrat an – und sollte den Abzug der Raketen überwachen. Verhindert haben den Krieg aber Abschreckung und Verhandlungen der beiden Regierungen." },
+          { t: "… sie sich eigentlich einig waren und nur zum Schein gegeneinander rüsteten.", ok: false, fb: "Haus 1 zeigt das Gegenteil: zwei Lager, zwei Weltbilder." },
+          { t: "… nur eine Seite Atomwaffen besaß und die andere deshalb nie angreifen konnte.", ok: false, fb: "Seit 1949 hatten beide Atombomben – gerade deshalb war ein Krieg so gefährlich." },
+          { t: "… Kuba den Konflikt beendet hat, indem es die Raketen selbst zurückschickte.", ok: false, fb: "Kuba saß nicht am Verhandlungstisch – Washington und Moskau einigten sich direkt." }
         ],
         musterantwort: "„Der Kalte Krieg wurde zwischen den Supermächten nie heiß, weil ein Angriff den eigenen Untergang bedeutet hätte (<b>Abschreckung</b>, <b>Gleichgewicht des Schreckens</b>) und weil beide Seiten in der Kubakrise am Ende <b>verhandelten</b>. Dahin führte das <b>Sicherheitsdilemma</b>: Jede Seite hielt die andere für den Aggressor und rüstete auf. Ausgetragen wurde der Konflikt in <b>Stellvertreterkriegen</b> – für die Menschen dort war er heiß.“",
         nachtrag: "NACHTRAG DER ZENTRALE: Was die Öffentlichkeit 1962 nicht erfuhr: Auch Washington gab nach. Öffentlich sicherten die USA zu, Kuba nicht anzugreifen. Geheim ließ Robert Kennedy dem sowjetischen Botschafter ausrichten, dass die USA ihre Raketen bald aus der Türkei abziehen würden – aber nicht als Teil der öffentlichen Lösung.",
