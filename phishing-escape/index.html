@@ -680,7 +680,7 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
           <li><b>Ziel:</b> Phishing an Absender, Link, Druck und Datenabfrage erkennen und richtig reagieren.</li>
           <li><b>Ablauf:</b> 10 Minuten spielen, danach ca. 10 Minuten Besprechung der drei Regeln vom Schlussbildschirm.</li>
           <li>Die Ziffern des Türcodes werden bei jedem Spiel neu ausgelost. Abschreiben zwischen Gruppen hilft nicht.</li>
-          <li>Fehler kosten zunehmend Zeit (der erste 10 Sekunden, der zweite 20, der dritte 30 …), ein Tipp nur 20 Sekunden. Wer nur rät, schafft es nicht. Läuft die Zeit ab, kann man ohne Zeitlimit weiterspielen.</li>
+          <li>Fehler in den Rätseln kosten zunehmend Zeit (der erste 10 Sekunden, der zweite 20, der dritte 30 … höchstens 90), ein falscher Türcode 10 Sekunden, ein Tipp 20 Sekunden. Wer nur rät, schafft es nicht. Läuft die Zeit ab, kann man ohne Zeitlimit weiterspielen.</li>
           <li>Für Schnelle: Nach dem Ausbruch wartet das <b>„Profi-Level“</b> mit fünf kniffligen Fällen (Messenger-Trick, echte Paketnachricht, QR-Code-Betrug, echter Bestätigungscode, gefälschter Firmen-Absender).</li>
           <li>Alle Firmen, Namen, Adressen und Nummern sind erfunden, außer dem Sperr-Notruf 116 116. Keine Anmeldung, es wird nichts gespeichert, keine Töne.</li>
           <li><b>Fragen fürs Gespräch:</b> Hast du unter Zeitdruck schlechter geprüft – und warum setzen Betrüger genau darauf? Welche Falle war am schwersten? Woran erkennt man die echte Adresse in einem Link? Was tust du, wenn du schon geklickt hast? Welche Phishing-Nachrichten kennst du selbst (Spielkonto, Messenger, Gewinnspiel)?</li>
@@ -993,7 +993,7 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
     <h2>Die 3 wichtigsten Regeln gegen Phishing</h2>
     <p class="defi"><b>Phishing</b> (sprich: Fisching) heißt „Passwort-Fischen“: Betrüger angeln mit gefälschten Mails, SMS oder Nachrichten nach Passwörtern, Bankdaten oder Geld.</p>
     <ol class="rules">
-      <li><div class="rn">1</div><h3>Absender und Link prüfen</h3><p>Ein Name wie „FlinkPaket“ ist schnell gefälscht. Schau auf die Adresse dahinter: Passt sie nicht, ist es Betrug. Passt sie, ist das noch kein Beweis. Bei Links zählt der Teil zwischen „http(s)://“ und dem nächsten „/“. Er muss genau auf den echten Namen enden, davor darf höchstens ein Punkt stehen: <b>talbank.de</b> und <b>www.talbank.de</b> sind echt, <b>konto-talbank.de</b> und <b>talbank.de.konto24.com</b> nicht.</p></li>
+      <li><div class="rn">1</div><h3>Absender und Link prüfen</h3><p>Ein Name wie „FlinkPaket“ ist schnell gefälscht. Schau auf die Adresse dahinter: Passt sie nicht, ist es Betrug. Passt sie, ist das noch kein Beweis. Bei Links zählt der Teil zwischen „http(s)://“ und dem nächsten „/“. Er muss genau auf den echten Namen enden, und direkt davor steht nichts oder ein Punkt: <b>talbank.de</b> und <b>www.talbank.de</b> sind echt, <b>konto-talbank.de</b> und <b>talbank.de.konto24.com</b> nicht.</p></li>
       <li><div class="rn">2</div><h3>Druck ist ein Alarmsignal</h3><p>Drohung, kurze Frist, Gewinn oder „sag es niemandem“: Wer dich hetzt, will, dass du nicht nachdenkst. Erst einmal nichts tun.</p></li>
       <li><div class="rn">3</div><h3>Nie Passwort, PIN oder TAN über einen Link</h3><p>Echte Banken, Firmen und Chefs fragen so etwas nie per Mail oder SMS. Im Zweifel selbst die echte App öffnen oder über eine bekannte Nummer anrufen.</p></li>
     </ol>
@@ -1185,7 +1185,7 @@ const LK = {}; LINKS.forEach(l => { LK[l.id] = l; });
 const HINTS = {
   monitor: 'Tippe in jeder Mail auf den Absender: Erst die Adresse hinter dem Namen verrät, wer wirklich schreibt. Die Firmenadresse steht an der Pinnwand. Misstrauisch machen außerdem: Drohung, Eile, Geheimhaltung und Fragen nach Daten oder Geld.',
   phone: 'Fünf Fragen helfen: Wer schreibt? Wie wirst du angesprochen? Wie viel Zeit bleibt dir? Was sollst du verraten? Wohin führt der Link?',
-  laptop: 'Die echte Adresse ist www.talbank.de (Pinnwand). Schau auf den Teil zwischen „https://“ und dem nächsten „/“. Er muss genau auf talbank.de enden, Buchstabe für Buchstabe, und davor darf höchstens „www.“ stehen.',
+  laptop: 'Die echte Adresse ist www.talbank.de (Pinnwand). Schau auf den Teil zwischen „http(s)://“ und dem nächsten „/“. Er muss genau auf talbank.de enden, Buchstabe für Buchstabe, und direkt davor steht nichts oder ein Punkt (wie bei www.talbank.de).',
   door: 'Jedes befreite Gerät lässt eine Ziffer über der Tür aufleuchten. Reihenfolge am Schloss: Monitor – Handy – Laptop.'
 };
 
@@ -1660,10 +1660,13 @@ function flash() {
   clearTimeout(S.hitT); S.hitT = setTimeout(() => document.body.classList.remove('hit'), 480);
 }
 function burst(ms) { if (RM) return; document.body.classList.add('burst'); clearTimeout(S.bT); S.bT = setTimeout(() => document.body.classList.remove('burst'), ms || 420); }
-/* Jeder weitere Fehler kostet mehr Zeit (10, 20, 30 … s): Wer nur rät, schafft es nicht. */
-function fail(line) {
-  S.mistakes++; penalty(PEN * S.mistakes); flash();
-  if (S.mistakes === 3 && !S.practice) setTimeout(() => say('Merkt ihr was? Jeder Fehler kostet jetzt mehr Zeit. Ratet ruhig weiter. 😈', { cls: 'evil' }), 900);
+/* Jeder weitere Rätsel-Fehler kostet mehr Zeit (10, 20, 30 … höchstens 90 s): Wer nur rät, schafft es nicht.
+   Ein falscher Türcode kostet pauschal 10 s. */
+function fail(line, flat) {
+  S.mistakes++;
+  if (flat) penalty(PEN); else { S.esc = (S.esc || 0) + 1; penalty(Math.min(90, PEN * S.esc)); }
+  flash();
+  if (!flat && S.esc === 3 && !S.practice) setTimeout(() => say('Merkt ihr was? Jeder Fehler kostet jetzt mehr Zeit. Ratet ruhig weiter. 😈', { cls: 'evil' }), 900);
   if (!RM) { const g = $('#ghost'); g.classList.remove('go'); void g.offsetWidth; g.classList.add('go'); }
   let t = line;
   if (!t) { const pool = S.practice ? H.taunt.filter(x => !/Zeit|Tick/.test(x)) : H.taunt; do { t = rnd(pool); } while (t === S.lastTaunt && pool.length > 1); S.lastTaunt = t; }
@@ -2022,7 +2025,7 @@ function tryOpen() {
   if (ok) { finale(); return; }
   const p = $('#lpanel'); p.classList.remove('shake'); void p.offsetWidth; p.classList.add('shake');
   $('#lstat').innerHTML = pxText('ZUGANG VERWEIGERT', 'stamp bad') + '✖ Falscher Code.' + (solvedCount() < 3 ? ' Dir fehlen noch Ziffern.' : ' Vergleiche mit den Ziffern über der Tür.');
-  fail(rnd(['Falsch. Ich könnte das den ganzen Tag machen. 😏', 'Daneben. Die Tür mag dich nicht.', 'Raten? Echt jetzt? 😈']));
+  fail(rnd(['Falsch. Ich könnte das den ganzen Tag machen. 😏', 'Daneben. Die Tür mag dich nicht.', 'Raten? Echt jetzt? 😈']), true);
 }
 
 /* ---------------- Finale ---------------- */
@@ -2119,11 +2122,12 @@ const BETA = [
     x: 'Falle, obwohl die Adresse stimmt! Absender lassen sich fälschen, oder ein echtes Konto wurde gehackt. Ein Programm im Anhang ist verdächtig. Im Zweifel kurz beim IT-Service anrufen.' }
 ];
 const BT = { i: 0, ok: 0, done: false };
+function showFocus(el) { if (!el) return; el.focus({ preventScroll: true }); el.scrollIntoView({ block: 'nearest', behavior: RM ? 'auto' : 'smooth' }); }
 function betaStart() { BT.i = 0; BT.ok = 0; $('#btnBeta').hidden = true; $('#betaBox').hidden = false; betaShow(); }
 function betaShow() {
   const c = BETA[BT.i]; BT.done = false;
-  $('#betaBox').innerHTML = `<p class="bcount">FALL ${BT.i + 1} VON ${BETA.length}</p><p class="bfrom">${c.from}</p><div class="bmsg">${c.msg}</div>${c.note ? `<p class="bnote">${c.note}</p>` : ''}<div class="bbtns"><button class="bph" data-b="1">🎣 Falle</button><button class="bok" data-b="0">✔ Echt</button></div><div id="bres"></div>`;
-  $('#betaBox .bbtns button').focus({ preventScroll: true });
+  $('#betaBox').innerHTML = `<p class="bcount" tabindex="-1">FALL ${BT.i + 1} VON ${BETA.length}</p><p class="bfrom">${c.from}</p><div class="bmsg">${c.msg}</div>${c.note ? `<p class="bnote">${c.note}</p>` : ''}<div class="bbtns"><button class="bph" data-b="1">🎣 Falle</button><button class="bok" data-b="0">✔ Echt</button></div><div id="bres"></div>`;
+  showFocus($('#betaBox .bcount'));
 }
 function betaAnswer(falle) {
   if (BT.done) return; BT.done = true;
@@ -2131,12 +2135,12 @@ function betaAnswer(falle) {
   $$('#betaBox .bbtns button').forEach(b => { b.disabled = true; });
   const last = BT.i === BETA.length - 1;
   $('#bres').innerHTML = `<div class="bres ${ok ? 'ok' : 'bad'}"><b>${ok ? '✔ Richtig!' : '✖ Daneben!'}</b> ${c.x}</div><button class="btn btn-ice" data-bn="1">${last ? 'Auswertung' : 'Nächster Fall →'}</button>`;
-  $('#bres .btn').focus({ preventScroll: true });
+  showFocus($('#bres .btn'));
 }
 function betaEnd() {
   const gut = BT.ok >= 4;
   $('#betaBox').innerHTML = `<div class="bres ${gut ? 'ok' : 'bad'}">${pxText(gut ? 'PROFI-LEVEL GESCHAFFT' : 'PROFI-LEVEL: NOCHMAL', 'stamp ' + (gut ? 'ok' : 'bad'))}<p>${BT.ok} von ${BETA.length} Fällen richtig. ${gut ? 'Du erkennst auch gut getarnte Fallen.' : 'Lies die Erklärungen nochmal: Die Tricks werden immer raffinierter.'}</p></div><button class="btn btn-ghost" data-br="1">↻ Profi-Level nochmal</button>`;
-  $('#betaBox [data-br]').focus({ preventScroll: true });
+  showFocus($('#betaBox [data-br]'));
 }
 
 /* ---------------- Intro ---------------- */
