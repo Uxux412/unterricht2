@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060203">
+<title>Nachtschicht · Escape Room: Phishing erkennen</title>
+<style>
+:root{
+  --bg:#060203; --panel:#120609; --line:#3d121b;
+  --ink:#f7ecec; --muted:#c9a7ac; --red:#ff2b3a; --red2:#ff6170; --deep:#6e0a14;
+  --ice:#9ff4ff; --amber:#ffc163;
+  --glow:0 0 6px rgba(255,43,58,.95),0 0 18px rgba(255,20,40,.7),0 0 44px rgba(255,0,30,.45);
+  --iceglow:0 0 6px rgba(159,244,255,.85),0 0 22px rgba(120,230,255,.5);
+  --mono:ui-monospace,"SFMono-Regular","Cascadia Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --hand:"Segoe Print","Bradley Hand","Marker Felt","Chalkboard SE","Comic Sans MS",cursive;
+  --hudH:60px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:17px/1.45 var(--sans);-webkit-text-size-adjust:100%}
+body{overflow:hidden;touch-action:manipulation;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+button:disabled{cursor:default}
+a{color:var(--red2)}
+:focus-visible{outline:3px solid var(--ice);outline-offset:2px}
+.svgmono{font-family:var(--mono)}
+
+/* ---------- Effekte über allem ---------- */
+#app{position:fixed;inset:0;will-change:transform}
+#ghost{position:fixed;left:50%;top:50%;z-index:88;width:min(80vh,90vw);height:min(80vh,90vw);transform:translate(-50%,-50%);pointer-events:none;opacity:0;filter:drop-shadow(0 0 30px rgba(255,20,40,.8))}
+#ghost .ava{width:100%;height:100%}
+#ghost.go{animation:ghost .6s steps(6)}
+@keyframes ghost{0%{opacity:0}17%{opacity:.32;transform:translate(-52%,-50%) scale(1.04)}33%{opacity:.08}50%{opacity:.28;transform:translate(-48%,-51%) scale(.98)}67%{opacity:.05}100%{opacity:0}}
+#scan{position:fixed;inset:0;z-index:40;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);opacity:.55}
+#vig{position:fixed;inset:0;z-index:41;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.6) 100%)}
+#grain{position:fixed;inset:-50%;z-index:42;pointer-events:none;opacity:.07;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain 1.1s steps(6) infinite}
+@keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-5%,3%)}40%{transform:translate(4%,-4%)}60%{transform:translate(-3%,-2%)}80%{transform:translate(5%,5%)}100%{transform:translate(0,0)}}
+#flash{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,rgba(255,30,50,.28),rgba(255,10,40,.62))}
+#flash.go{animation:flash .55s ease-out}
+@keyframes flash{0%{opacity:0}12%{opacity:1}35%{opacity:.3}52%{opacity:.75}100%{opacity:0}}
+#tear{position:fixed;inset:0;z-index:89;pointer-events:none;opacity:0;background:repeating-linear-gradient(0deg,transparent 0 23px,rgba(159,244,255,.16) 23px 26px,transparent 26px 61px,rgba(255,43,58,.24) 61px 64px);mix-blend-mode:screen}
+body.burst #tear{animation:tear .42s steps(4)}
+body.burst #app{animation:jit .42s steps(4)}
+@keyframes tear{0%{opacity:1;transform:translateY(0)}25%{transform:translateY(-34px)}50%{opacity:.7;transform:translateY(42px)}75%{transform:translateY(-12px)}100%{opacity:0}}
+@keyframes jit{0%{transform:none}25%{transform:translate(7px,0) skewX(4deg)}50%{transform:translate(-9px,0)}75%{transform:translate(3px,0) skewX(-3deg)}100%{transform:none}}
+body.hit #app,body.hit .modal-box{animation:shake .45s}
+@keyframes shake{0%,100%{transform:none}15%{transform:translate(-9px,2px) skewX(-2deg)}30%{transform:translate(8px,-2px)}45%{transform:translate(-5px,1px) skewX(1deg)}60%{transform:translate(4px,0)}80%{transform:translate(-2px,0)}}
+#white{position:fixed;inset:0;z-index:95;pointer-events:none;opacity:0;background:radial-gradient(circle at var(--wx,80%) var(--wy,45%),#fff 0%,#f2fdff 35%,#c6f5ff 100%);transition:opacity 1.3s ease}
+#white.on{opacity:1}
+/* Herzschlag in der letzten Minute */
+body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(140,0,18,.8) 100%);animation:heart 1.05s infinite}
+@keyframes heart{0%,100%{opacity:.55}10%{opacity:1}22%{opacity:.65}34%{opacity:1}60%{opacity:.55}}
+
+/* ---------- Neon-Schrift ---------- */
+.neon{font-family:var(--serif);font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:transparent;-webkit-text-stroke:2px var(--red2);text-shadow:var(--glow);animation:neonflick 7s infinite}
+@supports not (-webkit-text-stroke:1px red){.neon{color:var(--red)}}
+@keyframes neonflick{0%,17%,21%,24%,61%,64%,100%{opacity:1}19%,23%,62%{opacity:.45}}
+.glitch{position:relative;display:inline-block}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;-webkit-text-stroke:0}
+.glitch::before{color:var(--ice);animation:gA 3.4s infinite steps(1);opacity:.8}
+.glitch::after{color:var(--red);animation:gB 2.9s infinite steps(1);opacity:.85}
+@keyframes gA{0%,86%,100%{transform:none;clip-path:inset(0 0 100% 0)}87%{transform:translate(-4px,-1px);clip-path:inset(10% 0 55% 0)}90%{transform:translate(3px,1px);clip-path:inset(60% 0 8% 0)}93%{transform:translate(-2px,0);clip-path:inset(35% 0 40% 0)}}
+@keyframes gB{0%,78%,100%{transform:none;clip-path:inset(100% 0 0 0)}79%{transform:translate(4px,1px);clip-path:inset(70% 0 5% 0)}83%{transform:translate(-3px,0);clip-path:inset(20% 0 60% 0)}}
+
+/* ---------- Bildschirme ---------- */
+.screen{position:fixed;inset:0;display:none;flex-direction:column}
+.screen.on{display:flex}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 22px;border-radius:12px;border:1.5px solid var(--red);background:linear-gradient(180deg,#2a0910,#14050a);color:#fff1f2;font-weight:700;letter-spacing:.02em;text-decoration:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.6),0 0 16px rgba(255,43,58,.35);text-shadow:0 0 8px rgba(255,80,95,.6);transition:box-shadow .2s,transform .1s}
+.btn:hover{box-shadow:inset 0 0 0 1px rgba(0,0,0,.6),0 0 28px rgba(255,43,58,.65)}
+.btn:active{transform:scale(.98)}
+.btn-big{font:700 20px var(--mono);padding:16px 30px;letter-spacing:.08em}
+.btn-ice{border-color:var(--ice);background:linear-gradient(180deg,#0b2a30,#06171b);color:#effdff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.6),0 0 18px rgba(159,244,255,.3);text-shadow:none}
+.btn-ghost{border-color:#4a2a30;background:transparent;box-shadow:none;color:var(--muted);text-shadow:none}
+.foot{text-align:center;font-size:13px;color:var(--muted);padding:6px 0 max(6px,env(safe-area-inset-bottom))}
+.foot a{color:inherit;display:inline-block;padding:12px}
+
+/* Start */
+.start{overflow-y:auto;background:radial-gradient(ellipse at 50% 120%,rgba(255,30,50,.32),transparent 60%),radial-gradient(ellipse at 50% -20%,#1d0a14,#060203 65%)}
+.start-inner{max-width:920px;width:100%;margin:auto;padding:max(30px,env(safe-area-inset-top)) 20px 18px;text-align:center}
+.kicker{margin:0 0 10px;font:600 13px var(--mono);letter-spacing:.24em;color:var(--red2);text-transform:uppercase}
+.title{font-size:min(92px,calc((100vw - 48px) / 10.2));line-height:1.05;margin:0 0 6px;white-space:nowrap}
+.rule-line{height:2px;width:min(520px,80%);margin:4px auto 20px;background:var(--red);box-shadow:var(--glow);border-radius:2px}
+.lead{font-size:clamp(17px,2.4vw,20px);color:#ecd6d9;max-width:580px;margin:0 auto 18px}
+.facts{list-style:none;padding:0;margin:0 0 26px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.facts li{border:1px solid var(--line);background:#12060a;border-radius:999px;padding:6px 13px;font-size:15px;color:var(--muted)}
+.teacher{margin:28px auto 0;text-align:left;max-width:640px;border:1px solid var(--line);border-radius:12px;background:#0d0407}
+.teacher summary{cursor:pointer;padding:12px 16px;font-weight:700;color:var(--muted);min-height:44px}
+.teacher div{padding:0 18px 14px;font-size:15px;color:#e5cfd2}
+.teacher li{margin-bottom:6px}
+.start-fx{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.fog{position:absolute;inset:-25%;background:radial-gradient(ellipse at 28% 78%,rgba(255,40,60,.2),transparent 48%),radial-gradient(ellipse at 74% 86%,rgba(150,20,60,.22),transparent 52%),radial-gradient(ellipse at 50% 100%,rgba(255,30,50,.25),transparent 40%);animation:fog 16s ease-in-out infinite alternate}
+@keyframes fog{0%{transform:translate(-4%,2%) scale(1)}100%{transform:translate(4%,-3%) scale(1.12)}}
+.ember{position:absolute;bottom:-12px;width:4px;height:4px;border-radius:50%;background:#ff4d5e;box-shadow:0 0 8px #ff2b3a,0 0 16px rgba(255,43,58,.6);opacity:0;animation:ember linear infinite}
+@keyframes ember{0%{opacity:0;transform:translate(0,0)}10%{opacity:.9}70%{opacity:.6}100%{opacity:0;transform:translate(var(--dx,20px),-105vh)}}
+.start-inner,.start .foot{position:relative}
+
+/* Intro */
+.intro{z-index:20;background:#000;justify-content:center;align-items:center;transition:opacity .9s ease}
+.intro.red{background:radial-gradient(ellipse at center,#1a0207,#000 75%)}
+.intro.out{opacity:0;pointer-events:none}
+.term{position:relative;z-index:1;width:min(900px,100%);padding:24px 20px;font-family:var(--mono);font-size:clamp(15px,2.3vw,19px);color:var(--muted);max-height:100%;overflow:hidden;transition:opacity .5s}
+.intro-ava{position:absolute;left:50%;top:50%;width:min(70vh,80vw);height:min(70vh,80vw);transform:translate(-50%,-50%) scale(.9);opacity:0;pointer-events:none;transition:opacity 1.2s,transform 6s ease-out;filter:drop-shadow(0 0 24px rgba(255,20,40,.55))}
+.intro-ava .ava{width:100%;height:100%}
+.intro.red .intro-ava{opacity:.22;transform:translate(-50%,-50%) scale(1);animation:avaflick 3.2s steps(1) infinite 1.2s}
+@keyframes avaflick{0%,70%,100%{opacity:.22}72%{opacity:.05}74%{opacity:.3}76%{opacity:.12}}
+.term p{margin:0 0 7px;white-space:pre-wrap}
+.t-warn{color:var(--amber)}
+.t-hack{color:#ff4d5e;font-size:1.5em;font-weight:700;text-shadow:var(--glow);margin:16px 0 4px!important}
+.t-ok{color:var(--ice);text-shadow:0 0 8px rgba(159,244,255,.35)}
+.cursor::after{content:'█';animation:blink 1s steps(1) infinite;margin-left:2px}
+@keyframes blink{50%{opacity:0}}
+.intro.boot .term{animation:crt .8s ease-out,flick 1.4s steps(1) .8s}
+@keyframes crt{0%{transform:scale(1,.004);filter:brightness(5)}45%{transform:scale(1,.004)}75%{transform:scale(1,1.06);filter:brightness(2)}100%{transform:none;filter:none}}
+@keyframes flick{0%{opacity:1}12%{opacity:.25}22%{opacity:1}50%{opacity:.5}58%{opacity:1}100%{opacity:1}}
+.ready{position:relative;z-index:2;margin-top:20px}
+.skip{z-index:3;position:absolute;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));background:transparent;border:1px solid #3a2a2e;color:#a08a8e;border-radius:10px;padding:10px 14px;min-height:44px;font:14px var(--mono)}
+.bigclock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .3s,transform 1s cubic-bezier(.6,0,.3,1)}
+.bigclock span{font:800 clamp(84px,26vw,250px)/1 var(--mono);color:#ffd9dc;text-shadow:var(--glow)}
+.bigclock.on{opacity:1}
+.bigclock.fly{transform:translateY(-44vh) scale(.18);opacity:0}
+
+/* ---------- Raum ---------- */
+.room{background:#0a0508}
+.room.on{display:grid;grid-template-rows:auto 1fr auto;grid-template-columns:1fr}
+.room.enter{animation:roomIn 1.4s ease-out}
+@keyframes roomIn{0%{opacity:0}20%{opacity:.7}28%{opacity:.2}40%{opacity:1}48%{opacity:.6}60%{opacity:1}}
+.hud{grid-column:1/-1;position:relative;z-index:30;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:6px max(10px,env(safe-area-inset-right)) 6px max(10px,env(safe-area-inset-left));padding-top:max(6px,env(safe-area-inset-top));background:linear-gradient(180deg,rgba(8,2,4,.97),rgba(8,2,4,.88));border-bottom:1px solid #3a1019;box-shadow:0 1px 0 rgba(255,43,58,.25),0 6px 24px rgba(0,0,0,.6)}
+.hud-hack{justify-self:start;display:flex;align-items:center;gap:8px;min-height:46px;padding:4px 12px 4px 4px;border-radius:12px;border:1px solid #5a1424;background:#170509;color:#ff8e9b}
+.hud-hack.ping .ava{animation:ping .6s}
+.hud-hack.nerv .ava{animation:nerv .25s 3}
+.hud-hack.gone{opacity:.35;filter:grayscale(1);transition:opacity 1s,filter 1s}
+@keyframes ping{40%{transform:scale(1.18);filter:drop-shadow(0 0 8px #ff2b3a)}}
+@keyframes nerv{25%{transform:translate(-2px,1px) rotate(-4deg)}75%{transform:translate(2px,-1px) rotate(4deg)}}
+.ava{width:36px;height:36px;display:block}
+.ava .eye{animation:eye 4s infinite}
+@keyframes eye{0%,92%,100%{opacity:1}94%{opacity:.1}96%{opacity:1}}
+.hh{display:flex;flex-direction:column;align-items:flex-start;gap:4px;font:700 13px/1 var(--mono);letter-spacing:.08em}
+.meter{display:flex;gap:3px}
+.meter i{width:15px;height:6px;border-radius:2px;background:var(--red);box-shadow:0 0 6px var(--red);transition:all .6s}
+.meter i.off{background:#2e2226;box-shadow:none}
+.hud-c{position:relative;text-align:center}
+.clock{font:700 clamp(28px,7vw,40px)/1 var(--mono);color:#ffd9dc;text-shadow:var(--glow);letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.clock.warn{color:var(--amber);text-shadow:0 0 10px rgba(255,193,99,.7)}
+.clock.low{color:#fff;animation:lowp 1s infinite}
+@keyframes lowp{50%{color:var(--red);opacity:.65}}
+.pen{position:absolute;left:50%;top:100%;font:700 18px var(--mono);color:var(--red2);text-shadow:var(--glow);pointer-events:none;white-space:nowrap;animation:penf 1.25s ease-out forwards}
+@keyframes penf{0%{opacity:0;transform:translate(-50%,-6px) scale(1.5)}20%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,24px)}}
+.hud-code{justify-self:end;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.hc-lbl{font:600 11px var(--mono);letter-spacing:.16em;color:var(--muted);text-transform:uppercase}
+.hc{display:flex;gap:4px}
+.hc b{width:28px;height:32px;display:grid;place-items:center;border-radius:6px;border:1px solid #3a1a22;background:#12060a;color:#5a3a40;font:700 20px var(--mono)}
+.hc b.lit{color:#fff;border-color:var(--ice);box-shadow:0 0 12px rgba(159,244,255,.4);text-shadow:var(--iceglow);animation:hpop .8s}
+@keyframes hpop{0%{transform:scale(1.6)}100%{transform:none}}
+.stage{position:relative;min-height:0;overflow:hidden;background:#0d070b}
+.stage.pan{touch-action:none;cursor:grab}
+.stage.pan.dragging{cursor:grabbing}
+.panbtn{position:absolute;top:58%;z-index:3;display:none;align-items:center;justify-content:center;width:40px;height:60px;margin-top:-30px;padding:0;border:1px solid rgba(159,244,255,.35);border-radius:12px;background:rgba(6,2,4,.45);color:var(--ice);font-size:28px;line-height:1;animation:panhint 1.8s ease-in-out infinite}
+.panbtn.l{left:6px}.panbtn.r{right:6px}
+.stage.pan .panbtn.show{display:flex}
+@keyframes panhint{50%{box-shadow:0 0 18px rgba(159,244,255,.5)}}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block;transition:transform 2.6s cubic-bezier(.5,0,.2,1)}
+.objbar{display:flex;gap:6px;padding:8px max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));background:linear-gradient(0deg,rgba(8,2,4,.97),rgba(8,2,4,.85));border-top:1px solid #3a1019;transition:opacity .6s}
+.objbar.gone{opacity:0;pointer-events:none}
+.ob{flex:1;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:56px;padding:6px 2px;border-radius:10px;border:1px solid #3a1a22;background:#12060a;color:#f0d8db;font-size:13px}
+.ob:hover{border-color:var(--red);box-shadow:0 0 14px rgba(255,43,58,.35)}
+.ob .ico svg{width:24px;height:24px;display:block}
+.ob .lb{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ob .st{position:absolute;top:3px;right:6px;font:700 12px var(--mono);color:var(--red2)}
+.ob.done{border-color:#2c6b77;color:var(--ice)}
+.ob.done .st{color:var(--ice)}
+.ob.ready{border-color:var(--ice);animation:ready 1.3s infinite}
+@keyframes ready{50%{box-shadow:0 0 22px rgba(159,244,255,.6)}}
+.ico svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+@media (max-width:380px){.hh b{display:none}.hc b{width:24px}.ob{font-size:12px}}
+@media (max-height:540px) and (min-aspect-ratio:4/3){
+  .room.on{grid-template-rows:auto 1fr;grid-template-columns:1fr auto}
+  .objbar{flex-direction:column;border-top:0;border-left:1px solid #3a1019;width:118px;padding:6px max(6px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) 6px;overflow:auto}
+  .ob{flex-direction:row;justify-content:flex-start;gap:6px;min-height:44px;padding:4px 8px}
+  .ob .ico svg{width:20px;height:20px}
+  .hud{padding-top:max(4px,env(safe-area-inset-top));padding-bottom:4px}
+  .clock{font-size:28px}
+}
+
+/* Szene */
+.hot{cursor:pointer;outline:none}
+.hot .hl{fill:none;stroke:var(--ice);stroke-width:3;stroke-dasharray:10 7;opacity:0;transition:opacity .2s}
+.hot:hover .hl,.hot:focus-visible .hl{opacity:.9}
+#markers{pointer-events:none;transition:opacity .6s}
+#markers.gone{opacity:0}
+.mk .ring{fill:none;stroke:var(--ice);stroke-width:2.5;transform-box:fill-box;transform-origin:center;animation:ring 2.2s ease-out infinite}
+.mk .core{fill:var(--ice)}
+.mk text{font-family:var(--mono);font-weight:700;font-size:var(--fs,20px);fill:var(--ice);letter-spacing:.12em;text-anchor:middle;paint-order:stroke;stroke:#050203;stroke-width:4px}
+.mk.done .ring{animation:none;opacity:0}
+.mk.done .core{fill:#fff}
+.mk.done text{fill:#fff;opacity:.6}
+.mk.ready .ring{animation-duration:1s;stroke-width:4}
+@keyframes ring{0%{transform:scale(.6);opacity:1}100%{transform:scale(2.4);opacity:0}}
+.alarm{animation:alarm 3.6s ease-in-out infinite;pointer-events:none}
+@keyframes alarm{0%,100%{opacity:.25}50%{opacity:.9}}
+#scene.free .alarm{animation:none;opacity:0;transition:opacity 1s}
+.beacon{animation:beacon 3.6s ease-in-out infinite}
+@keyframes beacon{50%{fill:#ff6b77}}
+.exit{animation:exitf 5s infinite}
+@keyframes exitf{0%,40%,44%,48%,100%{opacity:1}42%,46%{opacity:.25}}
+#city .tw{animation:tw 6s infinite}
+@keyframes tw{0%,70%,100%{opacity:.8}75%{opacity:.08}}
+#monHack{animation:monf 5s infinite}
+@keyframes monf{0%,30%,33%,100%{opacity:1}31%{opacity:.6}32%{opacity:.9}}
+.monTxt{animation:montx 4s infinite steps(1)}
+@keyframes montx{0%,88%,100%{transform:none}90%{transform:translate(-6px,0)}93%{transform:translate(5px,0)}}
+.pnot{animation:pn 1.6s ease-in-out infinite}
+@keyframes pn{50%{opacity:.35}}
+.okv{display:none}
+#scene.s-monitor #monHack,#scene.s-phone .phHack,#scene.s-laptop #lapHack{display:none}
+#scene.s-monitor #monOk,#scene.s-phone .phOk,#scene.s-laptop #lapOk{display:inline}
+#monGlow,#deskGlow{transition:opacity 1s}
+#monGlowOk,#deskGlowOk{opacity:0;transition:opacity 1s}
+#scene.s-monitor #monGlow,#scene.s-monitor #deskGlow{opacity:0}
+#scene.s-monitor #monGlowOk,#scene.s-monitor #deskGlowOk{opacity:1}
+.dslot rect{fill:#120609;stroke:#3a1a22;stroke-width:2}
+.dslot text{font-family:var(--mono);font-weight:700;font-size:30px;fill:#4a2a30;text-anchor:middle;dominant-baseline:central;transform-box:fill-box;transform-origin:center}
+.dslot.lit rect{fill:rgba(159,244,255,.1);stroke:var(--ice)}
+.dslot.lit text{fill:#fff;filter:url(#fGlow)}
+.dslot.pop text{animation:dpop 1s ease-out}
+@keyframes dpop{0%{opacity:0;transform:scale(2.6)}35%{opacity:1}50%{opacity:.25}65%{opacity:1}100%{transform:none}}
+.burst{fill:none;stroke:var(--ice);stroke-width:3;opacity:0;transform-box:fill-box;transform-origin:center}
+.burst.go{animation:burst 1s ease-out}
+@keyframes burst{0%{opacity:1;transform:scale(.3)}100%{opacity:0;transform:scale(3)}}
+.neonframe{fill:none;stroke:var(--red);stroke-width:4;filter:url(#fGlow);animation:nf 2.4s ease-in-out infinite;transition:stroke .8s}
+@keyframes nf{0%,100%{opacity:.95}50%{opacity:.55}}
+#scene.ready .neonframe{stroke:var(--ice);animation-duration:1s}
+#scene.open .neonframe{stroke:#fff;animation:none;opacity:1}
+.boltWin,.boltPath,.boltRoom{opacity:0;pointer-events:none}
+#scene.bolt .boltWin{animation:boltA .9s ease-out}
+#scene.bolt .boltPath{animation:boltB .9s ease-out}
+#scene.bolt .boltRoom{animation:boltC .9s ease-out}
+@keyframes boltA{0%{opacity:0}6%{opacity:.8}12%{opacity:.08}20%{opacity:.6}45%{opacity:0}}
+@keyframes boltB{0%{opacity:0}6%{opacity:1}12%{opacity:0}20%{opacity:.9}35%{opacity:0}}
+@keyframes boltC{0%{opacity:0}6%{opacity:.35}12%{opacity:0}20%{opacity:.22}50%{opacity:0}}
+#doorPanel{transform-box:fill-box;transform-origin:0% 50%;transition:transform 1.9s cubic-bezier(.6,.05,.25,1),opacity 1.9s}
+#scene.open #doorPanel{transform:scaleX(.1);opacity:.85}
+#doorLight,#rays,#flood{opacity:0;transition:opacity 1.6s ease;pointer-events:none}
+#flood{transition-duration:2.6s;mix-blend-mode:screen}
+#scene.open #doorLight,#scene.open #rays{opacity:1}
+#scene.open #flood{opacity:1}
+#scene.open .hl,#scene.ready.open .hl{opacity:0!important}
+.code-scroll{animation:codescroll 9s linear infinite}
+@keyframes codescroll{from{transform:translateY(0)}to{transform:translateY(-168px)}}
+#scene.open #doorLed,#scene.free #doorLed{fill:var(--ice)}
+.deco{pointer-events:none}
+#agent{pointer-events:none}
+#beam{mix-blend-mode:screen;transition:opacity .35s}
+/* Agent auf Start-, Schluss- und Tipp-Anzeige */
+.start-agent{position:relative;width:96px;height:154px;margin:2px auto 12px}
+.start-agent svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 0 10px rgba(255,43,58,.55))}
+.start-agent .blink{opacity:0;animation:blinkf 4.2s steps(1) infinite}
+@keyframes blinkf{0%,93%,100%{opacity:0}94%,97%{opacity:1}}
+.start-agent::after{content:'';position:absolute;left:84%;top:76%;width:190px;height:120px;background:radial-gradient(ellipse at 0% 0%,rgba(255,242,176,.42),transparent 66%);transform:rotate(16deg);transform-origin:0 0;pointer-events:none}
+@media (max-height:700px){.start-agent{width:64px;height:102px}}
+.end-agent{width:90px;height:144px;margin:0 auto 4px}
+.end-agent svg{width:100%;height:100%;filter:drop-shadow(0 0 14px rgba(159,244,255,.55))}
+.hint-agent{flex:none}
+.hint-agent svg{display:block;width:40px;height:64px}
+
+/* ---------- Fenster (Rätsel) ---------- */
+.modal{position:fixed;left:0;right:0;bottom:0;top:var(--hudH);z-index:50;display:none;align-items:center;justify-content:center;padding:10px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:rgba(4,1,3,.74);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.modal.on{display:flex}
+.modal-box{position:relative;width:min(1060px,100%);height:min(790px,100%);display:flex;flex-direction:column;background:linear-gradient(180deg,#14070c,#0b0407);border:1px solid #4a1622;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.7),0 0 0 1px rgba(255,43,58,.12),0 0 40px rgba(255,43,58,.14);overflow:hidden;transform-origin:var(--ox,50%) var(--oy,50%)}
+.modal.show .modal-box{animation:zin .5s cubic-bezier(.2,.9,.2,1)}
+.modal.closing .modal-box{animation:zout .26s ease-in forwards}
+@keyframes zin{0%{transform:scale(.1);opacity:0;filter:blur(6px)}55%{opacity:1;filter:none}100%{transform:none}}
+@keyframes zout{to{transform:scale(.1);opacity:0}}
+.m-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 8px 8px 16px;border-bottom:1px solid #3a1019;background:#0e0407}
+.m-head h2{flex:1;min-width:0;margin:0;font:700 15px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--red2);text-shadow:0 0 10px rgba(255,43,58,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hintbtn{min-height:44px;padding:0 12px;border-radius:10px;border:1px solid #5a4314;background:#1a1206;color:var(--amber);font-size:14px;white-space:nowrap}
+.xbtn{flex:none;min-width:44px;height:44px;padding:0 12px;border-radius:10px;border:1px solid #4a1a24;background:#16070b;font-size:15px;white-space:nowrap}
+.xbtn b{font-size:20px;vertical-align:-2px}
+.m-ticker{order:10;flex:0 0 calc(100% + 24px);margin:0 -8px -8px -16px;display:flex;align-items:center;gap:8px;min-height:42px;padding:6px 12px;background:#1a050b;border-top:1px solid #4a1622;color:#ffe4e8;font-size:15px;line-height:1.35}
+.m-ticker .ava{flex:none;width:26px;height:26px}
+.m-ticker .tt{flex:1;min-width:0}
+.m-ticker .tt b{font:700 12px var(--mono);letter-spacing:.12em;color:var(--red2);margin-right:8px}
+.m-ticker.new .tt{animation:msgin .35s ease-out}
+.m-ticker.nervous.new .tt{animation:msgin .35s ease-out,jitter .14s linear .35s 5}
+.m-ticker.evil{box-shadow:inset 0 0 0 1px var(--red),inset 0 0 22px rgba(255,43,58,.35)}
+.m-ticker.sys{background:#061a1e;border-bottom-color:#1d5560;color:#d6fbff}
+.m-ticker.sys .tt b{color:var(--ice)}
+.tdots{color:#c98c96;font-style:italic}
+@media (min-width:1100px){.m-ticker{display:none!important}.modal{padding-left:376px}.chat-body{max-height:min(62vh,560px)}}
+.sweep{position:absolute;left:0;right:0;top:0;height:120px;z-index:7;pointer-events:none;background:linear-gradient(180deg,transparent,rgba(159,244,255,.0) 30%,rgba(159,244,255,.35) 85%,#e9fdff 100%);animation:sweep 1s ease-in forwards}
+@keyframes sweep{0%{transform:translateY(-120px);opacity:1}100%{transform:translateY(calc(var(--bh,800px) + 20px));opacity:.6}}
+.m-hint{display:flex;gap:12px;align-items:center;margin:10px 12px 0;padding:10px 14px;border-left:3px solid var(--amber);background:#1a1306;color:#ffe9b8;border-radius:6px;font-size:15px}
+.m-hint b{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--amber)}
+.m-body{flex:1;min-height:0;overflow:auto;padding:12px;position:relative;-webkit-overflow-scrolling:touch}
+.k-phone{width:min(440px,100%)}
+.k-laptop{width:min(980px,100%)}
+.k-door,.k-board{width:min(720px,100%);height:auto;max-height:100%}
+.k-monitor .m-body{overflow:hidden}
+@media (max-width:600px){.modal{padding:0}.modal-box,.k-door,.k-board{width:100%;height:100%;max-height:none;border-radius:0;border-left:0;border-right:0}.xbtn span{display:none}}
+
+/* Geschafft-Karte */
+.solved{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(4,1,3,.84);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);animation:fadein .3s}
+@keyframes fadein{from{opacity:0}}
+.sv-card{width:min(420px,100%);text-align:center;padding:24px 20px;border-radius:18px;background:#0b0507;border:1px solid #2c5f6b;box-shadow:0 0 0 1px rgba(159,244,255,.15),0 0 60px rgba(159,244,255,.18)}
+.sv-k{margin:0;font:700 14px var(--mono);letter-spacing:.2em;color:var(--ice)}
+.sv-d{font:800 112px/1.1 var(--mono);color:#fff;text-shadow:var(--iceglow)}
+.sv-d.set{animation:dset .6s}
+@keyframes dset{0%{transform:scale(1.5);filter:brightness(2)}100%{transform:none}}
+.sv-t{margin:0 0 12px;color:#e6f6f8}
+.sv-b{display:flex;flex-direction:column;gap:8px}
+
+/* Monitor: Mailprogramm */
+.bezel{height:100%;padding:8px;background:#050203;border-radius:12px;border:1px solid #3a1a22;box-shadow:inset 0 0 0 2px #120609,0 0 30px rgba(255,43,58,.12)}
+.mailapp{height:100%;display:flex;flex-direction:column;background:#eef2f8;color:#172033;border-radius:6px;overflow:hidden;font-size:16px}
+.mailbar{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#1c2a4a;color:#e3ecff;padding:8px 12px;font-size:14px}
+.acct{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mprog{flex:none;font-family:var(--mono);background:#0f1a33;border-radius:999px;padding:3px 10px}
+.mtip{margin:0;padding:8px 12px;background:#fff7d6;color:#4d3f00;font-size:14px;border-bottom:1px solid #eadb9a}
+.mwrap{flex:1;min-height:0;display:grid;grid-template-columns:minmax(250px,34%) 1fr}
+.mlist{list-style:none;margin:0;padding:0;overflow:auto;background:#fff;border-right:1px solid #d6ddea}
+.mitem{display:grid;grid-template-columns:12px minmax(0,1fr) auto;column-gap:8px;row-gap:1px;width:100%;text-align:left;border:0;border-bottom:1px solid #e7ebf3;background:#fff;color:#172033;padding:10px 12px;min-height:72px}
+.mitem:hover{background:#f3f6fc}
+.mitem.sel{background:#e3ecff;box-shadow:inset 3px 0 0 #2f6bff}
+.mdot{grid-row:1/4;margin-top:7px;width:9px;height:9px;border-radius:50%;background:#2f6bff}
+.mitem.done .mdot{background:transparent}
+.mn{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mitem.done .mn{font-weight:600}
+.mt{font-size:12px;color:#5d6984;align-self:center}
+.ms,.mp{grid-column:2/4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms{font-size:14px}
+.mp{font-size:13px;color:#5d6984}
+.tag{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:1px 8px;margin-right:4px}
+.tag.ph{background:#ffe1e6;color:#a4001f}
+.tag.ok{background:#d6f5e6;color:#0a6340}
+.tag.x{background:#3a0f1a;color:#ffd1da}
+.mview{overflow:auto;padding:16px 18px 0;background:#fff}
+.mview::after{content:'';display:block;height:1px}
+.mempty{height:100%;display:flex;align-items:center;justify-content:center;color:#5d6984;text-align:center}
+.mback{display:none;margin:0 0 10px;min-height:44px;padding:0 14px;border-radius:10px;border:1px solid #c8d2e6;background:#f3f6fc;color:#1c2a4a;font-weight:700}
+.msubj{font-size:20px;line-height:1.3;margin:0 0 12px}
+.mfrom{display:flex;gap:10px;align-items:flex-start;margin-bottom:14px}
+.mav{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#d8e2f5;color:#2a3b62;font-weight:700}
+.mfw{min-width:0}
+.msender{display:block;border:0;background:none;padding:2px 0;text-align:left;color:#172033;min-height:36px}
+.msender .tg{display:inline-block;font-size:13px;color:#1d55e0;margin-left:6px;text-decoration:underline;white-space:nowrap}
+.maddr{display:inline-block;margin:2px 0 4px;padding:3px 8px;border-radius:6px;background:#eef2f8;font:14px var(--mono);color:#1f2a44;word-break:break-all}
+.mmeta{font-size:13px;color:#5d6984}
+.mtext p{margin:0 0 12px}
+.mlink{display:inline-block;border:0;border-radius:8px;padding:10px 18px;background:#2f6bff;color:#fff;font-weight:700;min-height:44px}
+.mlink.txt{background:none;color:#1d55e0;text-decoration:underline;padding:8px 0}
+.lprev{margin:-4px 0 14px;padding:10px 12px;border-radius:8px;background:#1c2a4a;color:#e9f0ff;font-size:14px}
+.lprev code{display:block;margin-top:2px;font:15px var(--mono);color:#ffd47a;word-break:break-all}
+.lprev small{display:block;margin-top:6px;color:#b4c4e2;font-size:13px}
+.mstick{position:sticky;bottom:0;z-index:2;margin:18px -18px 0;padding:12px 18px 16px;background:#fff;border-top:1px solid #e7ebf3;box-shadow:0 -12px 18px rgba(255,255,255,.92)}
+.mdecide{display:flex;gap:10px;flex-wrap:wrap}
+.show-s{display:none}
+.mdecide button{flex:1;min-width:110px;min-height:54px;border-radius:12px;font-weight:800;font-size:17px;border:2px solid}
+.bph{background:#fff0f3;border-color:#ff3355!important;color:#a4001f}
+.bok{background:#ecfbf3;border-color:#1fae6b!important;color:#0a6340}
+.verdict{margin:16px 0 22px;border-radius:12px;padding:12px 14px;font-size:15px}
+.verdict.ok{background:#e9fbf2;border:1px solid #9be3c2}
+.verdict.bad{background:#fff0f3;border:1px solid #ffb3c1}
+.vh{margin:0 0 6px;font-size:16px}
+.verdict ul{margin:6px 0 12px;padding-left:20px}
+.verdict li{margin-bottom:5px}
+.verdict code,.mtext code{font:14px var(--mono);background:rgba(0,0,0,.06);padding:0 4px;border-radius:4px;word-break:break-all}
+.btn-light{min-height:46px;padding:10px 18px;border-radius:10px;border:1px solid #c8d2e6;background:#fff;color:#172033;font-weight:700}
+.verdict .btn,.lres .btn{width:100%}
+@media (max-width:760px){
+  .mwrap{grid-template-columns:1fr}
+  .mview{display:none}
+  .mwrap.reading .mlist{display:none}
+  .mwrap.reading .mview{display:block}
+  .mback{display:inline-flex;align-items:center}
+  .hide-s{display:none}
+  .show-s{display:inline}
+}
+
+/* Diensthandy */
+.k-phone .m-body{display:flex;justify-content:center;padding:10px}
+.phone{position:relative;width:100%;max-width:380px;height:100%;min-height:500px;border-radius:40px;padding:10px;background:#0b0608;box-shadow:0 0 0 2px #3a2228,0 0 30px rgba(255,43,58,.18),0 20px 50px rgba(0,0,0,.6)}
+.notch{position:absolute;top:16px;left:50%;transform:translateX(-50%);width:84px;height:22px;border-radius:12px;background:#000;z-index:2}
+.pscreen{height:100%;border-radius:31px;overflow:hidden;background:#000;color:#fff;display:flex;flex-direction:column}
+.plock{flex:1;display:flex;flex-direction:column;align-items:center;padding:58px 14px 18px;background:radial-gradient(ellipse at 50% 0%,#3a0d1a,#0a0306 70%)}
+.ptime{font-size:66px;font-weight:300;line-height:1;letter-spacing:-1px}
+.pdate{color:#e7cfd4;margin:6px 0 30px}
+.pnotif{width:100%;text-align:left;border:0;border-radius:18px;padding:12px 14px;background:rgba(255,255,255,.15);color:#fff;display:flex;flex-direction:column;gap:2px;font-size:15px;animation:notif 2.2s ease-in-out infinite}
+@keyframes notif{50%{box-shadow:0 0 0 3px rgba(255,97,112,.5)}}
+.pn-app{font-size:12px;letter-spacing:.06em;color:#e2ccd1}
+.phint{margin-top:auto;color:#c9a7ac;font-size:14px}
+.sms{flex:1;min-height:0;display:flex;flex-direction:column;background:#000}
+.shead{display:flex;flex-direction:column;align-items:center;gap:3px;padding:44px 10px 10px;background:#131316;border-bottom:1px solid #26262c;text-align:center}
+.sav{width:46px;height:46px;border-radius:50%;background:#5b5f6a;display:grid;place-items:center;font-weight:700;font-size:20px}
+.shead .ch{font-size:17px;font-weight:600}
+.ssub{font-size:12px;color:#9a9aa6}
+.stask{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;background:#1a0a0f;color:#f3dde0;font-size:14px;border-bottom:1px solid #3a1019}
+.sdots{font-family:var(--mono);letter-spacing:2px;color:var(--red2);white-space:nowrap}
+.sbody{flex:1;min-height:0;overflow:auto;padding:12px 12px 22px}
+.stime{text-align:center;font-size:12px;color:#9a9aa6;margin:4px 0 10px}
+.bubble{background:#26272c;border-radius:20px 20px 20px 6px;padding:12px 14px;font-size:18px;line-height:1.8;max-width:96%}
+.ch{cursor:pointer;border-radius:6px;padding:3px 1px;border-bottom:2px dotted rgba(255,255,255,.32);-webkit-box-decoration-break:clone;box-decoration-break:clone;transition:background .2s}
+.ch:hover{background:rgba(255,255,255,.1)}
+.ch.lnk{color:#6cb2ff;text-decoration:underline}
+.ch.hit{background:rgba(255,43,58,.32);border-bottom:2px solid var(--red);color:#fff}
+.ch.hit::after{content:attr(data-n);display:inline-block;width:19px;height:19px;margin-left:4px;border-radius:50%;background:var(--red);color:#fff;font:700 12px/19px var(--sans);text-align:center;vertical-align:2px}
+.ch.meh{background:rgba(160,160,175,.22);border-bottom-color:transparent;color:#c9c9d2}
+.ch.meh::after{content:' ✓ harmlos';font-size:12px;color:#a7a7b5}
+.found{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+.found li{display:grid;grid-template-columns:24px 1fr;gap:8px;background:#1c080d;border:1px solid #521726;border-radius:12px;padding:9px 10px;font-size:15px;color:#ffe1e6;animation:fadein .4s}
+.fn{width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px}
+.sact{margin-top:14px;background:#12121a;border:1px solid #3a3a52;border-radius:16px;padding:12px;animation:fadein .4s}
+.sact h4{margin:0 0 4px;font-size:17px}
+.opt{display:block;width:100%;text-align:left;margin:8px 0 0;padding:12px;border-radius:12px;border:1px solid #3d3d58;background:#1a1a26;color:#f1f1f8;font-size:15px;min-height:48px}
+.opt.bad{border-color:var(--red);background:#2a0b12;color:#ffd7dd}
+.opt.good{border-color:var(--ice);background:#0b262b;color:#e9fdff}
+.ox{display:block;margin-top:6px;font-size:14px;opacity:.95}
+.sact .btn{width:100%;margin-top:12px}
+
+/* Laptop */
+.k-laptop .m-body{display:flex;flex-direction:column;align-items:center;padding:12px}
+.laptop{width:100%;max-width:920px;flex:1;min-height:0;display:flex;flex-direction:column}
+.lscreen{flex:1;min-height:0;display:flex;padding:12px;background:#070305;border:2px solid #3a2228;border-bottom:0;border-radius:14px 14px 0 0;box-shadow:0 0 30px rgba(255,43,58,.12)}
+.lbase{flex:none;height:16px;margin:0 -3%;background:linear-gradient(180deg,#3a3036,#18121a);border-radius:0 0 18px 18px;position:relative}
+.lbase::after{content:'';position:absolute;left:50%;top:0;transform:translateX(-50%);width:16%;height:6px;background:#0d0a0d;border-radius:0 0 8px 8px}
+.browser{flex:1;min-height:0;display:flex;flex-direction:column;background:#fff;color:#172033;border-radius:6px;overflow:hidden}
+.btabs{display:flex;background:#dfe5ef;padding:6px 8px 0}
+.btab{background:#fff;border-radius:8px 8px 0 0;padding:6px 14px;font-size:13px}
+.baddr{padding:8px 10px;border-bottom:1px solid #e1e6ef}
+.bar{display:block;background:#eef2f8;border-radius:999px;padding:8px 14px;font:14px var(--mono);color:#4a5670;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar.okk{color:#0a6340;background:#ddf6ea}
+.bar.bad{color:#a4001f;background:#ffe9ee}
+.bpage{flex:1;min-height:0;overflow:auto;padding:16px 18px 24px}
+.hnote{font:14px var(--mono);color:#b0001f;background:#fff0f3;border-left:3px solid var(--red);padding:8px 12px;border-radius:4px;margin:0 0 14px}
+.bpage h3{margin:0 0 6px;font-size:20px}
+.bpage p{margin:0}
+.muted2{color:#5d6984}
+.lcards{display:grid;gap:10px;margin-top:14px}
+.lcard{display:grid;grid-template-columns:42px minmax(0,1fr);gap:2px 12px;align-items:center;width:100%;text-align:left;border:1px solid #d0d8e6;border-radius:12px;background:#f8fafd;padding:12px 14px;color:#172033;min-height:66px}
+.lcard:not(:disabled):hover{border-color:#2f6bff;background:#f0f5ff}
+.lfav{grid-row:1/3;width:42px;height:42px;border-radius:10px;background:#0f4c81;color:#fff;display:grid;place-items:center;font-weight:800;font-size:20px}
+.lttl{font-weight:700}
+.lurl{font:15px var(--mono);color:#1d55e0;word-break:break-all}
+.lcard.bad{border-color:#ff3355;background:#fff0f3}
+.lcard.good{border-color:#1fae6b;background:#e9fbf2}
+.lcard:disabled:not(.bad):not(.good){opacity:.6}
+.lurl mark{background:#ffd2da;color:#a0001f;border-radius:3px;padding:0 2px}
+.lcard.good mark{background:#c4f1da;color:#0a6340}
+.lx{grid-column:1/-1;margin-top:8px;font-size:15px;color:#2a1d24}
+.lres{margin-top:14px}
+
+/* Pinnwand */
+.board{padding:22px 14px;border-radius:10px;background:#5a3d22 radial-gradient(rgba(0,0,0,.2) 1px,transparent 1.6px) 0 0/7px 7px;border:12px solid #2b1d10;box-shadow:inset 0 0 50px rgba(0,0,0,.65),0 0 40px rgba(255,43,58,.1);display:flex;flex-wrap:wrap;gap:18px;justify-content:center}
+.note{width:min(210px,44%);min-height:128px;padding:24px 12px 12px;background:#f1dd7a;color:#2b2410;font:600 18px/1.35 var(--hand);box-shadow:0 6px 14px rgba(0,0,0,.45);position:relative;transform:rotate(var(--r,0deg))}
+.note::before{content:'';position:absolute;top:7px;left:50%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ff8a8a,#b3001e);box-shadow:0 2px 3px rgba(0,0,0,.5)}
+.note.p{background:#f6b8c8}.note.g{background:#bfe8b4}.note.b{background:#b4d8f5}
+.note b{display:block;margin-top:4px;font:700 14px var(--mono);overflow-wrap:anywhere}
+.board-cap{margin:12px 4px 0;text-align:center;color:var(--muted);font-size:15px}
+
+/* Tür / Zahlenschloss */
+.lockwrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding:8px 4px 12px}
+.ltext{margin:0;text-align:center;color:#ecd6d9;max-width:480px}
+.lpanel{position:relative;width:100%;max-width:520px;padding:26px 14px 18px;border-radius:18px;background:linear-gradient(160deg,#3a2c32,#1a1216 60%,#2a1f24);border:1px solid #5a4048;box-shadow:inset 0 2px 0 rgba(255,255,255,.08),0 18px 40px rgba(0,0,0,.55),0 0 30px rgba(255,43,58,.12)}
+.lpanel.shake{animation:shake .45s}
+.scr{position:absolute;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#9a8d92,#3a3034)}
+.scr.a{top:9px;left:9px}.scr.b{top:9px;right:9px}.scr.c{bottom:9px;left:9px}.scr.d{bottom:9px;right:9px}
+.led{position:absolute;top:10px;left:50%;margin-left:-6px;width:12px;height:12px;border-radius:50%;background:var(--red);box-shadow:0 0 12px var(--red);animation:pn 1.4s infinite}
+.led.ok{background:var(--ice);box-shadow:0 0 16px var(--ice);animation:none}
+.wheels{display:flex;justify-content:center;gap:clamp(8px,4vw,26px)}
+.wheel{display:flex;flex-direction:column;align-items:center;gap:6px}
+.wico{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:#d8bcc2}
+.wico svg{width:26px;height:26px}
+.wbtn{width:66px;height:46px;border-radius:10px;border:1px solid #5a4048;background:#140a0e;color:#ffd9dc;font-size:18px}
+.wbtn:hover{border-color:var(--red)}
+.wwin{position:relative;width:76px;height:136px;overflow:hidden;border-radius:12px;background:linear-gradient(90deg,#0a0406,#1a1013 50%,#0a0406);border:2px solid #5a4048;cursor:ns-resize;touch-action:none;box-shadow:inset 0 0 14px rgba(0,0,0,.9)}
+.wwin::before{content:'';position:absolute;left:0;right:0;top:50%;height:66px;margin-top:-33px;border-top:1px solid rgba(255,43,58,.35);border-bottom:1px solid rgba(255,43,58,.35);pointer-events:none}
+.wwin::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.95),rgba(0,0,0,.35) 26%,transparent 38%,transparent 62%,rgba(0,0,0,.35) 74%,rgba(0,0,0,.95))}
+.wheel.ok .wwin::before{border-color:rgba(159,244,255,.6)}
+.wstrip{transition:transform .28s cubic-bezier(.3,1.35,.5,1)}
+.wstrip span{display:block;height:64px;line-height:64px;text-align:center;font:700 50px var(--mono);color:#ffe9eb}
+.wheel.ok .wwin{border-color:var(--ice);box-shadow:0 0 18px rgba(159,244,255,.5)}
+.wheel.ok .wstrip span{color:#fff;text-shadow:var(--iceglow)}
+.lpanel .btn{width:100%;margin-top:18px}
+.lstat{min-height:26px;margin:0;text-align:center;font-family:var(--mono)}
+.lstat .ok{color:var(--ice);text-shadow:var(--iceglow);font-size:20px;letter-spacing:.2em}
+
+/* Chat des Hackers */
+.chat{position:fixed;z-index:70;top:calc(var(--hudH) + 6px);left:max(8px,env(safe-area-inset-left));width:min(350px,calc(100vw - 16px));background:rgba(12,3,6,.96);border:1px solid #6a1628;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.65),0 0 26px rgba(255,43,58,.25);overflow:hidden;transform-origin:top left;opacity:0;transform:translateY(-8px) scale(.96);pointer-events:none;transition:transform .25s,opacity .25s}
+.chat.open{opacity:1;transform:none;pointer-events:auto}
+.chat-top{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 10px;background:#1c060c;border-bottom:1px solid #3d0d18;font:700 13px var(--mono);color:#ff8e9b;letter-spacing:.06em}
+.chat-top .ava{width:24px;height:24px}
+.chat-top .on{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
+.chat-x{margin-left:auto;width:40px;height:40px;border:0;background:none;color:#ff8e9b;font-size:18px}
+.chat-body{max-height:min(34vh,230px);overflow:auto;padding:8px 10px 10px;display:flex;flex-direction:column;gap:6px}
+.msg{align-self:flex-start;max-width:92%;background:#2c0a13;border:1px solid #5a1626;color:#ffe4e8;border-radius:12px 12px 12px 4px;padding:7px 11px;font-size:15px;line-height:1.4;animation:msgin .35s ease-out}
+.msg.evil{border-color:var(--red);box-shadow:0 0 12px rgba(255,43,58,.35)}
+.msg.nervous{animation:msgin .35s ease-out,jitter .14s linear .35s 5}
+.msg.sys{align-self:stretch;max-width:100%;background:#071c20;border-color:#1d5560;color:#d6fbff;font:13px/1.45 var(--mono);border-radius:8px}
+.msg.typing{display:flex;gap:4px;padding:10px 12px}
+.msg.typing i{width:6px;height:6px;border-radius:50%;background:#ff8e9b;animation:dots 1s infinite}
+.msg.typing i:nth-child(2){animation-delay:.15s}.msg.typing i:nth-child(3){animation-delay:.3s}
+@keyframes dots{0%,100%{opacity:.25}50%{opacity:1}}
+@keyframes msgin{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:none;filter:none}}
+@keyframes jitter{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+.chat.kicked{animation:kick 1.4s forwards}
+@keyframes kick{0%{transform:none;filter:none}18%{transform:translateX(-7px) skewX(9deg);filter:hue-rotate(120deg)}34%{transform:translateX(9px) skewX(-11deg)}52%{transform:scale(1,.03);opacity:1;filter:brightness(3)}80%{transform:scale(0,.03);opacity:1}100%{transform:scale(0,0);opacity:0}}
+@media (max-width:600px){.chat-body{max-height:150px}.msg{font-size:14px}}
+.hud-hack.kicked{animation:kick 1.4s forwards}
+/* Untertitel im Finale */
+.subs{position:fixed;left:50%;bottom:max(15%,calc(env(safe-area-inset-bottom) + 80px));z-index:92;width:min(92vw,760px);transform:translateX(-50%);text-align:center;pointer-events:none}
+.sub{display:inline-block;padding:10px 18px;border-radius:12px;background:rgba(6,1,3,.8);border:1px solid rgba(255,43,58,.55);font:700 clamp(17px,4.2vw,25px)/1.35 var(--mono);color:#ffe4e8;text-shadow:0 0 10px rgba(255,43,58,.85);box-shadow:0 0 30px rgba(255,43,58,.3);animation:subin .4s ease-out}
+.sub b{margin-right:10px;color:var(--red2)}
+.sub.glitchy{animation:subin .4s ease-out,jitter .12s linear .4s 6}
+.sub.sys{border-color:rgba(159,244,255,.6);color:#effdff;text-shadow:0 0 10px rgba(159,244,255,.85);box-shadow:0 0 30px rgba(159,244,255,.3)}
+.sub.sys b{color:var(--ice)}
+@keyframes subin{0%{opacity:0;transform:translateY(10px) skewX(-8deg);filter:blur(3px)}100%{opacity:1;transform:none;filter:none}}
+
+/* Ende & verloren */
+.end{z-index:25;overflow-y:auto;background:radial-gradient(ellipse at 50% -10%,#3b5f6a 0%,#122530 32%,#070306 78%)}
+.end-inner{max-width:960px;width:100%;margin:0 auto;padding:max(30px,env(safe-area-inset-top)) 18px 20px;text-align:center}
+.end .kicker{color:var(--ice)}
+.end h1{margin:6px 0 4px;font:700 clamp(38px,9vw,70px)/1.05 var(--serif);color:#fff;text-shadow:0 0 30px rgba(159,244,255,.5)}
+.stats{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:18px 0 28px}
+.stats div{min-width:112px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(159,244,255,.22)}
+.stats b{display:block;font:700 24px var(--mono);color:#fff}
+.stats span{font-size:13px;color:#b9d6dc}
+.end h2{margin:0 0 14px;font:700 clamp(22px,4vw,30px) var(--serif);color:#fff}
+.rules{list-style:none;padding:0;margin:0 0 22px;display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));text-align:left}
+.rules li{padding:18px;border-radius:16px;background:linear-gradient(180deg,#10232c,#0a141b);border:1px solid #2a5260;opacity:0;transform:translateY(18px)}
+.end.on .rules li{animation:rin .7s forwards}
+.end.on .rules li:nth-child(1){animation-delay:.3s}
+.end.on .rules li:nth-child(2){animation-delay:.6s}
+.end.on .rules li:nth-child(3){animation-delay:.9s}
+@keyframes rin{to{opacity:1;transform:none}}
+.rn{font:800 38px/1 var(--mono);color:var(--ice);text-shadow:var(--iceglow)}
+.rules h3{margin:8px 0 6px;font-size:19px;color:#fff}
+.rules p{margin:0;color:#d4e6ea;font-size:16px}
+.sos{max-width:760px;margin:0 auto 24px;text-align:left;padding:14px 16px;border-radius:14px;background:#1d1406;border:1px solid #5a4210;color:#ffe9b8;font-size:15px}
+.end-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.over{z-index:25;overflow-y:auto;background:radial-gradient(ellipse at center,#40050f,#0a0204 70%)}
+.over-inner{margin:auto;max-width:620px;padding:30px 20px;text-align:center}
+.over h1{font-size:clamp(36px,10vw,76px);line-height:1.05;margin:0 0 14px}
+.over .said{font:600 18px var(--mono);color:#ff8e9b;margin:0 0 16px}
+.over p{color:#f0d6da}
+.over .btns{display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:22px}
+
+/* ---------- Kleine Bildschirme (am Ende, damit diese Regeln gewinnen) ---------- */
+@media (max-width:480px){.board .note{width:100%;min-height:0;padding:24px 14px 12px}}
+@media (max-width:520px){.end .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.end .stats div{min-width:0;padding:8px 4px}.end .stats div:last-child{grid-column:1/-1}.end .stats b{font-size:19px}}
+
+/* Handy quer: alles kompakter, damit Mails und Browser lesbar bleiben */
+@media (max-height:540px) and (min-aspect-ratio:4/3){
+  .modal{padding:0}
+  .modal-box,.k-door,.k-board,.k-phone,.k-laptop{width:100%;height:100%;max-height:none;border-radius:0;border-left:0;border-right:0;border-bottom:0}
+  .m-head{flex-wrap:nowrap;padding:3px 6px 3px 12px}
+  .m-head h2{flex:0 1 auto;max-width:28%;font-size:13px}
+  .m-ticker{order:0;flex:1 1 0;min-width:0;margin:0;min-height:0;padding:0 6px;background:none;border:0;box-shadow:none!important;font-size:13px;white-space:nowrap}
+  .m-ticker .tt{overflow:hidden;text-overflow:ellipsis}
+  .m-ticker .ava{width:20px;height:20px}
+  .hintbtn,.xbtn{min-height:40px;height:40px}
+  .m-body{padding:6px}
+  .bezel{padding:0;border:0;border-radius:0}
+  .mtip{display:none}
+  .mailbar{padding:4px 10px}
+  .mstick{padding:8px 18px 10px}
+  .mdecide button{min-height:44px;font-size:16px}
+  .phone{min-height:0;max-width:560px;border-radius:22px;padding:6px}
+  .notch,.sav{display:none}
+  .pscreen{border-radius:16px}
+  .plock{padding:12px 12px 10px}
+  .ptime{font-size:40px}
+  .pdate{margin:2px 0 10px}
+  .shead{flex-direction:row;justify-content:center;gap:8px;padding:8px 10px}
+  .lscreen{padding:4px;border-radius:8px 8px 0 0}
+  .lbase,.btabs{display:none}
+  .hnote{margin-bottom:8px;padding:6px 10px}
+  .lockwrap{gap:6px;padding:0}
+  .ltext{display:none}
+  .lpanel{display:flex;align-items:center;justify-content:center;gap:18px;padding:12px 14px}
+  .lpanel .btn{width:auto;margin:0}
+  .wheel{gap:4px}
+  .wico span{display:none}
+  .wico svg{width:22px;height:22px}
+  .wbtn{height:38px}
+  .wwin{height:100px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  #grain{display:none}
+  #flash.go{animation:flashR .7s ease-out!important}
+  @keyframes flashR{0%{opacity:0}20%{opacity:.7}100%{opacity:0}}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ===================== START ===================== -->
+<section id="sStart" class="screen start on" aria-labelledby="t1">
+  <div class="start-fx" aria-hidden="true"><div class="fog"></div><div id="embers"></div></div>
+  <div class="start-inner">
+    <p class="kicker">Escape Room · Phishing erkennen</p>
+    <h1 id="t1" class="title neon">Nachtschicht</h1>
+    <div class="rule-line"></div>
+    <div class="start-agent" id="startAgent" aria-hidden="true"></div>
+    <p class="lead">23:47 Uhr, Geheimeinsatz im Büro der Hafenlicht Logistik. Du sollst den Arbeitsplatz von Kim Weber überprüfen. Da flackern plötzlich alle Bildschirme: Ein Hacker hat das System übernommen und die Tür verriegelt.</p>
+    <ul class="facts"><li>⏱ 10 Minuten</li><li>👥 allein oder zu zweit</li><li>📱 Handy, Tablet, PC</li></ul>
+    <button id="btnStart" class="btn btn-big">▶ System starten</button>
+    <details class="teacher">
+      <summary>Für Lehrkräfte</summary>
+      <div>
+        <ul>
+          <li><b>Ziel:</b> Phishing an Absender, Link, Druck und Datenabfrage erkennen und richtig reagieren.</li>
+          <li><b>Ablauf:</b> 10 Minuten spielen, danach ca. 10 Minuten Besprechung der drei Regeln vom Schlussbildschirm.</li>
+          <li>Die Ziffern des Türcodes werden bei jedem Spiel neu ausgelost. Abschreiben zwischen Gruppen hilft nicht.</li>
+          <li>Ein Fehler kostet 10 Sekunden, ein Tipp 20 Sekunden. Läuft die Zeit ab, kann man ohne Zeitlimit weiterspielen.</li>
+          <li>Alle Firmen, Namen, Adressen und Nummern sind erfunden, außer dem Sperr-Notruf 116 116. Keine Anmeldung, es wird nichts gespeichert, keine Töne.</li>
+          <li><b>Fragen fürs Gespräch:</b> Welche Falle war am schwersten – und warum? Woran erkennt man die echte Adresse in einem Link? Was tust du, wenn du schon geklickt hast?</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+  <footer class="foot"><a href="../index.html">🏠 Übersicht</a> · <a href="../impressum/index.html">Impressum &amp; Datenschutz</a></footer>
+</section>
+
+<!-- ===================== INTRO ===================== -->
+<section id="sIntro" class="screen intro" aria-live="polite">
+  <div class="intro-ava ava-slot" aria-hidden="true"></div>
+  <div class="term" id="term"></div>
+  <button id="btnReady" class="btn btn-big ready" hidden>Herausforderung annehmen</button>
+  <button id="btnSkip" class="skip">Überspringen ⏭</button>
+  <div id="bigClock" class="bigclock" aria-hidden="true"><span>10:00</span></div>
+</section>
+
+<!-- ===================== RAUM ===================== -->
+<section id="sRoom" class="screen room">
+  <header class="hud" id="hud">
+    <button class="hud-hack" id="chatToggle" aria-expanded="false" aria-controls="chat" aria-label="Chat mit dem Hacker N0X öffnen">
+      <span class="ava-slot"></span>
+      <span class="hh"><b>N0X</b><span class="meter" id="meter" title="Zugriff des Hackers"><i></i><i></i><i></i></span></span>
+    </button>
+    <div class="hud-c" id="hudC"><div id="clock" class="clock" role="timer" aria-label="Restzeit">10:00</div></div>
+    <div class="hud-code" aria-label="Türcode"><span class="hc-lbl">Türcode</span><span class="hc" id="hudCode"><b>?</b><b>?</b><b>?</b></span></div>
+  </header>
+
+  <div class="stage" id="stage">
+<svg id="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Dunkles Büro bei Nacht">
+<defs>
+  <linearGradient id="gWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#170b14"/><stop offset="1" stop-color="#0d070b"/></linearGradient>
+  <linearGradient id="gFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b0609"/><stop offset=".5" stop-color="#050203"/></linearGradient>
+  <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050b24"/><stop offset="1" stop-color="#1c1d4a"/></linearGradient>
+  <radialGradient id="gMoon"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset=".3" stop-color="#cfe0ff" stop-opacity=".45"/><stop offset="1" stop-color="#cfe0ff" stop-opacity="0"/></radialGradient>
+  <linearGradient id="gShaft" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fb0ff" stop-opacity=".13"/><stop offset="1" stop-color="#8fb0ff" stop-opacity="0"/></linearGradient>
+  <radialGradient id="gRed"><stop offset="0" stop-color="#ff2b3a" stop-opacity=".42"/><stop offset="1" stop-color="#ff2b3a" stop-opacity="0"/></radialGradient>
+  <radialGradient id="gIce"><stop offset="0" stop-color="#9ff4ff" stop-opacity=".28"/><stop offset="1" stop-color="#9ff4ff" stop-opacity="0"/></radialGradient>
+  <radialGradient id="gAlarm"><stop offset="0" stop-color="#ff1a2e" stop-opacity=".42"/><stop offset=".5" stop-color="#ff1a2e" stop-opacity=".12"/><stop offset="1" stop-color="#ff1a2e" stop-opacity="0"/></radialGradient>
+  <linearGradient id="gDoor" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#26141c"/><stop offset="1" stop-color="#160a10"/></linearGradient>
+  <radialGradient id="gLight" cx=".5" cy=".55" r=".75"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#e9fbff"/><stop offset="1" stop-color="#9be9ff"/></radialGradient>
+  <linearGradient id="gRay" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2fdff" stop-opacity=".6"/><stop offset="1" stop-color="#f2fdff" stop-opacity="0"/></linearGradient>
+  <radialGradient id="gHalo"><stop offset="0" stop-color="#ffffff" stop-opacity=".55"/><stop offset="1" stop-color="#bff6ff" stop-opacity="0"/></radialGradient>
+  <pattern id="pScan" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="1.3" fill="#000" opacity=".45"/></pattern>
+  <clipPath id="cWin"><rect x="96" y="116" width="318" height="408"/></clipPath>
+  <clipPath id="cMon"><rect x="553" y="343" width="314" height="188"/></clipPath>
+  <radialGradient id="gFlood" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#e9fdff" stop-opacity=".75"/><stop offset=".45" stop-color="#bff6ff" stop-opacity=".28"/><stop offset="1" stop-color="#bff6ff" stop-opacity="0"/></radialGradient>
+  <filter id="fGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="fRim" x="-30%" y="-15%" width="160%" height="130%"><feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="#ff2b3a" flood-opacity=".6"/></filter>
+  <filter id="fSil" x="-10%" y="-10%" width="120%" height="120%"><feColorMatrix type="matrix" values="0 0 0 0 .03  0 0 0 0 .03  0 0 0 0 .06  0 0 0 1 0"/></filter>
+  <linearGradient id="gBeam" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff6cf" stop-opacity=".62"/><stop offset=".55" stop-color="#fff2b0" stop-opacity=".2"/><stop offset="1" stop-color="#fff2b0" stop-opacity="0"/></linearGradient>
+  <radialGradient id="gSpot"><stop offset="0" stop-color="#fff6cf" stop-opacity=".42"/><stop offset="1" stop-color="#fff6cf" stop-opacity="0"/></radialGradient>
+</defs>
+
+<g class="deco">
+  <!-- Wand, Decke, Boden -->
+  <rect x="-2400" y="-1400" width="6400" height="2100" fill="#120910"/>
+  <rect x="-2400" y="0" width="6400" height="700" fill="url(#gWall)"/>
+  <rect x="-2400" y="-1400" width="6400" height="1432" fill="#0a0509"/>
+  <rect x="-2400" y="28" width="6400" height="6" fill="#1d0f17"/>
+  <rect x="-2400" y="700" width="6400" height="1600" fill="url(#gFloor)"/>
+  <g id="floorLines" stroke="#170c12" stroke-width="2"></g>
+  <rect x="-2400" y="692" width="6400" height="10" fill="#1d0f17"/>
+  <!-- Alarmlicht -->
+  <ellipse class="alarm" cx="1150" cy="40" rx="950" ry="560" fill="url(#gAlarm)"/>
+  <rect x="1128" y="34" width="44" height="8" rx="2" fill="#24141a"/>
+  <path class="beacon" d="M1134 34 a16 16 0 0 1 32 0z" fill="#ff2b3a"/>
+  <!-- Fenster -->
+  <rect x="80" y="100" width="350" height="440" rx="4" fill="#150b12"/>
+  <rect x="96" y="116" width="318" height="408" fill="url(#gSky)"/>
+  <g clip-path="url(#cWin)">
+    <circle cx="330" cy="190" r="84" fill="url(#gMoon)"/>
+    <circle cx="330" cy="190" r="24" fill="#e6eeff"/>
+    <circle cx="322" cy="184" r="5" fill="#cdd9f2"/><circle cx="338" cy="198" r="3.5" fill="#cdd9f2"/>
+    <g id="stars"></g>
+    <rect class="boltWin" x="96" y="116" width="318" height="408" fill="#dfe9ff"/>
+    <path class="boltPath" d="M188 116 l-14 52 l16 3 l-26 62 l14 2 l-30 74" fill="none" stroke="#f4f8ff" stroke-width="3" stroke-linejoin="round"/>
+    <g id="city"></g>
+  </g>
+  <rect x="252" y="116" width="6" height="408" fill="#150b12"/>
+  <rect x="96" y="318" width="318" height="6" fill="#150b12"/>
+  <g id="blinds"></g>
+  <rect x="68" y="536" width="374" height="12" rx="3" fill="#24141c"/>
+  <polygon points="96,524 414,524 760,900 -160,900" fill="url(#gShaft)"/>
+  <polygon class="boltRoom" points="96,524 414,524 760,900 -160,900" fill="#cfe0ff"/>
+  <!-- Poster -->
+  <rect x="470" y="128" width="140" height="180" rx="3" fill="#14090f" stroke="#2e1820" stroke-width="3"/>
+  <path d="M540 152 l32 13 v22 c0 23 -15 37 -32 45 c-17 -8 -32 -22 -32 -45 v-22 z" fill="none" stroke="#7a2a38" stroke-width="4"/>
+  <rect x="529" y="186" width="22" height="17" rx="2" fill="#7a2a38"/>
+  <path d="M533 186 v-6 a7 7 0 0 1 14 0 v6" fill="none" stroke="#7a2a38" stroke-width="3"/>
+  <text x="540" y="262" text-anchor="middle" class="svgmono" font-size="13" font-weight="700" fill="#8e3646">ERST DENKEN,</text>
+  <text x="540" y="282" text-anchor="middle" class="svgmono" font-size="13" font-weight="700" fill="#8e3646">DANN KLICKEN</text>
+  <!-- Pflanze -->
+  <path d="M352 640 h66 l-8 60 h-50z" fill="#24141c"/>
+  <path d="M385 642 C370 600 340 590 322 560 C352 566 378 590 385 642 M385 642 C392 590 410 560 440 548 C428 584 404 606 385 642 M385 642 C380 596 386 560 400 520 C410 560 398 604 385 642" fill="#0f2019" stroke="#173528" stroke-width="2"/>
+</g>
+
+<!-- Monitor-Licht an der Wand -->
+<ellipse id="monGlow" class="deco" cx="710" cy="440" rx="380" ry="260" fill="url(#gRed)"/>
+<ellipse id="monGlowOk" class="deco" cx="710" cy="440" rx="380" ry="260" fill="url(#gIce)"/>
+
+<!-- Pinnwand -->
+<g class="hot" data-obj="board" tabindex="0" role="button" aria-label="Pinnwand ansehen">
+  <rect x="880" y="96" width="272" height="248" fill="transparent" pointer-events="all"/>
+  <rect x="900" y="140" width="232" height="182" rx="4" fill="#3a2716" stroke="#20150b" stroke-width="8"/>
+  <g transform="rotate(-4 948 186)"><rect x="920" y="160" width="58" height="52" fill="#a89344"/><path d="M928 176 h40 M928 186 h34 M928 196 h38" stroke="#5a4c1e" stroke-width="3"/></g>
+  <g transform="rotate(3 1028 190)"><rect x="998" y="164" width="60" height="52" fill="#a8707e"/><path d="M1006 180 h44 M1006 190 h36 M1006 200 h40" stroke="#5a3240" stroke-width="3"/></g>
+  <g transform="rotate(-2 1095 200)"><rect x="1070" y="172" width="50" height="48" fill="#7e9e76"/><path d="M1077 188 h34 M1077 198 h28" stroke="#3d5236" stroke-width="3"/></g>
+  <g transform="rotate(4 975 268)"><rect x="944" y="240" width="62" height="56" fill="#7891a8"/><path d="M952 256 h44 M952 266 h36 M952 276 h40" stroke="#33445a" stroke-width="3"/></g>
+  <g transform="rotate(-5 1060 272)"><rect x="1032" y="246" width="56" height="50" fill="#a89344"/><path d="M1040 262 h40 M1040 272 h30" stroke="#5a4c1e" stroke-width="3"/></g>
+  <circle cx="949" cy="162" r="4" fill="#c8293a"/><circle cx="1028" cy="166" r="4" fill="#c8293a"/><circle cx="1095" cy="174" r="4" fill="#c8293a"/><circle cx="975" cy="242" r="4" fill="#c8293a"/><circle cx="1060" cy="248" r="4" fill="#c8293a"/>
+  <rect class="hl" x="890" y="130" width="252" height="202" rx="8"/>
+</g>
+
+<!-- Tür -->
+<g class="hot" data-obj="door" tabindex="0" role="button" aria-label="Tür mit Zahlenschloss">
+  <rect x="1178" y="60" width="262" height="652" fill="transparent" pointer-events="all"/>
+  <rect x="1250" y="70" width="115" height="30" rx="4" fill="#04170d" stroke="#1d6b45" stroke-width="2"/>
+  <text class="exit svgmono" x="1307.5" y="91" text-anchor="middle" font-size="16" font-weight="700" fill="#3dffa8">AUSGANG</text>
+  <rect x="1212" y="108" width="190" height="54" rx="8" fill="#0a0407" stroke="#3a1a22" stroke-width="3"/>
+  <g class="dslot" data-k="monitor"><rect x="1224" y="116" width="50" height="38" rx="5"/><text x="1249" y="136">–</text></g>
+  <g class="dslot" data-k="phone"><rect x="1282" y="116" width="50" height="38" rx="5"/><text x="1307" y="136">–</text></g>
+  <g class="dslot" data-k="laptop"><rect x="1340" y="116" width="50" height="38" rx="5"/><text x="1365" y="136">–</text></g>
+  <circle class="burst" cx="1249" cy="135" r="28"/><circle class="burst" cx="1307" cy="135" r="28"/><circle class="burst" cx="1365" cy="135" r="28"/>
+  <rect x="1195" y="170" width="225" height="530" fill="#0f070b" stroke="#3a1a22" stroke-width="5"/>
+  <rect class="neonframe" x="1189" y="164" width="237" height="538" rx="5"/>
+  <rect x="1210" y="185" width="195" height="515" fill="#010001"/>
+  <rect id="doorLight" x="1210" y="185" width="195" height="515" fill="url(#gLight)"/>
+  <g id="doorPanel">
+    <rect x="1210" y="185" width="195" height="515" fill="url(#gDoor)" stroke="#3a1e28" stroke-width="2"/>
+    <rect x="1232" y="212" width="151" height="170" rx="4" fill="none" stroke="#33192a" stroke-width="3"/>
+    <rect x="1232" y="500" width="151" height="172" rx="4" fill="none" stroke="#33192a" stroke-width="3"/>
+    <rect x="1250" y="404" width="104" height="64" rx="8" fill="#0a0407" stroke="#4a2a34" stroke-width="3"/>
+    <rect x="1260" y="418" width="20" height="32" rx="3" fill="#1e1016"/><rect x="1286" y="418" width="20" height="32" rx="3" fill="#1e1016"/><rect x="1312" y="418" width="20" height="32" rx="3" fill="#1e1016"/>
+    <circle id="doorLed" cx="1342" cy="424" r="5" fill="#ff2b3a"/>
+    <rect x="1372" y="424" width="10" height="36" rx="4" fill="#6d5a62"/><rect x="1360" y="434" width="28" height="8" rx="4" fill="#8f7b84"/>
+  </g>
+  <rect class="hl" x="1188" y="64" width="240" height="640" rx="10"/>
+</g>
+
+<!-- Schreibtisch -->
+<g class="deco">
+  <polygon points="420,598 1180,598 1214,640 386,640" fill="#1b0f16"/>
+  <polygon points="420,598 1180,598 1182,603 418,603" fill="#33202a"/>
+  <ellipse id="deskGlow" cx="710" cy="616" rx="300" ry="30" fill="url(#gRed)"/>
+  <ellipse id="deskGlowOk" cx="710" cy="616" rx="300" ry="30" fill="url(#gIce)"/>
+  <rect x="386" y="640" width="828" height="24" fill="#12090e"/>
+  <rect x="404" y="664" width="190" height="150" fill="#0e070b"/>
+  <path d="M404 712 h190 M404 762 h190" stroke="#1d1016" stroke-width="3"/>
+  <rect x="478" y="684" width="40" height="7" rx="3" fill="#2a1820"/><rect x="478" y="732" width="40" height="7" rx="3" fill="#2a1820"/><rect x="478" y="782" width="40" height="7" rx="3" fill="#2a1820"/>
+  <rect x="1168" y="664" width="28" height="150" fill="#0e070b"/>
+  <!-- Tasse -->
+  <rect x="890" y="566" width="26" height="32" rx="4" fill="#2a1820"/>
+  <path d="M916 573 h6 a8 8 0 0 1 0 16 h-6" stroke="#2a1820" stroke-width="4" fill="none"/>
+</g>
+
+<!-- Monitor -->
+<g class="hot" data-obj="monitor" tabindex="0" role="button" aria-label="Monitor untersuchen">
+  <rect x="520" y="296" width="380" height="312" fill="transparent" pointer-events="all"/>
+  <rect x="695" y="545" width="30" height="55" fill="#1d1218"/>
+  <ellipse cx="710" cy="600" rx="76" ry="9" fill="#26161e"/>
+  <rect x="540" y="330" width="340" height="220" rx="10" fill="#070305" stroke="#3a1e28" stroke-width="3"/>
+  <g id="monHack">
+    <rect x="553" y="343" width="314" height="188" fill="#1c0207"/>
+    <g clip-path="url(#cMon)"><g class="code-scroll svgmono" font-size="11" fill="#ff2b3a" opacity=".22" id="monCode"></g></g>
+    <g transform="translate(670 350) scale(2)">
+      <path d="M20 2.5C11.5 2.5 5.5 9.5 5.5 19v18.5h29V19C34.5 9.5 28.5 2.5 20 2.5z" fill="#2a0409" stroke="#ff2b3a" stroke-width=".9"/>
+      <path d="M11.5 23c1.6-6.2 4.6-9.5 8.5-9.5s6.9 3.3 8.5 9.5c-1.8 5.4-4.8 8.4-8.5 8.4s-6.7-3-8.5-8.4z" fill="#000"/>
+      <path d="M14.5 21.8l4 1.3M25.5 21.8l-4 1.3" stroke="#ff2b3a" stroke-width="2" stroke-linecap="round"/>
+    </g>
+    <g class="monTxt"><text x="710" y="458" text-anchor="middle" class="svgmono" font-size="21" font-weight="700" fill="#ff2b3a">SYSTEM GEHACKT</text>
+    <text x="710" y="482" text-anchor="middle" class="svgmono" font-size="12" fill="#ff8e9b">// N0X WAR HIER</text></g>
+    <rect x="553" y="343" width="314" height="188" fill="url(#pScan)"/>
+  </g>
+  <g id="monOk" class="okv">
+    <rect x="553" y="343" width="314" height="188" fill="#041a1e"/>
+    <path d="M676 424 l22 22 l42 -48" stroke="#9ff4ff" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="710" y="492" text-anchor="middle" class="svgmono" font-size="18" font-weight="700" fill="#9ff4ff">GESICHERT</text>
+    <rect x="553" y="343" width="314" height="188" fill="url(#pScan)"/>
+  </g>
+  <rect class="hl" x="530" y="320" width="360" height="240" rx="14"/>
+</g>
+
+<!-- Laptop -->
+<g class="hot" data-obj="laptop" tabindex="0" role="button" aria-label="Laptop untersuchen">
+  <rect x="900" y="430" width="290" height="200" fill="transparent" pointer-events="all"/>
+  <rect x="945" y="468" width="190" height="128" rx="6" fill="#070305" stroke="#3a1e28" stroke-width="3"/>
+  <g id="lapHack">
+    <rect x="953" y="476" width="174" height="112" fill="#1a0510"/>
+    <rect x="1025" y="512" width="30" height="24" rx="3" fill="#ff2b3a"/>
+    <path d="M1031 512 v-8 a9 9 0 0 1 18 0 v8" stroke="#ff2b3a" stroke-width="5" fill="none"/>
+    <text x="1040" y="562" text-anchor="middle" class="svgmono" font-size="12" font-weight="700" fill="#ff8e9b">GESPERRT</text>
+    <rect x="953" y="476" width="174" height="112" fill="url(#pScan)"/>
+  </g>
+  <g id="lapOk" class="okv">
+    <rect x="953" y="476" width="174" height="112" fill="#041a1e"/>
+    <path d="M1018 530 l14 14 l28 -32" stroke="#9ff4ff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <polygon points="925,596 1155,596 1175,614 905,614" fill="#2a1a22"/>
+  <rect x="1015" y="603" width="50" height="4" rx="2" fill="#12090e"/>
+  <rect class="hl" x="934" y="458" width="248" height="166" rx="10"/>
+</g>
+
+<!-- Diensthandy -->
+<g class="hot" data-obj="phone" tabindex="0" role="button" aria-label="Diensthandy untersuchen">
+  <rect x="418" y="436" width="146" height="180" fill="transparent" pointer-events="all"/>
+  <ellipse class="phHack deco" cx="485" cy="540" rx="80" ry="70" fill="url(#gRed)"/>
+  <rect x="448" y="586" width="74" height="14" rx="4" fill="#2a1820"/>
+  <rect x="457" y="476" width="56" height="114" rx="10" fill="#050203" stroke="#3a1e28" stroke-width="3"/>
+  <rect x="462" y="486" width="46" height="94" rx="5" fill="#120a1e"/>
+  <g class="phHack"><rect class="pnot" x="465" y="498" width="40" height="18" rx="4" fill="#ff2b3a"/>
+  <rect x="466" y="524" width="32" height="4" rx="2" fill="#3a2a44"/><rect x="466" y="533" width="24" height="4" rx="2" fill="#3a2a44"/></g>
+  <g class="phOk okv"><path d="M474 532 l8 8 l16 -18" stroke="#9ff4ff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+  <rect class="hl" x="446" y="466" width="78" height="142" rx="12"/>
+</g>
+
+<!-- Bürostuhl -->
+<g class="deco" fill="#070305" stroke="#24141c" stroke-width="3">
+  <rect x="640" y="592" width="150" height="118" rx="26" fill="#070305"/>
+  <rect x="630" y="700" width="170" height="30" rx="12" fill="#070305"/>
+  <rect x="707" y="728" width="16" height="60" fill="#070305"/>
+  <path d="M640 815 l75 -25 l75 25" fill="none" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="640" cy="818" r="8" fill="#070305"/><circle cx="790" cy="818" r="8" fill="#070305"/><circle cx="715" cy="824" r="8" fill="#070305"/>
+</g>
+
+<!-- Agent (Spielfigur) -->
+<g id="agent" transform="translate(860 868)">
+  <ellipse cx="0" cy="-2" rx="74" ry="13" fill="#000" opacity=".55"/>
+  <g id="agentFlip">
+    <g id="beam" opacity="0"><polygon points="0,-7 420,-120 420,120 0,7" fill="url(#gBeam)"/><ellipse cx="420" cy="0" rx="70" ry="120" fill="url(#gSpot)"/></g>
+    <g id="agentWrap" filter="url(#fRim)"><g id="agentSprite" transform="translate(-90 -288) scale(9)" shape-rendering="crispEdges"></g></g>
+  </g>
+</g>
+
+<!-- Licht hinter der Tür -->
+<g id="rays">
+  <polygon points="1210,700 1405,700 1760,940 860,940" fill="url(#gRay)"/>
+  <polygon points="1210,200 1210,700 620,940 380,940" fill="url(#gRay)" opacity=".55"/>
+  <ellipse cx="1307" cy="440" rx="300" ry="380" fill="url(#gHalo)"/>
+</g>
+<ellipse id="flood" cx="1307" cy="470" rx="1500" ry="900" fill="url(#gFlood)"/>
+
+<g id="markers"></g>
+</svg>
+    <button class="panbtn l" id="panL" aria-label="Nach links umsehen">‹</button>
+    <button class="panbtn r" id="panR" aria-label="Nach rechts umsehen">›</button>
+  </div>
+
+  <nav class="objbar" id="objbar" aria-label="Gegenstände im Raum">
+    <button class="ob" data-obj="monitor"><span class="ico"></span><span class="lb">Monitor</span><em class="st">!</em></button>
+    <button class="ob" data-obj="phone"><span class="ico"></span><span class="lb">Handy</span><em class="st">!</em></button>
+    <button class="ob" data-obj="laptop"><span class="ico"></span><span class="lb">Laptop</span><em class="st">!</em></button>
+    <button class="ob" data-obj="board"><span class="ico"></span><span class="lb">Pinnwand</span><em class="st"></em></button>
+    <button class="ob" data-obj="door"><span class="ico"></span><span class="lb">Tür</span><em class="st"></em></button>
+  </nav>
+</section>
+
+<!-- ===================== ENDE ===================== -->
+<section id="sEnd" class="screen end" aria-labelledby="t2">
+  <div class="end-inner">
+    <p class="kicker">Verbindung getrennt · N0X entfernt</p>
+    <div class="end-agent" id="endAgent" aria-hidden="true"></div>
+    <h1 id="t2">Ihr seid draußen!</h1>
+    <div class="stats">
+      <div><b id="eTime">–</b><span>Restzeit</span></div>
+      <div><b id="eErr">0</b><span>Fehler</span></div>
+      <div><b id="eHint">0</b><span>Tipps</span></div>
+      <div><b id="eRank">–</b><span>Rang</span></div>
+    </div>
+    <h2>Die 3 wichtigsten Regeln gegen Phishing</h2>
+    <ol class="rules">
+      <li><div class="rn">1</div><h3>Absender und Link prüfen</h3><p>Der Name „FlinkPaket“ lässt sich leicht fälschen, die Adresse dahinter nicht. Lies jede Adresse bis zum ersten „/“: Direkt vor .de oder .com muss genau der echte Name stehen.</p></li>
+      <li><div class="rn">2</div><h3>Druck ist ein Alarmsignal</h3><p>Drohung, kurze Frist, Gewinn oder „sag es niemandem“: Wer dich hetzt, will, dass du nicht nachdenkst. Erst einmal nichts tun.</p></li>
+      <li><div class="rn">3</div><h3>Nie Passwort, PIN oder TAN über einen Link</h3><p>Echte Banken, Firmen und Chefs fragen so etwas nie per Mail oder SMS. Im Zweifel selbst die echte App öffnen oder über eine bekannte Nummer anrufen.</p></li>
+    </ol>
+    <div class="sos"><b>Schon draufgeklickt oder Daten eingegeben?</b> Kein Grund, sich zu schämen, aber schnell handeln: Passwort ändern, die Bank anrufen, Karte und Online-Banking sperren lassen (Sperr-Notruf <b>116 116</b>). Im Betrieb sofort die IT informieren.</div>
+    <div class="end-actions"><button class="btn btn-ice" id="btnAgain">↻ Nochmal spielen</button></div>
+  </div>
+  <footer class="foot"><a href="../index.html">🏠 Übersicht</a> · <a href="../impressum/index.html">Impressum &amp; Datenschutz</a></footer>
+</section>
+
+<section id="sOver" class="screen over" aria-labelledby="t3">
+  <div class="over-inner">
+    <h1 id="t3" class="neon">Zeit abgelaufen</h1>
+    <p class="said">N0X: „Euer System gehört jetzt mir.“</p>
+    <p>Gib nicht auf: Du kannst ohne Zeitlimit weiterspielen und die restlichen Fallen entlarven.</p>
+    <div class="btns">
+      <button class="btn btn-big" id="btnPractice">▶ Ohne Zeitlimit weiterspielen</button>
+      <button class="btn btn-ghost" id="btnRestart">↻ Von vorn beginnen</button>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- Fenster für die Rätsel -->
+<div id="modal" class="modal" aria-hidden="true">
+  <div class="modal-box" id="mbox" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div class="m-head">
+      <h2 id="mTitle"></h2>
+      <div class="m-ticker" id="mTicker" hidden><span class="ava-slot"></span><span class="tt" id="mTickerText"></span></div>
+      <button class="hintbtn" id="hintBtn">💡 Tipp</button>
+      <button class="xbtn" id="closeBtn" aria-label="Zurück in den Raum"><b>✕</b> <span>Zurück</span></button>
+    </div>
+    <div class="m-hint" id="mHint" hidden></div>
+    <div class="m-body" id="mBody"></div>
+  </div>
+</div>
+
+<!-- Chatfenster des Hackers -->
+<aside id="chat" class="chat" aria-live="polite" aria-label="Chat mit dem Hacker" hidden>
+  <div class="chat-top"><span class="ava-slot"></span>N0X <span class="on"></span> <span style="color:#b98a92;font-weight:400">privat</span><button class="chat-x" id="chatX" aria-label="Chat schließen">✕</button></div>
+  <div class="chat-body" id="chatBody"></div>
+</aside>
+
+<div id="scan"></div><div id="vig"></div><div id="grain"></div><div id="tear"></div><div id="ghost" class="ava-slot" aria-hidden="true"></div><div id="flash"></div><div id="subs" class="subs" aria-live="assertive"></div><div id="white"></div>
+<noscript><p style="position:fixed;inset:0;z-index:99;background:#000;color:#fff;padding:20px">Bitte JavaScript aktivieren, um das Spiel zu starten.</p></noscript>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const rnd = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const SVGNS = 'http://www.w3.org/2000/svg';
+
+const TOTAL = 600, PEN = 10, HINT_PEN = 20;
+const KEYS = ['monitor', 'phone', 'laptop'];
+const LABEL = { monitor: 'Monitor', phone: 'Diensthandy', laptop: 'Laptop', board: 'Pinnwand', door: 'Tür' };
+const TITLE = { monitor: 'Monitor<span class="hide-s"> · Posteingang</span>', phone: 'Diensthandy', laptop: 'Laptop<span class="hide-s"> · Browser</span>', board: 'Pinnwand', door: '<span class="hide-s">Tür · </span>Zahlenschloss' };
+const MK = { monitor: [710, 300], phone: [485, 450], laptop: [1040, 444], board: [1015, 114], door: [1307, 300] };
+const DATE = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
+
+const ICON = {
+  monitor: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="3.5" width="19" height="13" rx="1.5"/><path d="M9 20.5h6M12 16.5v4"/></svg>',
+  phone: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.2"/><path d="M10.5 18.5h3"/></svg>',
+  laptop: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="4.5" width="15" height="10.5" rx="1.2"/><path d="M2 18.5h20l-1.5-3.5h-17z"/></svg>',
+  board: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="1.5"/><path d="M7 8h4v4H7zM13.5 9h4M13.5 12h3M8 21l1.5-3M16 21l-1.5-3"/></svg>',
+  door: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="1"/><path d="M14.6 12.5h.8M3 21.5h18"/></svg>'
+};
+const AVA = '<svg class="ava" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2.5C11.5 2.5 5.5 9.5 5.5 19v18.5h29V19C34.5 9.5 28.5 2.5 20 2.5z" fill="#2a0409" stroke="#ff2b3a" stroke-width="1.4"/><path d="M11.5 23c1.6-6.2 4.6-9.5 8.5-9.5s6.9 3.3 8.5 9.5c-1.8 5.4-4.8 8.4-8.5 8.4s-6.7-3-8.5-8.4z" fill="#000"/><path class="eye" d="M14.5 21.8l4 1.3M25.5 21.8l-4 1.3" stroke="#ff2b3a" stroke-width="2.2" stroke-linecap="round"/></svg>';
+
+/* ---------------- Inhalte ---------------- */
+const MAILS = [
+  { id: 'm1', phish: true, name: 'Talbank Sicherheit', addr: 'sicherheit@talbank-kontoschutz.info', time: '23:41',
+    subj: '⚠ Ihr Konto wurde vorübergehend gesperrt',
+    body: ['Sehr geehrter Kunde,',
+      'bei einer Routineprüfung haben wir ungewöhnliche Aktivitäten auf Ihrem Konto festgestellt. Ihr Konto wurde deshalb vorübergehend gesperrt.',
+      'Bestätigen Sie <b>innerhalb von 24 Stunden</b> Ihre Identität mit Online-Banking-PIN und Kartennummer. Andernfalls wird Ihr Konto endgültig geschlossen.',
+      '{LINK}',
+      'Mit freundlichen Grüßen<br>Ihr Talbank-Sicherheitsteam'],
+    link: { t: 'Konto jetzt entsperren', url: 'http://talbank-entsperren.ru/login', btn: true },
+    why: ['Absender: <code>talbank-kontoschutz.info</code>. Die echte Bank schreibt von <code>talbank.de</code>.',
+      '„Sehr geehrter Kunde“ statt deines Namens.',
+      'Drohung und Frist: „innerhalb von 24 Stunden … endgültig geschlossen“.',
+      'Fragt nach PIN und Kartennummer. Das macht keine Bank per Mail.',
+      'Der Link führt zu <code>talbank-entsperren.ru</code>, nicht zur Bank.'] },
+  { id: 'm5', phish: true, name: 'FlinkPaket', addr: 'service@flinkpaket-zustellung.com', time: '23:12',
+    subj: 'Zustellung fehlgeschlagen – Gebühr offen',
+    body: ['Lieber Kunde,',
+      'Ihr Paket konnte nicht zugestelt werden, weil die Versandgebühr von <b>1,99 €</b> noch offen ist.',
+      'Bitte zahlen sie die Gebühr innerhalb von 12 Stunden. Sonst geht das Paket an den Absender zurück.',
+      '{LINK}',
+      'Ihr FlinkPaket Kundendienst'],
+    link: { t: 'Gebühr jetzt bezahlen', url: 'https://flinkpaket.de.flinkpaket-zahlung.com/karte', btn: true },
+    why: ['Absender: <code>flinkpaket-zustellung.com</code>. Echt wäre <code>flinkpaket.de</code> – vergleiche mit der echten Paket-Mail!',
+      'Unpersönlich: „Lieber Kunde“.',
+      'Fehler im Text: „zugestelt“, „zahlen sie“.',
+      'Zeitdruck: „innerhalb von 12 Stunden“.',
+      'Der Link führt zu <code>flinkpaket-zahlung.com</code>. Die 1,99 € sind nur der Köder – abgefischt werden deine Kreditkartendaten.'] },
+  { id: 'm3', phish: true, name: 'Petra Hansen (Geschäftsführung)', addr: 'petra.hansen.chefin@blitzmail.net', time: '22:58',
+    subj: 'Dringend – bitte vertraulich',
+    body: ['Kim,',
+      'ich sitze gerade in einem wichtigen Termin und kann nicht telefonieren. Ich brauche <b>heute noch</b> fünf Geschenkkarten zu je 100 € für einen Kunden.',
+      'Kauf sie bitte an der Tankstelle und schick mir die Codes als Foto. Das Geld bekommst du morgen zurück.',
+      'Bitte sprich mit niemandem darüber – es soll eine Überraschung werden.',
+      'Petra<br><span class="mmeta">Von meinem Smartphone gesendet</span>'],
+    why: ['Absender: private Adresse <code>blitzmail.net</code> statt <code>@hafenlicht-logistik.de</code> (siehe Pinnwand).',
+      'Ungewöhnliche Bitte: Codes von Geschenkkarten sind wie Bargeld. Weg ist weg.',
+      'Druck („heute noch“) und Geheimhaltung („sprich mit niemandem“).',
+      'Angeblich nicht erreichbar, damit du nicht nachfragst.',
+      'Achtung: Hier stimmt sogar dein Name. Betrüger recherchieren vorher. Diese Masche heißt „Chef-Betrug“. Richtig wäre: die Chefin über ihre bekannte Nummer anrufen.'] },
+  { id: 'm4', phish: false, name: 'FlinkPaket', addr: 'benachrichtigung@flinkpaket.de', time: '19:12',
+    subj: 'Deine Sendung kommt morgen',
+    body: ['Hallo Kim Weber,',
+      'deine Sendung <b>FP 4471 2290 DE</b> ist unterwegs und wird morgen zwischen 10 und 14 Uhr zugestellt.',
+      'Den Stand kannst du in der FlinkPaket-App oder auf unserer Website verfolgen:',
+      '{LINK}',
+      'Dein FlinkPaket-Team'],
+    link: { t: 'Sendung verfolgen', url: 'https://www.flinkpaket.de/sendung/FP44712290DE', btn: false },
+    why: ['Absender passt: <code>flinkpaket.de</code>.',
+      'Der Link führt zu <code>flinkpaket.de</code>, direkt vor dem ersten „/“.',
+      'Dein voller Name und eine Sendungsnummer.',
+      'Kein Druck, keine Zahlung, keine Daten.',
+      'Ganz sicher gehst du, wenn du die Nummer selbst in der App eingibst.'] },
+  { id: 'm2', phish: false, name: 'IT-Service Hafenlicht', addr: 'it-service@hafenlicht-logistik.de', time: '18:05',
+    subj: 'Wartung am Samstag, 8–12 Uhr',
+    body: ['Hallo Kim,',
+      'am Samstag spielen wir zwischen 8 und 12 Uhr Updates auf die Server. In dieser Zeit sind E-Mail und Laufwerke nicht erreichbar.',
+      'Du musst nichts tun. Speichere am Freitag vor Feierabend einfach deine Dateien.',
+      'Fragen? Ruf an: Durchwahl 240.',
+      'Viele Grüße<br>Jonas vom IT-Service'],
+    why: ['Absender: <code>@hafenlicht-logistik.de</code> – die Firmenadresse von der Pinnwand.',
+      'Persönliche Anrede, kein Link, kein Anhang.',
+      'Du sollst nichts eingeben und nichts bezahlen.',
+      'Mit Durchwahl zum Nachfragen. Betrüger wollen genau das verhindern.'] },
+  { id: 'm6', phish: false, name: 'FilmFlut', addr: 'rechnung@filmflut.de', time: '08:30',
+    subj: 'Deine Rechnung für November',
+    body: ['Hallo Kim,',
+      'danke, dass du FilmFlut schaust! Deine Rechnung für November über <b>7,99 €</b> liegt in deinem Kundenkonto.',
+      'Wir buchen den Betrag wie gewohnt ab. Du musst nichts weiter tun.',
+      'Die Rechnung findest du, wenn du dich wie immer in der App anmeldest.',
+      'Viel Spaß beim Schauen<br>Dein FilmFlut-Team'],
+    why: ['Absender passt: <code>filmflut.de</code>.',
+      'Kein Link, keine Frist, keine Drohung.',
+      'Statt „Klick hier“ der Hinweis, dich selbst in der App anzumelden. Genau so ist es sicher.',
+      'Ein erwarteter Vorgang: Du hast das Abo ja.'] }
+];
+
+const SENDER = { id: 'sender', t: '+44 7700 900461', w: true, x: 'Unbekannte Handynummer aus dem Ausland. Vorsicht: Auch ein Absendername wie „Talbank“ kann gefälscht sein.' };
+const SMS = [
+  { id: 'anrede', t: 'Lieber Kunde,', w: true, x: 'Keine persönliche Anrede. Deine Bank kennt deinen Namen.' },
+  { id: 'n1', t: 'Ihr Talbank-Konto' },
+  { id: 'druck', t: 'wird in 2 Stunden gesperrt!', w: true, x: 'Zeitdruck und Drohung: Du sollst in Panik handeln statt nachdenken.' },
+  { id: 'n2', t: 'Um das zu verhindern,' },
+  { id: 'daten', t: 'bestaetigen Sie jetzt Ihre PIN und TAN', w: true, x: 'PIN und TAN sind deine Geheimzahlen fürs Online-Banking. Keine Bank fragt jemals danach, schon gar nicht per SMS. Auffällig auch: „bestaetigen“ ohne ä.' },
+  { id: 'n3', t: 'über diesen Link:' },
+  { id: 'link', t: 'talbank-sicherheit.top/login', w: true, x: 'Fremde Adresse: Die echte Bank ist talbank.de. „talbank-sicherheit.top“ gehört jemand anderem.' },
+  { id: 'n4', t: 'Vielen Dank!' }
+];
+const CH = {}; [SENDER].concat(SMS).forEach(c => { CH[c.id] = c; });
+const ACT = [
+  { t: 'Auf den Link tippen und nachsehen, ob die Seite echt aussieht.', ok: false,
+    x: 'Schon das Öffnen kann schaden: Die Seite kann Schadsoftware laden. Und gefälschte Seiten sehen oft täuschend echt aus.',
+    h: 'Ja! Klick drauf! 😈' },
+  { t: 'Zurückschreiben: „Sind Sie wirklich die Talbank?“', ok: false,
+    x: 'Dann weiß der Betrüger, dass deine Nummer aktiv ist, und lügt dich weiter an.',
+    h: 'Oh ja, schreib mir! Ich antworte immer. 😏' },
+  { t: 'Nichts antippen, Nummer blockieren, SMS löschen. Im Zweifel die Bank selbst anrufen – über die bekannte Nummer.', ok: true,
+    x: 'Genau. Der sichere Weg führt nie über den Link in der Nachricht, sondern über die echte App oder eine Nummer, die du selbst nachschaust.' }
+];
+const LINKS = [
+  { id: 'a', ok: false, pre: 'https://talbank.de.', dom: 'konto-talbank.com', post: '/anmelden',
+    x: '✖ Fälschung! „talbank.de“ steht hier nur vorne als Tarnung. Entscheidend ist, was direkt vor dem ersten einzelnen „/“ steht: <b>konto-talbank.com</b>. Übrigens hat auch diese Seite ein Schloss 🔒. Das heißt nur „verschlüsselt“, nicht „echt“.' },
+  { id: 'b', ok: true, pre: 'https://www.', dom: 'talbank.de', post: '/anmelden',
+    x: '✔ Richtig! Direkt vor dem ersten „/“ steht genau <b>talbank.de</b>, die Adresse von der Pinnwand. Noch sicherer: die Adresse selbst eintippen oder die echte Banking-App nutzen.' },
+  { id: 'c', ok: false, pre: 'https://www.', dom: 'ta1bank.de', post: '/anmelden',
+    x: '✖ Fälschung! Schau genau hin: eine <b>Ziffer 1</b> statt des Buchstabens l. „ta1bank.de“ ist eine völlig andere Adresse und sieht nur fast gleich aus.' }
+];
+const LK = {}; LINKS.forEach(l => { LK[l.id] = l; });
+
+const HINTS = {
+  monitor: 'Tippe in jeder Mail auf den Absender: Erst die Adresse hinter dem Namen verrät, wer wirklich schreibt. Die Firmenadresse steht an der Pinnwand. Misstrauisch machen außerdem: Drohung, Eile, Geheimhaltung und Fragen nach Daten oder Geld.',
+  phone: 'Fünf Fragen helfen: Wer schreibt? Wie wirst du angesprochen? Wie viel Zeit bleibt dir? Was sollst du verraten? Wohin führt der Link?',
+  laptop: 'Die echte Adresse ist www.talbank.de (Pinnwand). Lies jede Adresse bis zum ersten einzelnen „/“. Direkt davor muss genau talbank.de stehen, Buchstabe für Buchstabe.',
+  door: 'Jedes befreite Gerät lässt eine Ziffer über der Tür aufleuchten. Reihenfolge am Schloss: Monitor – Handy – Laptop.'
+};
+
+const H = {
+  taunt: ["Fast hättest du's gemerkt. 😏", 'Danke! Genau so fallen sie alle rein.', 'Klick ruhig weiter. Ich warte.', 'Haha. Zu einfach.',
+    'Noch so ein Fehler, und die Tür bleibt für immer zu.', 'Ich liebe Leute, die nicht genau hinschauen.', 'Tick, tack. Die Zeit läuft – für mich.'],
+  nerv: [
+    ['Hm. Glück gehabt.', 'Na und? Das war nur eine von vielen.', 'Zufall. Reiner Zufall.'],
+    ['Moment mal… wie hast du das gesehen?', 'Das… das sollte nicht passieren.', 'Hör auf, so genau hinzuschauen!'],
+    ['W-wer hat dir das beigebracht?!', 'Nein, nein, nein…', 'Ihr seid zu schnell. Viel zu schnell.']
+  ],
+  solved: ['Eine Ziffer. Na und? Die Tür bleibt trotzdem zu.', 'Okay. Okay. Kein Grund zur Panik…', 'NEIN. Finger weg von der Tür!'],
+  idle: ['Na? Angst, etwas anzuklicken?', 'Ich langweile mich. Macht doch einen Fehler. 😈', 'Schlaft ihr? Die Uhr schläft nicht.'],
+  first: {
+    monitor: 'Schöner Posteingang. Ein paar Mails sind von mir. Viel Spaß beim Raten. 😏',
+    phone: 'Oh, eine SMS! Lies sie lieber schnell. Ganz schnell.',
+    laptop: 'Ich habe deine Lesezeichen ein bisschen… umgebaut.',
+    board: 'Zettel an der Pinnwand? Wie altmodisch.',
+    door: 'Ohne Code? Es gibt tausend Möglichkeiten. Viel Glück. 😈'
+  }
+};
+
+/* ---------------- Agent: Pixelbilder (20 x 32, eigene Zeichnung) ---------------- */
+const SPR_PAL = {"k":"#0c0b10","h":"#1f1e27","H":"#4a495f","s":"#efb892","S":"#c98b68","e":"#121218","m":"#9c5a44","w":"#eef2f6","t":"#14151c","j":"#2a2b37","J":"#444659","q":"#16161d","p":"#22232c","P":"#363848","b":"#0a0a0e","B":"#4a4a56","f":"#aab3c4","F":"#626a7c","L":"#fff2b0","d":"#c8a364","D":"#8e6c39","x":"#f2ead6","X":"#9a8f78","G":"#f0c64a"};
+const SPR = {
+  front: ["......kkkkkkkk......","....kkhhhhhhhhkk....","...khhhHHHHhhhhhk...","..khhhhhhHHHHhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhsssssssssshhk..","..khskkksssskkkshk..",".kSssseesssseesssSk.",".kSssssssssSssssssk.","..kssssssmmssssk....","....kSssssssssSk....",".......kSSSSk.......","....kjjJwttwJjjk....","...kjjjJwttwJjjjk...","..kjqjjJwttwJjjqjk..","..kjqjjjJttJjjjqjk..","..kjqjjjjttjjjjqjk..","..kjqjjjjJjjjjjqjk..","..kjqjjjjjjjjjjqjk..",".kssqjjjjjjjjjjqssk.",".kSSkqqqqqqqqqqkSfk.",".....kppppppppk..fk.",".....kpppkkpppk..Fk.",".....kpPpkkpPpk..L..",".....kpPpkkpPpk.....",".....kpPpkkpPpk.....",".....kpppkkpppk.....","....kbbbbkkbbbbk....","....kbBbbkkbBbbk....",".....kkkk..kkkk....."],
+  blink: ["......kkkkkkkk......","....kkhhhhhhhhkk....","...khhhHHHHhhhhhk...","..khhhhhhHHHHhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhsssssssssshhk..","..khskkksssskkkshk..",".kSssskksssskksssSk.",".kSssssssssSssssssk.","..kssssssmmssssk....","....kSssssssssSk....",".......kSSSSk.......","....kjjJwttwJjjk....","...kjjjJwttwJjjjk...","..kjqjjJwttwJjjqjk..","..kjqjjjJttJjjjqjk..","..kjqjjjjttjjjjqjk..","..kjqjjjjJjjjjjqjk..","..kjqjjjjjjjjjjqjk..",".kssqjjjjjjjjjjqssk.",".kSSkqqqqqqqqqqkSfk.",".....kppppppppk..fk.",".....kpppkkpppk..Fk.",".....kpPpkkpPpk..L..",".....kpPpkkpPpk.....",".....kpPpkkpPpk.....",".....kpppkkpppk.....","....kbbbbkkbbbbk....","....kbBbbkkbBbbk....",".....kkkk..kkkk....."],
+  back: ["......kkkkkkkk......","....kkhhhhhhhhkk....","...khhhhhHHhhhhhk...","..khhhhhHHHHhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..",".kShhhhhhhhhhhhhhSk.",".kShhhhhhhhhhhhhhSk.","..khhhhhhhhhhhhhhk..","....khhhhhhhhhhk....",".......kSSSSk.......","....kjjjwwwwjjjk....","...kjjjjjjjjjjjjk...","..kjqjjjjjjjjjjqjk..","..kjqjjjjjjjjjjqjk..","..kjqjjjjjqjjjjqjk..","..kjqjjjjjqjjjjqjk..","..kjqjjjjjqjjjjqjk..",".kssqjjjjjqjjjjqssk.",".kSSkqqqqqqqqqqkSfk.",".....kppppppppk..fk.",".....kpppkkpppk..Fk.",".....kpPpkkpPpk..L..",".....kpPpkkpPpk.....",".....kpPpkkpPpk.....",".....kpppkkpppk.....","....kbbbbkkbbbbk....","....kbBbbkkbBbbk....",".....kkkk..kkkk....."],
+  r1: ["......kkkkkkk.......","....kkhhhhhhhkk.....","...khhhHHHHHhhhk....","..khhhhhhhhHHHhhk...","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhsssssk..","..khhhhhhhhskkksssk.","..khhhhSShsssessssk.","..khhhhSSssssssssssk","...khhhhssssssmmsk..","....kkhhSsssssssSk..",".......kSSSSk.......","......kjjjjwtk......",".....kjjkJjktjk.....",".....kjkJjqktjk.....",".....kkJjqkjjkqqk...",".....kJjqkjjjkqssFfL","....kssskjjjjjkkkkkk","....kSSkjjjjjjk.....",".....kkjjjjjjjk.....",".....kqqqqqqqqk.....",".....kppppppk.......",".....kqqqkkpppk.....",".....kqqk..kpPpk....","....kqqk....kpPpk...","....kqqk.....kpPpk..","...kqqk.......kpPk..","..kbbbk.......kbbbbk","..kbbbbbk.....kbBbbk","...kkkkk.......kkkkk"],
+  r2: ["......kkkkkkk.......","....kkhhhhhhhkk.....","...khhhHHHHHhhhk....","..khhhhhhhhHHHhhk...","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhsssssk..","..khhhhhhhhskkksssk.","..khhhhSShsssessssk.","..khhhhSSssssssssssk","...khhhhssssssmmsk..","....kkhhSsssssssSk..",".......kSSSSk.......","......kjjjjwtk......",".....kjjkJjktjk.....",".....kjkJjqktjk.....",".....kjkJjqkjkqqk...",".....kjkJjqkjkqssFfL",".....kjkJjqkjjkkkkkk",".....kjkssskjjk.....",".....kjjkSSkjjk.....",".....kqqqkkqqqk.....",".....kppppppk.......","......kppppppk......",".......kpPpqqk......",".......kpPpkqk......",".......kpPpkqqk.....",".......kpPpkkqk.....","......kbbbbk.kbbk...","......kbBbbbkkbbbk..",".......kkkkkk.kkk..."],
+  r3: ["......kkkkkkk.......","....kkhhhhhhhkk.....","...khhhHHHHHhhhk....","..khhhhhhhhHHHhhk...","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhsssssk..","..khhhhhhhhskkksssk.","..khhhhSShsssessssk.","..khhhhSSssssssssssk","...khhhhssssssmmsk..","....kkhhSsssssssSk..",".......kSSSSk.......","......kjjjjwtk......",".....kjjkJjktjk.....",".....kjjkJjqkjk.....",".....kjjjkJjqkqqk...",".....kjjjjkJjqkssFfL",".....kjjjjjkssskkkkk",".....kjjjjjjkSSk....",".....kjjjjjjjkk.....",".....kqqqqqqqqk.....",".....kppppppk.......",".....kpppkkqqqk.....",".....kpPk..kqqqk....","....kpPk....kqqqk...","....kpPk.....kqqqk..","...kpPk.......kqqk..","..kbbbk.......kbbbbk","..kbBbbbk.....kbbbbk","...kkkkk.......kkkkk"],
+  r4: ["......kkkkkkk.......","....kkhhhhhhhkk.....","...khhhHHHHHhhhk....","..khhhhhhhhHHHhhk...","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhsssssk..","..khhhhhhhhskkksssk.","..khhhhSShsssessssk.","..khhhhSSssssssssssk","...khhhhssssssmmsk..","....kkhhSsssssssSk..",".......kSSSSk.......","......kjjjjwtk......",".....kjjkJjktjk.....",".....kjkJjqktjk.....",".....kjkJjqkjkqqk...",".....kjkJjqkjkqssFfL",".....kjkJjqkjjkkkkkk",".....kjkssskjjk.....",".....kjjkSSkjjk.....",".....kqqqkkqqqk.....",".....kppppppk.......","......kppppppk......",".......kqqqppk......",".......kqqqkpk......",".......kqqqkpPk.....",".......kqqqkkpk.....","......kbbbbk.kbbk...","......kbbbbbkkbBbk..",".......kkkkkk.kkk..."],
+  watch: ["......kkkkkkkk......","....kkhhhhhhhhkk....","...khhhHHHHhhhhhk...","..khhhhhhHHHHhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhsssssssssshhk..","..khskkksssskkkshk..",".kSssssssssssssssSk.",".kSsseesssseesSsssk.","..kssssssmmssssk....","....kSssssssssSk....",".......kSSSSk.......","....kjjJwttwJjjk....","...kjjjJwttwJjjjk...","..kjqjjJwttwJjjqjk..","..kjqjjjJttJjjjqjk..","..kjqkkkkkkkkkkqjk..","..kjqkssGJJJJJJkjk..","..kjqkkkkkkkkkkkjk..",".kssqjjjjjjjjjjqjk..",".kSSkqqqqqqqqqqkqk..",".....kppppppppk..fk.",".....kpppkkpppk..Fk.",".....kpPpkkpPpk..L..",".....kpPpkkpPpk.....",".....kpPpkkpPpk.....",".....kpppkkpppk.....","....kbbbbkkbbbbk....","....kbBbbkkbBbbk....",".....kkkk..kkkk....."],
+  read: ["......kkkkkkkk......","....kkhhhhhhhhkk....","...khhhHHHHhhhhhk...","..khhhhhhHHHHhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhsssssssssshhk..","..khskkksssskkkshk..",".kSssssssssssssssSk.",".kSsseesssseesSsssk.","..kssssssmmssssk....","....kSssssssssSk....",".......kSSSSk.......","....kjjJwttwJjjk....","...kjjjJwttwJjjjk...","..kjqjjJwttwJjjqjk..","..kjqkkkkkkkkkkqjk..","..kjqkxxxxDxxxxkqjk.","..kjqkxXXxDxXXxkqjk.","..kjskxxxxDxxxxksjk.","..kjqkddddDddddkqjk.",".kqqqqkkkkkkkkkkqqk.",".....kppppppppk..fk.",".....kpppkkpppk..Fk.",".....kpPpkkpPpk..L..",".....kpPpkkpPpk.....",".....kpPpkkpPpk.....",".....kpppkkpppk.....","....kbbbbkkbbbbk....","....kbBbbkkbBbbk....",".....kkkk..kkkk....."],
+  win: ["......kkkkkkkk......","....kkhhhhhhhhkk....","...khhhHHHHhhhhhk...","..khhhhhhHHHHhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhhk..","..khhhhhhhhhhhhhkkk.","..khhsssssssssskSsSk","..khskkksssskkkksssk",".kSssseesssseesksssk",".kSssssssssSsssskJk.","..kssssssmmsssskkjk.","....kSssssssssSkkjk.",".......kSSSSk...kjk.","....kjjJwttwJjjkjjk.","...kjjjJwttwJjjjjk..","..kjqjjJwttwJjjqk...","..kjqjjjJttJjjjk....","..kjqjjjjttjjjjk....","..kjqjjjjJjjjjjk....","..kjqjjjjjjjjjjk....",".kssqjjjjjjjjjjk....",".kSSkqqqqqqqqqqk....",".....kppppppppk..fk.",".....kpppkkpppk..Fk.",".....kpPpkkpPpk..L..",".....kpPpkkpPpk.....",".....kpPpkkpPpk.....",".....kpppkkpppk.....","....kbbbbkkbbbbk....","....kbBbbkkbBbbk....",".....kkkk..kkkk....."],
+};
+
+/* ---------------- Spielstand ---------------- */
+const S = {
+  digits: KEYS.map(() => 1 + Math.floor(Math.random() * 9)),
+  solved: { monitor: false, phone: false, laptop: false },
+  lit: { monitor: false, phone: false, laptop: false },
+  claimed: {}, seen: {}, hints: {}, warned: {}, hintCount: 0, mistakes: 0,
+  deadline: 0, tick: null, practice: false, ended: false, over: false, kicked: false, inRoom: false,
+  lastAct: Date.now(), lastSay: 0, lastTaunt: '',
+  mails: {}, peek: {}, curMail: null,
+  sms: { stage: 'lock', found: [], wrong: {}, act: {}, done: false, order: shuffle([0, 1, 2]) },
+  lap: { tried: {}, done: false, last: null, order: shuffle(['a', 'b', 'c']) },
+  wheels: [0, 0, 0], wpos: [10, 10, 10]
+};
+const solvedCount = () => KEYS.filter(k => S.solved[k]).length;
+const plain = s => s.replace(/<[^>]+>/g, '');
+
+/* ---------------- Elemente ---------------- */
+const scene = $('#scene'), stage = $('#stage');
+const modal = $('#modal'), box = $('#mbox'), mBody = $('#mBody'), mTitle = $('#mTitle'), mHint = $('#mHint'), hintBtn = $('#hintBtn');
+const chatEl = $('#chat'), chatBody = $('#chatBody'), chatBtn = $('#chatToggle'), white = $('#white');
+$$('.ava-slot').forEach(s => { s.innerHTML = AVA; });
+$$('#objbar .ob').forEach(b => { $('.ico', b).innerHTML = ICON[b.dataset.obj]; });
+
+function show(id) { $$('.screen').forEach(s => s.classList.toggle('on', s.id === id)); }
+
+/* ---------------- Szene ---------------- */
+function el(tag, attrs, parent) { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function buildScene() {
+  const stars = $('#stars');
+  for (let i = 0; i < 36; i++) el('circle', { cx: (100 + Math.random() * 310).toFixed(0), cy: (120 + Math.random() * 170).toFixed(0), r: (Math.random() * 1.5 + .4).toFixed(1), fill: '#dfe8ff', opacity: (Math.random() * .6 + .3).toFixed(2) }, stars);
+  const city = $('#city'); let x = 96;
+  while (x < 414) {
+    const w = 26 + Math.random() * 44, h = 70 + Math.random() * 150, y = 524 - h;
+    el('rect', { x: x.toFixed(0), y: y.toFixed(0), width: w.toFixed(0), height: h.toFixed(0), fill: Math.random() < .5 ? '#070818' : '#0b0b20' }, city);
+    for (let wy = y + 10; wy < 518; wy += 14) for (let wx = x + 6; wx < x + w - 8; wx += 10) {
+      if (Math.random() < .2) { const r = el('rect', { x: wx.toFixed(0), y: wy.toFixed(0), width: 5, height: 7, fill: '#ffcf7a', opacity: (.35 + Math.random() * .5).toFixed(2) }, city); if (Math.random() < .25) { r.setAttribute('class', 'tw'); r.style.animationDelay = (Math.random() * 6).toFixed(2) + 's'; } }
+    }
+    x += w + 2;
+  }
+  const bl = $('#blinds'); for (let y = 116; y < 232; y += 13) el('rect', { x: 92, y, width: 326, height: 9, rx: 2, fill: '#24141e' }, bl);
+  const fl = $('#floorLines');
+  for (let i = -14; i <= 14; i++) el('line', { x1: 800 + i * 85, y1: 702, x2: 800 + i * 330, y2: 1500 }, fl);
+  [745, 805, 890, 1010].forEach(y => el('line', { x1: -2400, y1: y, x2: 4000, y2: y }, fl));
+  const code = ['> connect hafenlicht.local', '> bypass firewall ... ok', '> sudo door.lock --all', '> dump mails > /n0x/', 'while(true){ phish(); }', '> inject sms.payload', '> swap bookmarks', '> keylog --silent', '> exfil 4,2 GB ...', '> rm -rf /backup', '> N0X WAS HERE', '> tick tack tick tack'];
+  const mc = $('#monCode');
+  code.concat(code).forEach((line, i) => { const t = el('text', { x: 562, y: 358 + i * 14 }, mc); t.textContent = line; });
+  const mk = $('#markers');
+  for (const k in MK) {
+    const [mx, my] = MK[k];
+    const g = el('g', { class: 'mk', 'data-k': k, 'data-y': my }, mk);
+    el('circle', { class: 'ring', cx: mx, cy: my, r: 12 }, g);
+    el('circle', { class: 'core', cx: mx, cy: my, r: 6 }, g);
+    const t = el('text', { x: mx, y: my + 30 }, g); t.textContent = (k === 'phone' ? 'Handy' : LABEL[k]).toUpperCase();
+  }
+}
+/* Kamera: Auf Handys im Hochformat füllt der Raum den Bildschirm und lässt sich seitlich wischen. */
+const CAM = { pan: false, x: 0, y: 20, w: 1600, h: 860, sc: 1, anim: 0 };
+const PAN_MIN = 300, PAN_MAX = 1500;
+const clampPan = x => Math.max(PAN_MIN, Math.min(PAN_MAX - CAM.w, x));
+function setPan(x) {
+  CAM.x = clampPan(x);
+  scene.setAttribute('viewBox', `${CAM.x.toFixed(1)} ${CAM.y} ${CAM.w.toFixed(1)} ${CAM.h}`);
+  $('#panL').classList.toggle('show', CAM.pan && CAM.x > PAN_MIN + 4);
+  $('#panR').classList.toggle('show', CAM.pan && CAM.x < PAN_MAX - CAM.w - 4);
+}
+function stopPan() { cancelAnimationFrame(CAM.anim); if (CAM.res) { const r = CAM.res; CAM.res = null; r(); } }
+function panTo(cx, ms) {
+  if (!CAM.pan) return Promise.resolve();
+  stopPan();
+  const from = CAM.x, to = clampPan(cx - CAM.w / 2);
+  if (Math.abs(to - from) < 2) return Promise.resolve();
+  if (RM) { setPan(to); return Promise.resolve(); }
+  const dur = ms || 750;
+  return new Promise(res => {
+    CAM.res = res;
+    const t0 = performance.now();
+    const step = t => {
+      const k = Math.min(1, (t - t0) / dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      setPan(from + (to - from) * e);
+      if (k < 1) CAM.anim = requestAnimationFrame(step); else if (CAM.res === res) { CAM.res = null; res(); }
+    };
+    CAM.anim = requestAnimationFrame(step);
+  });
+}
+function fitScene() {
+  const r = stage.getBoundingClientRect(); if (!r.width || !r.height) return;
+  const a = r.width / r.height;
+  const pan = a < 1 && r.width < 600;
+  let vb;
+  if (pan) {
+    const center = CAM.pan ? CAM.x + CAM.w / 2 : 720;
+    CAM.pan = true; CAM.h = 860; CAM.w = Math.min(PAN_MAX - PAN_MIN, CAM.h * a);
+    CAM.x = clampPan(center - CAM.w / 2);
+    vb = [CAM.x, CAM.y, CAM.w, CAM.h];
+  } else {
+    CAM.pan = false;
+    vb = a < 1.2 ? [425, 50, 1010, 850] : a < 1.75 ? [0, 0, 1600, 900] : [300, 40, 1180, 840];
+  }
+  stage.classList.toggle('pan', pan);
+  if (pan) setPan(CAM.x); else { scene.setAttribute('viewBox', vb.join(' ')); $('#panL').classList.remove('show'); $('#panR').classList.remove('show'); }
+  const sc = Math.min(r.width / vb[2], r.height / vb[3]);
+  CAM.sc = sc;
+  scene.style.setProperty('--fs', (12.5 / sc).toFixed(1) + 'px');
+  $$('.mk').forEach(g => {
+    $('.ring', g).setAttribute('r', (10 / sc).toFixed(1));
+    $('.core', g).setAttribute('r', (4.5 / sc).toFixed(1));
+    $('text', g).setAttribute('y', (+g.dataset.y + 26 / sc).toFixed(1));
+  });
+}
+function setHudH() { const h = $('#hud'); if (h && h.offsetHeight) document.documentElement.style.setProperty('--hudH', h.offsetHeight + 'px'); }
+
+/* ---------------- Agent (Spielfigur) ---------------- */
+function spritePaths(rows) {
+  const by = {};
+  rows.forEach((r, y) => {
+    for (let x = 0; x < r.length;) {
+      const c = r[x];
+      if (!SPR_PAL[c]) { x++; continue; }
+      let n = 1; while (r[x + n] === c) n++;
+      (by[c] = by[c] || []).push(`M${x} ${y}h${n}v1h-${n}z`);
+      x += n;
+    }
+  });
+  return Object.keys(by).map(c => `<path fill="${SPR_PAL[c]}" d="${by[c].join('')}"/>`).join('');
+}
+const spriteSVG = (name, cls) => `<svg class="${cls || ''}" viewBox="0 0 20 32" shape-rendering="crispEdges" aria-hidden="true">${spritePaths(SPR[name])}</svg>`;
+const FLOOR = 868, SPEED = 950;
+const STAND = { phone: 470, monitor: 600, board: 1005, laptop: 1050, door: 1290 };
+const AIM = { phone: [485, 530], monitor: [710, 440], board: [1015, 230], laptop: [1040, 530], door: [1307, 440] };
+const AG = { x: 860, y: FLOOR, s: 1, dir: 1, cur: '', walking: false, tx: 860, token: 0, raf: 0, last: 0, res: null, pt: 0 };
+const agentEl = $('#agent'), agentFlip = $('#agentFlip'), beamEl = $('#beam'), agentSprite = $('#agentSprite');
+function buildAgent() {
+  agentSprite.innerHTML = Object.keys(SPR).map(n => `<g data-f="${n}" style="display:none">${spritePaths(SPR[n])}</g>`).join('');
+  agFrame('front'); agPlace(); beam('down');
+  $('#startAgent').innerHTML = spriteSVG('front') + spriteSVG('blink', 'blink');
+  $('#endAgent').innerHTML = spriteSVG('win');
+}
+function agFrame(n) {
+  if (AG.cur === n) return;
+  if (AG.cur) agentSprite.querySelector(`[data-f="${AG.cur}"]`).style.display = 'none';
+  agentSprite.querySelector(`[data-f="${n}"]`).style.display = '';
+  AG.cur = n;
+}
+function agPlace() {
+  agentEl.setAttribute('transform', `translate(${AG.x.toFixed(1)} ${AG.y.toFixed(1)}) scale(${AG.s.toFixed(3)})`);
+  agentFlip.setAttribute('transform', AG.dir < 0 ? 'scale(-1 1)' : 'scale(1 1)');
+}
+/* Lichtkegel der Taschenlampe: seitlich beim Laufen, nach unten im Stehen, auf den Gegenstand beim Untersuchen */
+function beam(kind, target) {
+  if (kind === 'off') { beamEl.setAttribute('opacity', '0'); return; }
+  let ox, oy, ang, len = 420, op = 1;
+  if (kind === 'side') { ox = 90; oy = -122; ang = 12; }
+  else if (kind === 'down') { ox = 76; oy = -50; ang = 62; len = 150; op = .8; }
+  else {
+    ox = 24; oy = -150;
+    const dx = target[0] - AG.x - ox, dy = target[1] - AG.y - oy;
+    ang = Math.atan2(dy, dx) * 180 / Math.PI; len = Math.max(120, Math.hypot(dx, dy));
+  }
+  beamEl.setAttribute('opacity', String(op));
+  beamEl.setAttribute('transform', `translate(${ox} ${oy}) rotate(${ang.toFixed(1)}) scale(${(len / 420).toFixed(3)} 1)`);
+}
+function walkTo(x) {
+  x = Math.max(380, Math.min(1400, x));
+  stopPan(); clearTimeout(AG.pt);
+  AG.tx = x;
+  if (AG.res) { const r = AG.res; AG.res = null; r(); }
+  if (Math.abs(x - AG.x) < 3) { if (!AG.walking) { agFrame('front'); beam('down'); } return Promise.resolve(); }
+  AG.dir = x > AG.x ? 1 : -1; AG.walking = true; beam('side'); agPlace();
+  if (RM) {
+    AG.x = x; AG.walking = false; agFrame('front'); agPlace(); beam('down');
+    if (CAM.pan) setPan(AG.x - CAM.w / 2);
+    return Promise.resolve();
+  }
+  return new Promise(res => {
+    AG.res = res;
+    if (!AG.raf) { AG.last = performance.now(); AG.raf = requestAnimationFrame(agStep); }
+  });
+}
+function agStep(t) {
+  const dt = Math.min(.05, Math.max(0, (t - AG.last) / 1000)); AG.last = t;
+  const d = AG.tx - AG.x, step = SPEED * dt;
+  if (Math.abs(d) <= step) { AG.x = AG.tx; AG.walking = false; }
+  else { AG.x += Math.sign(d) * step; AG.dir = Math.sign(d); }
+  if (AG.walking) agFrame(['r1', 'r2', 'r3', 'r4'][Math.floor(t / 115) % 4]);
+  agPlace();
+  if (CAM.pan && !S.ended) setPan(AG.x - CAM.w / 2);
+  if (AG.walking) { AG.raf = requestAnimationFrame(agStep); return; }
+  AG.raf = 0; agFrame('front'); beam('down');
+  const r = AG.res; AG.res = null; if (r) r();
+}
+function agPose(name, ms) {
+  if (AG.walking || S.ended || !S.inRoom || modalOpen()) return;
+  clearTimeout(AG.pt); agFrame(name); beam('off');
+  AG.pt = setTimeout(() => { if (!AG.walking && !S.ended && AG.cur === name) { agFrame('front'); beam('down'); } }, ms);
+}
+function agFaceFront() { if (!AG.walking && !S.ended) { clearTimeout(AG.pt); agFrame('front'); beam('down'); } }
+/* Klick auf einen Gegenstand: Agent läuft hin, dreht sich um, leuchtet ihn an – dann öffnet sich das Rätsel */
+async function requestObj(key, from) {
+  if (S.ended || S.over || modalOpen() || !S.inRoom) return;
+  const tok = ++AG.token;
+  S.lastAct = Date.now();
+  await walkTo(STAND[key]);
+  if (tok !== AG.token || S.ended || S.over || modalOpen()) return;
+  clearTimeout(AG.pt);
+  AG.dir = 1; agFrame('back'); agPlace(); beam('aim', AIM[key]);
+  await wait(RM ? 0 : 280);
+  if (tok !== AG.token || S.ended || S.over || modalOpen()) return;
+  openObj(key, from);
+}
+function nearestObj() {
+  let best = null, bd = 150;
+  for (const k in STAND) { const d = Math.abs(STAND[k] - AG.x); if (d < bd) { bd = d; best = k; } }
+  return best;
+}
+function intoLight() {
+  $('#agentWrap').setAttribute('filter', 'url(#fSil)');
+  const x0 = AG.x, y0 = AG.y, t0 = performance.now(), dur = RM ? 1 : 2300;
+  const step = t => {
+    const k = Math.min(1, (t - t0) / dur), e = k * (2 - k);
+    AG.x = x0 + (1307 - x0) * e; AG.s = 1 - .44 * e;
+    AG.y = y0 + (714 - y0) * e + Math.sin(t / 70) * 2.5 * (1 - k);
+    agPlace();
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+setInterval(() => {
+  if (AG.cur === 'front' && !AG.walking) { agFrame('blink'); setTimeout(() => { if (AG.cur === 'blink') agFrame('front'); }, 150); }
+}, 3400);
+
+/* ---------------- Uhr ---------------- */
+const remaining = () => S.practice ? Infinity : Math.max(0, S.deadline - Date.now());
+const fmt = ms => { const s = Math.ceil(ms / 1000); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
+function renderClock() {
+  const c = $('#clock');
+  if (S.practice) { c.textContent = '∞'; c.className = 'clock'; c.setAttribute('aria-label', 'ohne Zeitlimit'); document.body.classList.remove('low'); return; }
+  const ms = remaining(); c.textContent = fmt(ms);
+  c.classList.toggle('warn', ms <= 120000 && ms > 60000);
+  c.classList.toggle('low', ms <= 60000);
+  document.body.classList.toggle('low', ms <= 60000 && ms > 0 && S.inRoom && !S.ended);
+  const bc = $('#bigClock span'); if (bc) bc.textContent = fmt(ms);
+}
+function startClock() { S.deadline = Date.now() + TOTAL * 1000; clearInterval(S.tick); S.tick = setInterval(tick, 250); renderClock(); }
+function tick() {
+  if (S.ended || S.over) return;
+  renderClock();
+  if (!S.practice) {
+    const s = Math.ceil(remaining() / 1000);
+    [[300, 'Halbzeit. Ich hab’s nicht eilig.'], [120, 'Zwei Minuten. Ich kann eure Panik förmlich hören.'], [60, '60 Sekunden…'], [15, '15… 14… 13… 😈']].forEach(([t, txt]) => {
+      if (s <= t && !S.warned[t]) { S.warned[t] = 1; if (s > t - 8 && S.inRoom) { say(txt, { cls: 'evil' }); agPose('watch', 2600); } }
+    });
+    if (s <= 0) { gameOver(); return; }
+  }
+  if (S.inRoom && Date.now() - S.lastAct > 75000) { S.lastAct = Date.now(); say(rnd(H.idle)); }
+}
+function penalty(sec) {
+  if (S.practice || S.ended || S.over || !S.deadline) return;
+  S.deadline -= sec * 1000;
+  const p = document.createElement('span'); p.className = 'pen'; p.textContent = '−' + sec + ' s';
+  $('#hudC').appendChild(p); setTimeout(() => p.remove(), 1300);
+  tick();
+}
+
+/* ---------------- Chat des Hackers ---------------- */
+const C = { q: [], busy: false, pinned: false, t: null };
+function say(text, o) { if (S.kicked) return; C.q.push(Object.assign({ text, who: 'hack' }, o || {})); S.lastSay = Date.now(); if (!C.busy) pump(); }
+function sys(text) { say(text, { who: 'sys', fast: true }); }
+function sayMaybe(text, gap, o) { if (Date.now() - S.lastSay > gap) say(text, o); }
+const wide = () => innerWidth >= 1100;
+const ticker = $('#mTicker'), tickerT = $('#mTickerText');
+async function pump() {
+  C.busy = true;
+  while (C.q.length) {
+    const m = C.q.shift();
+    if (!m.fast) {
+      const ty = document.createElement('div'); ty.className = 'msg typing'; ty.innerHTML = '<i></i><i></i><i></i>';
+      chatBody.appendChild(ty); peek(); scrollChat(); toTicker(null);
+      await wait(RM ? 150 : Math.min(1300, 380 + m.text.length * 15));
+      ty.remove();
+    }
+    addMsg(m);
+    await wait(m.fast ? 120 : 450);
+  }
+  C.busy = false;
+}
+function addMsg(m) {
+  const who = m.who || 'hack';
+  const d = document.createElement('div');
+  d.className = 'msg ' + who + (m.cls ? ' ' + m.cls : '');
+  d.textContent = m.text;
+  chatBody.appendChild(d); scrollChat(); peek(); toTicker(m);
+  if (who === 'hack') { chatBtn.classList.remove('ping'); void chatBtn.offsetWidth; chatBtn.classList.add('ping'); }
+}
+/* In den Rätseln funkt der Hacker über eine Leiste dazwischen, statt den Inhalt zu verdecken. */
+function toTicker(m) {
+  if (!modalOpen() || modal.classList.contains('closing')) return;
+  ticker.hidden = false;
+  if (!m) { ticker.className = 'm-ticker'; tickerT.innerHTML = '<b>N0X</b><span class="tdots">tippt …</span>'; return; }
+  const who = m.who || 'hack';
+  ticker.className = 'm-ticker ' + who + (m.cls ? ' ' + m.cls : '');
+  tickerT.textContent = '';
+  const b = document.createElement('b'); b.textContent = who === 'sys' ? 'SYSTEM' : 'N0X';
+  tickerT.append(b, document.createTextNode(m.text));
+  void ticker.offsetWidth; ticker.classList.add('new');
+}
+/* Untertitel wie im Kino – fürs Finale */
+function subtitle(text, who) {
+  const s = $('#subs'); s.textContent = '';
+  if (!text) return;
+  const d = document.createElement('div');
+  d.className = 'sub ' + (who === 'sys' ? 'sys' : 'hack glitchy');
+  const b = document.createElement('b'); b.textContent = who === 'sys' ? 'SYSTEM' : 'N0X';
+  d.append(b, document.createTextNode(text)); s.appendChild(d);
+}
+function finalLine(text, who) {
+  subtitle(text, who);
+  if (wide()) addMsg({ who: who || 'hack', text, cls: who === 'sys' ? '' : 'nervous' });
+}
+function scrollChat() { chatBody.scrollTop = chatBody.scrollHeight; }
+function openChat() { chatEl.classList.add('open'); chatBtn.setAttribute('aria-expanded', 'true'); }
+function closeChat() { chatEl.classList.remove('open'); chatBtn.setAttribute('aria-expanded', 'false'); C.pinned = false; clearTimeout(C.t); }
+function peek() {
+  if (!S.inRoom || (S.ended && !wide())) return;
+  if (modalOpen() && !wide() && !C.pinned) return;
+  openChat(); clearTimeout(C.t);
+  if (!C.pinned && !wide()) C.t = setTimeout(() => { if (!C.pinned) closeChat(); }, 5200);
+}
+
+/* ---------------- Rückmeldung ---------------- */
+function flash() {
+  const f = $('#flash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+  document.body.classList.remove('hit'); void document.body.offsetWidth; document.body.classList.add('hit');
+  clearTimeout(S.hitT); S.hitT = setTimeout(() => document.body.classList.remove('hit'), 480);
+}
+function burst(ms) { if (RM) return; document.body.classList.add('burst'); clearTimeout(S.bT); S.bT = setTimeout(() => document.body.classList.remove('burst'), ms || 420); }
+function fail(line) {
+  S.mistakes++; penalty(PEN); flash();
+  if (!RM) { const g = $('#ghost'); g.classList.remove('go'); void g.offsetWidth; g.classList.add('go'); }
+  let t = line;
+  if (!t) { do { t = rnd(H.taunt); } while (t === S.lastTaunt); S.lastTaunt = t; }
+  say(t, { cls: 'evil' });
+}
+function good(line, gap) {
+  const t = line || rnd(H.nerv[Math.min(2, solvedCount())]);
+  if (gap === 0) say(t, { cls: 'nervous' }); else sayMaybe(t, gap || 7000, { cls: 'nervous' });
+  chatBtn.classList.remove('nerv'); void chatBtn.offsetWidth; chatBtn.classList.add('nerv');
+}
+
+/* ---------------- Rätsel-Fenster ---------------- */
+let cur = null, lastFocus = null;
+const modalOpen = () => modal.classList.contains('on');
+const RENDER = { monitor: renderMonitor, phone: renderPhone, laptop: renderLaptop, board: renderBoard, door: renderLock };
+function openObj(key, from) {
+  if (S.ended || S.over || !RENDER[key]) return;
+  if (modalOpen()) { modal.classList.remove('on', 'show', 'closing'); $$('.solved', box).forEach(x => x.remove()); }
+  S.lastAct = Date.now(); lastFocus = from || document.activeElement; cur = key;
+  box.className = 'modal-box k-' + key;
+  mTitle.innerHTML = TITLE[key];
+  mHint.hidden = true; mHint.innerHTML = '';
+  ticker.hidden = true;
+  if (!wide() && !C.pinned) closeChat();
+  const canHint = HINTS[key] && !(KEYS.includes(key) && S.solved[key]);
+  hintBtn.hidden = !canHint;
+  hintBtn.textContent = S.hints[key] ? '💡 Tipp' : '💡 Tipp (−20 s)';
+  mBody.scrollTop = 0;
+  RENDER[key]();
+  if (S.hints[key] && canHint) showHint(key, false);
+  modal.classList.add('on'); modal.setAttribute('aria-hidden', 'false');
+  const r = (from && from.getBoundingClientRect ? from : stage).getBoundingClientRect(), br = box.getBoundingClientRect();
+  box.style.setProperty('--ox', (r.left + r.width / 2 - br.left) + 'px');
+  box.style.setProperty('--oy', (r.top + r.height / 2 - br.top) + 'px');
+  modal.classList.remove('show'); void box.offsetWidth; modal.classList.add('show');
+  burst(260);
+  if (key === 'door') afterLockRender();
+  if (!S.seen[key]) {
+    S.seen[key] = true;
+    const line = key === 'door' && solvedCount() === 3 ? 'Finger weg! Das ist MEINE Tür!' : H.first[key];
+    setTimeout(() => say(line, { cls: key === 'door' && solvedCount() === 3 ? 'nervous' : '' }), 650);
+  }
+  setTimeout(() => $('#closeBtn').focus({ preventScroll: true }), 60);
+}
+function closeModal(silent) {
+  if (!modalOpen()) return;
+  modal.classList.remove('show'); modal.classList.add('closing');
+  setTimeout(() => {
+    modal.classList.remove('on', 'closing'); modal.setAttribute('aria-hidden', 'true');
+    mBody.innerHTML = ''; $$('.solved', box).forEach(x => x.remove()); cur = null;
+    if (!silent) { lightPending(); setTimeout(agFaceFront, 160); }
+    if (lastFocus && lastFocus.focus && !S.ended) { try { lastFocus.focus({ preventScroll: true }); } catch (e) {} }
+  }, RM ? 10 : 250);
+}
+function showHint(key, charge) {
+  if (charge && !S.hints[key]) { S.hints[key] = true; S.hintCount++; penalty(HINT_PEN); say('Tipps? Wie süß. Kosten aber Zeit. 😏'); }
+  mHint.innerHTML = '<span class="hint-agent">' + spriteSVG('read') + '</span><div><b>AUS DEM DOSSIER</b><br>' + HINTS[key] + '</div>';
+  mHint.hidden = false; hintBtn.textContent = '💡 Tipp';
+}
+function claimBtn(key, light) {
+  const txt = S.claimed[key] ? '✔ ' + LABEL[key] + ' gesichert' : 'Ziffer abholen →';
+  return `<button class="btn ${light ? '' : 'btn-ice'}" data-act="claim" data-v="${key}">${txt}</button>`;
+}
+function completePuzzle(key) {
+  if (S.solved[key]) return;
+  S.solved[key] = true;
+  scene.classList.add('s-' + key);
+  updateObj(); updateMeter();
+  hintBtn.hidden = true;
+  if (modalOpen() && !RM) {
+    const sw = document.createElement('div'); sw.className = 'sweep';
+    sw.style.setProperty('--bh', box.offsetHeight + 'px');
+    box.appendChild(sw); setTimeout(() => sw.remove(), 1100);
+  }
+  const n = solvedCount();
+  say(H.solved[n - 1], { cls: 'nervous' });
+  sys('✔ ' + LABEL[key] + ' befreit. Ziffer für den Türcode freigegeben (' + n + '/3).');
+}
+function showSolvedOverlay(key) {
+  $$('.solved', box).forEach(x => x.remove());
+  S.claimed[key] = true;
+  const d = S.digits[KEYS.indexOf(key)];
+  const ov = document.createElement('div'); ov.className = 'solved';
+  ov.innerHTML = `<div class="sv-card" role="status"><p class="sv-k">${LABEL[key].toUpperCase()} GESICHERT</p><div class="sv-d" id="svd">?</div><p class="sv-t">Ziffer freigegeben – sie leuchtet gleich über der Tür auf.</p><div class="sv-b"><button class="btn btn-ice" data-act="room">Zurück in den Raum</button><button class="btn btn-ghost" data-act="review">Nochmal ansehen</button></div></div>`;
+  box.appendChild(ov);
+  const sd = $('#svd'); let i = 0;
+  const iv = setInterval(() => { sd.textContent = 1 + Math.floor(Math.random() * 9); if (++i > 13 || RM) { clearInterval(iv); sd.textContent = d; sd.classList.add('set'); } }, 55);
+  burst(300);
+  setTimeout(() => { const b = $('.btn', ov); if (b) b.focus({ preventScroll: true }); }, 50);
+}
+async function lightPending() {
+  const keys = KEYS.filter(k => S.solved[k] && !S.lit[k]);
+  if (!keys.length) return;
+  keys.forEach(k => { S.lit[k] = true; });
+  if (CAM.pan) await panTo(1307, 850);   // Kamera schwenkt zur Tür
+  keys.forEach((k, n) => setTimeout(() => lightDigit(k, KEYS.indexOf(k)), 200 + n * 500));
+  setTimeout(() => agPose('win', 1500), 250);
+}
+function lightDigit(k, i) {
+  const g = $(`.dslot[data-k="${k}"]`);
+  $('text', g).textContent = S.digits[i];
+  g.classList.remove('pop'); void g.getBoundingClientRect(); g.classList.add('lit', 'pop');
+  const b = $$('.burst')[i]; b.classList.remove('go'); void b.getBoundingClientRect(); b.classList.add('go');
+  const hb = $$('#hudCode b')[i]; hb.textContent = S.digits[i]; hb.classList.add('lit');
+  if (KEYS.every(x => S.lit[x])) {
+    $('.mk[data-k="door"]').classList.add('ready');
+    $('#objbar [data-obj="door"]').classList.add('ready');
+    scene.classList.add('ready');
+  }
+}
+function updateObj() {
+  $$('#objbar .ob').forEach(b => {
+    const k = b.dataset.obj; if (!KEYS.includes(k)) return;
+    b.classList.toggle('done', S.solved[k]); $('.st', b).textContent = S.solved[k] ? '✔' : '!';
+  });
+  $$('.mk').forEach(m => m.classList.toggle('done', !!S.solved[m.dataset.k]));
+}
+function updateMeter() { const n = solvedCount(); $$('#meter i').forEach((m, i) => m.classList.toggle('off', i >= 3 - n)); }
+
+/* ---------------- Monitor ---------------- */
+function renderMonitor() {
+  mBody.innerHTML = `<div class="bezel"><div class="mailapp">
+    <div class="mailbar"><span class="acct">✉ Posteingang<span class="hide-s"> · kim.weber@hafenlicht-logistik.de</span></span><span class="mprog" id="mProg"></span></div>
+    <p class="mtip">🔍 <span class="hide-s">Tippe auf den <b>Absender</b> und auf <b>Links</b>, um sie zu prüfen. Entscheide dann: echt oder Phishing?</span><span class="show-s"><b>Absender</b> und <b>Links</b> antippen – dann entscheiden.</span></p>
+    <div class="mwrap" id="mwrap"><ul class="mlist" id="mlist"></ul><div class="mview" id="mview"><div class="mempty">Wähle links eine Mail aus.</div></div></div>
+  </div></div>`;
+  drawList();
+  if (innerWidth > 760) openMail(S.curMail || (MAILS.find(m => !S.mails[m.id]) || MAILS[0]).id);
+}
+function drawList() {
+  const ul = $('#mlist'); if (!ul) return;
+  ul.innerHTML = MAILS.map(m => {
+    const st = S.mails[m.id];
+    const tag = st ? (m.phish ? '<span class="tag ph">🎣 Phishing</span>' : '<span class="tag ok">✔ Echt</span>') + (st.ok ? '' : '<span class="tag x">✖ falsch getippt</span>') : '';
+    return `<li><button class="mitem${st ? ' done' : ''}${S.curMail === m.id ? ' sel' : ''}" data-act="mail" data-v="${m.id}"><span class="mdot"></span><span class="mn">${m.name}</span><span class="mt">${m.time}</span><span class="ms">${m.subj}</span><span class="mp">${tag || plain(m.body[1])}</span></button></li>`;
+  }).join('');
+  $('#mProg').textContent = 'Geprüft: ' + Object.keys(S.mails).length + '/' + MAILS.length;
+}
+function openMail(id) {
+  const m = MAILS.find(x => x.id === id); if (!m) return;
+  S.curMail = id;
+  const st = S.mails[id], pk = S.peek[id] || (S.peek[id] = {});
+  const showAddr = pk.sender || st, showLink = pk.link || st;
+  const body = m.body.map(p => p === '{LINK}'
+    ? `<p><button class="mlink${m.link.btn ? '' : ' txt'}" data-act="link" data-v="${id}">${m.link.t}</button></p><div class="lprev" id="lprev"${showLink ? '' : ' hidden'}>🔗 Dieser Link führt zu:<code>${m.link.url}</code><small>Prüfen ohne Klicken: am PC mit der Maus darauf zeigen, am Handy lange drücken.</small></div>`
+    : `<p>${p}</p>`).join('');
+  $('#mview').innerHTML = `<button class="mback" data-act="back">← Posteingang</button>
+    <h3 class="msubj">${m.subj}</h3>
+    <div class="mfrom"><div class="mav">${m.name[0]}</div><div class="mfw">
+      <button class="msender" data-act="sender" data-v="${id}" aria-expanded="${!!showAddr}"><b>${m.name}</b><span class="tg">${showAddr ? 'Adresse ▴' : 'Adresse zeigen ▾'}</span></button>
+      <div class="maddr"${showAddr ? '' : ' hidden'}>&lt;${m.addr}&gt;</div>
+      <div class="mmeta">an mich · heute, ${m.time} Uhr</div></div></div>
+    <div class="mtext">${body}</div>
+    <div id="mfoot"${st ? '' : ' class="mstick"'}>${st ? verdictHTML(m, st) : `<div class="mdecide"><button class="bph" data-act="dec" data-v="${id}" data-p="1">🎣 Phishing!</button><button class="bok" data-act="dec" data-v="${id}" data-p="0">✔ Echt</button></div>`}</div>`;
+  $('#mwrap').classList.add('reading');
+  $('#mview').scrollTop = 0;
+  drawList();
+}
+function verdictHTML(m, st) {
+  const all = Object.keys(S.mails).length === MAILS.length;
+  const nxt = all ? claimBtn('monitor', true) : '<button class="btn-light" data-act="next">Nächste Mail →</button>';
+  return `<div class="verdict ${st.ok ? 'ok' : 'bad'}"><p class="vh"><b>${st.ok ? '✔ Richtig erkannt!' : '✖ Daneben!'}</b> ${m.phish ? 'Das ist <b>Phishing</b>.' : 'Diese Mail ist <b>echt</b>.'}</p><ul>${m.why.map(w => `<li>${w}</li>`).join('')}</ul>${nxt}</div>`;
+}
+function revealSender(id, b) {
+  const pk = S.peek[id] || (S.peek[id] = {});
+  const a = $('.maddr', b.parentElement); const showIt = a.hidden;
+  a.hidden = !showIt; if (showIt) pk.sender = true;
+  b.setAttribute('aria-expanded', String(showIt));
+  $('.tg', b).textContent = showIt ? 'Adresse ▴' : 'Adresse zeigen ▾';
+}
+function showLinkPrev(id) {
+  const pk = S.peek[id] || (S.peek[id] = {}); pk.link = true;
+  const p = $('#lprev'); if (p) p.hidden = false;
+}
+function decide(id, saysPhish) {
+  if (S.mails[id]) return;
+  const m = MAILS.find(x => x.id === id), pk = S.peek[id] || {};
+  const ok = saysPhish === m.phish;
+  S.mails[id] = { ok };
+  if (ok) good(m.phish ? null : rnd(['Hm. Die war echt. Langweilig.', 'Ja ja, die ist echt. Na und?']), m.phish ? 4000 : 9000);
+  else if (m.phish && !pk.sender) fail("Hättest du mal auf den Absender getippt. Fast hättest du's gemerkt. 😏");
+  else if (!m.phish) fail('Jetzt traust du nicht mal mehr echten Mails? Auch gut für mich. 😈');
+  else fail();
+  if (Object.keys(S.mails).length === MAILS.length) completePuzzle('monitor');
+  openMail(id);
+  setTimeout(() => { const f = $('#mfoot'); if (f) f.scrollIntoView({ behavior: RM ? 'auto' : 'smooth', block: 'nearest' }); }, 60);
+}
+function nextMail() {
+  const i = MAILS.findIndex(m => m.id === S.curMail);
+  const nx = MAILS.slice(i + 1).concat(MAILS.slice(0, i + 1)).find(m => !S.mails[m.id]);
+  if (nx) openMail(nx.id);
+}
+
+/* ---------------- Diensthandy ---------------- */
+function renderPhone() { mBody.innerHTML = '<div class="phone"><div class="notch"></div><div class="pscreen" id="pscreen"></div></div>'; drawPhone(); }
+function chunkHTML(c) {
+  const st = S.sms, f = st.found.indexOf(c.id);
+  return `<span class="ch${c.id === 'link' ? ' lnk' : ''}${f >= 0 ? ' hit' : ''}${st.wrong[c.id] ? ' meh' : ''}" role="button" tabindex="0" data-act="ch" data-v="${c.id}"${f >= 0 ? ` data-n="${f + 1}"` : ''}>${c.t}</span>`;
+}
+function dotsHTML() { const n = S.sms.found.length; return '●'.repeat(n) + '○'.repeat(5 - n); }
+function drawPhone() {
+  const ps = $('#pscreen'), st = S.sms;
+  if (st.stage === 'lock') {
+    ps.innerHTML = `<div class="plock"><div class="ptime">23:47</div><div class="pdate">${DATE}</div>
+      <button class="pnotif" data-act="unlock"><span class="pn-app">💬 NACHRICHTEN · jetzt</span><b>${SENDER.t}</b><span>Lieber Kunde, Ihr Talbank-Konto wird in 2 Stunden gesperrt! …</span></button>
+      <p class="phint">Tippe auf die Nachricht.</p></div>`;
+    return;
+  }
+  ps.innerHTML = `<div class="sms">
+    <div class="shead"><div class="sav">?</div>${chunkHTML(SENDER)}<span class="ssub">SMS · nicht in deinen Kontakten</span></div>
+    <div class="stask"><span id="stxt">${st.found.length < 5 ? 'Tippe die <b>5 Warnzeichen</b> an – auch der Absender zählt.' : '<b>Alle 5 Warnzeichen gefunden!</b>'}</span><span class="sdots" id="sdots" aria-label="${st.found.length} von 5 gefunden">${dotsHTML()}</span></div>
+    <div class="sbody" id="sbody"><div class="stime">Heute 23:47</div>
+      <div class="bubble">${SMS.map(chunkHTML).join(' ')}</div>
+      <ol class="found" id="found">${st.found.map((id, i) => `<li><span class="fn">${i + 1}</span><span>${CH[id].x}</span></li>`).join('')}</ol>
+      <div id="sact">${st.found.length === 5 ? actHTML() : ''}</div>
+    </div></div>`;
+}
+function actHTML() {
+  const st = S.sms;
+  return `<div class="sact"><h4>Was tust du jetzt?</h4>${st.order.map(i => {
+    const a = ACT[i], tried = st.act[i];
+    return `<button class="opt${tried ? (a.ok ? ' good' : ' bad') : ''}" data-act="opt" data-v="${i}"${tried || st.done ? ' disabled' : ''}>${tried ? (a.ok ? '✔ ' : '✖ ') : ''}${a.t}${tried ? `<span class="ox">${a.x}</span>` : ''}</button>`;
+  }).join('')}${st.done ? claimBtn('phone') : ''}</div>`;
+}
+function tapChunk(id, sp) {
+  const st = S.sms; if (st.found.includes(id)) return;
+  const c = CH[id]; S.lastAct = Date.now();
+  if (c.w) {
+    st.found.push(id); sp.classList.add('hit'); sp.dataset.n = st.found.length;
+    const li = document.createElement('li'); li.innerHTML = `<span class="fn">${st.found.length}</span><span>${c.x}</span>`;
+    $('#found').appendChild(li);
+    $('#sdots').textContent = dotsHTML();
+    if (st.found.length === 5) {
+      $('#stxt').innerHTML = '<b>Alle 5 Warnzeichen gefunden!</b>';
+      good(null, 0);
+      $('#sact').innerHTML = actHTML();
+      setTimeout(() => $('#sact').scrollIntoView({ behavior: RM ? 'auto' : 'smooth', block: 'nearest' }), 120);
+    } else {
+      good(null, 6000);
+      setTimeout(() => li.scrollIntoView({ behavior: RM ? 'auto' : 'smooth', block: 'nearest' }), 60);
+    }
+  } else if (!st.wrong[id]) {
+    st.wrong[id] = true; sp.classList.add('meh');
+    fail(rnd(['Das ist doch harmlos. Hast du etwa Panik? 😏', "Fast hättest du's gemerkt. 😏", 'Daneben. Lies genauer – oder lieber nicht. 😈']));
+  }
+}
+function chooseAct(i) {
+  const st = S.sms; if (st.done || st.act[i]) return;
+  st.act[i] = true; const a = ACT[i];
+  if (a.ok) { st.done = true; completePuzzle('phone'); } else fail(a.h);
+  $('#sact').innerHTML = actHTML();
+}
+
+/* ---------------- Laptop ---------------- */
+function barHTML() {
+  const l = LK[S.lap.last];
+  if (!l) return '🔍 Lesezeichen › Online-Banking';
+  return '🔒 ' + l.pre + l.dom + l.post + (l.ok ? '' : '  ⚠');
+}
+function cardHTML(id) {
+  const l = LK[id], t = S.lap.tried[id];
+  const url = t ? `${l.pre}<mark>${l.dom}</mark>${l.post}` : l.pre + l.dom + l.post;
+  return `<button class="lcard${t ? (l.ok ? ' good' : ' bad') : ''}" data-act="lap" data-v="${id}"${t || S.lap.done ? ' disabled' : ''}><span class="lfav">T</span><span class="lttl">Talbank – Online-Banking</span><span class="lurl">${url}</span>${t ? `<span class="lx">${l.x}</span>` : ''}</button>`;
+}
+function renderLaptop() {
+  const L = S.lap, last = LK[L.last];
+  mBody.innerHTML = `<div class="laptop"><div class="lscreen"><div class="browser">
+    <div class="btabs"><span class="btab">🏦 Lesezeichen</span></div>
+    <div class="baddr"><span class="bar${last ? (last.ok ? ' okk' : ' bad') : ''}">${barHTML()}</span></div>
+    <div class="bpage" id="bpage">
+      <p class="hnote">// N0X: Ich habe deine Lesezeichen ausgetauscht. Viel Spaß beim Raten. 😈</p>
+      <h3>Du willst dich bei deiner Bank anmelden.</h3>
+      <p>Nur <b>einer</b> der drei Links führt wirklich zur Talbank. Welcher? <span class="muted2">Die echte Adresse hängt an der Pinnwand.</span></p>
+      <div class="lcards">${L.order.map(cardHTML).join('')}</div>
+      <div class="lres">${L.done ? claimBtn('laptop', true) : ''}</div>
+    </div></div></div><div class="lbase"></div></div>`;
+}
+function chooseLink(id) {
+  const L = S.lap; if (L.done || L.tried[id]) return;
+  const top = ($('#bpage') || {}).scrollTop || 0;
+  L.tried[id] = true; L.last = id;
+  if (LK[id].ok) { L.done = true; completePuzzle('laptop'); }
+  else fail(id === 'a' ? "Willkommen auf MEINER Seite. 😈 Fast hättest du's gemerkt." : 'Eins oder l? Wer schaut da schon so genau hin. 😏');
+  renderLaptop();
+  const bp = $('#bpage'); if (bp) bp.scrollTop = top;
+  const c = $(`.lcard[data-v="${id}"]`); if (c) setTimeout(() => c.scrollIntoView({ behavior: RM ? 'auto' : 'smooth', block: 'nearest' }), 60);
+}
+
+/* ---------------- Pinnwand ---------------- */
+function renderBoard() {
+  mBody.innerHTML = `<div class="board">
+    <div class="note" style="--r:-3deg">Unsere Bank:<b>www.talbank.de</b></div>
+    <div class="note p" style="--r:2deg">Firmen-Mails enden immer auf<b>@hafenlicht-logistik.de</b></div>
+    <div class="note g" style="--r:-1.5deg">IT-Service:<b>Durchwahl 240</b></div>
+    <div class="note b" style="--r:3deg">Karte weg? Sperr-Notruf<b>116 116</b></div>
+    <div class="note" style="--r:-4deg">KAFFEE KAUFEN!!! ☕</div>
+  </div><p class="board-cap">Merk dir, was hier hängt. Es könnte nützlich sein.</p>`;
+}
+
+/* ---------------- Tür & Zahlenschloss ---------------- */
+function renderLock() {
+  const n = solvedCount();
+  mBody.innerHTML = `<div class="lockwrap">
+    <p class="ltext">${n < 3 ? `Gefundene Ziffern: <b>${n} von 3</b>. Befreie erst alle Geräte – oder rate. 😈` : 'Alle Ziffern leuchten über der Tür. Stell den Code ein!'}</p>
+    <div class="lpanel" id="lpanel"><span class="scr a"></span><span class="scr b"></span><span class="scr c"></span><span class="scr d"></span><span class="led" id="led"></span>
+      <div class="wheels">${KEYS.map((k, i) => `<div class="wheel" data-i="${i}">
+        <div class="wico ico">${ICON[k]}<span>${k === 'phone' ? 'Handy' : LABEL[k]}</span></div>
+        <button class="wbtn" data-act="wup" data-v="${i}" aria-label="${LABEL[k]}: Ziffer hoch">▲</button>
+        <div class="wwin" tabindex="0" role="spinbutton" aria-valuemin="0" aria-valuemax="9" aria-valuenow="${S.wheels[i]}" aria-label="Ziffer ${LABEL[k]}" data-i="${i}"><div class="wstrip">${Array.from({ length: 30 }, (_, j) => `<span>${j % 10}</span>`).join('')}</div></div>
+        <button class="wbtn" data-act="wdn" data-v="${i}" aria-label="${LABEL[k]}: Ziffer runter">▼</button>
+      </div>`).join('')}</div>
+      <button class="btn" data-act="open">🔓 Entriegeln</button>
+    </div>
+    <p class="lstat" id="lstat" aria-live="polite"></p>
+  </div>`;
+}
+function afterLockRender() {
+  $$('.wstrip', mBody).forEach((s, i) => { placeWheel(i, false); s.addEventListener('transitionend', () => normWheel(i)); });
+  $$('.wwin', mBody).forEach(bindWheel);
+}
+function placeWheel(i, anim) {
+  const s = $$('.wstrip', mBody)[i]; if (!s) return;
+  const h = s.firstElementChild.offsetHeight, wh = s.parentElement.clientHeight;
+  if (!anim) s.style.transition = 'none';
+  s.style.transform = `translateY(${(wh - h) / 2 - S.wpos[i] * h}px)`;
+  if (!anim) { void s.offsetHeight; s.style.transition = ''; }
+  s.parentElement.setAttribute('aria-valuenow', S.wheels[i]);
+}
+function normWheel(i) { if (S.wpos[i] >= 20 || S.wpos[i] < 10) { S.wpos[i] = 10 + S.wheels[i]; placeWheel(i, false); } }
+function stepWheel(i, d) {
+  if (S.ended) return;
+  if (S.wpos[i] > 26 || S.wpos[i] < 3) { S.wpos[i] = 10 + S.wheels[i]; placeWheel(i, false); }
+  S.wpos[i] += d; S.wheels[i] = ((S.wpos[i] % 10) + 10) % 10;
+  placeWheel(i, true); S.lastAct = Date.now();
+  const ls = $('#lstat'); if (ls && !S.ended) ls.textContent = '';
+}
+function bindWheel(w) {
+  const i = +w.dataset.i; let y0 = null, moved = false, lastWheel = 0;
+  w.addEventListener('pointerdown', e => { y0 = e.clientY; moved = false; try { w.setPointerCapture(e.pointerId); } catch (x) {} });
+  w.addEventListener('pointermove', e => {
+    if (y0 === null) return; const dy = e.clientY - y0;
+    if (Math.abs(dy) > 22) { stepWheel(i, dy < 0 ? 1 : -1); y0 = e.clientY; moved = true; }
+  });
+  w.addEventListener('pointerup', () => { if (y0 !== null && !moved) stepWheel(i, 1); y0 = null; });
+  w.addEventListener('pointercancel', () => { y0 = null; });
+  w.addEventListener('wheel', e => { e.preventDefault(); const n = Date.now(); if (n - lastWheel < 90) return; lastWheel = n; stepWheel(i, e.deltaY > 0 ? 1 : -1); }, { passive: false });
+  w.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp') { e.preventDefault(); stepWheel(i, 1); }
+    if (e.key === 'ArrowDown') { e.preventDefault(); stepWheel(i, -1); }
+  });
+}
+function tryOpen() {
+  if (S.ended) return;
+  const ok = S.wheels.every((v, i) => v === S.digits[i]);
+  if (ok) { finale(); return; }
+  const p = $('#lpanel'); p.classList.remove('shake'); void p.offsetWidth; p.classList.add('shake');
+  $('#lstat').textContent = '✖ Falscher Code.' + (solvedCount() < 3 ? ' Dir fehlen noch Ziffern.' : ' Vergleiche mit den Ziffern über der Tür.');
+  fail(rnd(['Falsch. Ich könnte das den ganzen Tag machen. 😏', 'Daneben. Die Tür mag dich nicht.', 'Raten? Echt jetzt? 😈']));
+}
+
+/* ---------------- Finale ---------------- */
+async function finale() {
+  S.ended = true; S.endRemain = remaining(); clearInterval(S.tick);
+  C.q.length = 0; document.body.classList.remove('low');
+  $('#led').classList.add('ok'); $$('button', mBody).forEach(b => { b.disabled = true; });
+  for (const w of $$('.wheel', mBody)) { w.classList.add('ok'); await wait(RM ? 0 : 230); }
+  $('#lstat').innerHTML = '<span class="ok">ENTRIEGELT</span>';
+  addMsg({ who: 'hack', text: 'Was…? Woher habt ihr den Code?!', cls: 'nervous' });
+  await wait(RM ? 300 : 1300);
+  closeModal(true);
+  if (!wide()) closeChat();
+  KEYS.forEach((k, i) => { if (S.solved[k] && !S.lit[k]) { S.lit[k] = true; lightDigit(k, i); } });
+  $('#objbar').classList.add('gone'); $('#markers').classList.add('gone');
+  // Der Agent stellt sich vor die Tür
+  AG.token++;
+  await walkTo(STAND.door);
+  AG.dir = 1; agFrame('back'); agPlace(); beam('off');
+  await panTo(1307, 600);
+  await wait(RM ? 100 : 350);
+  finalLine('Nein. NEIN! Das ist MEIN System!'); burst(520);
+  // Kamerafahrt: die Tür wandert in die Bildmitte und wird groß
+  const dr = $('#doorPanel').getBoundingClientRect(), sr = scene.getBoundingClientRect();
+  const cx = dr.left + dr.width / 2 - sr.left, cy = dr.top + dr.height / 2 - sr.top;
+  const z = Math.max(1.15, Math.min(2.4, (sr.height * .9) / dr.height, (sr.width * .55) / dr.width));
+  scene.style.transformOrigin = '0 0';
+  scene.style.transform = `translate(${sr.width / 2 - z * cx}px, ${sr.height / 2 - z * cy}px) scale(${z})`;
+  white.style.setProperty('--wx', (sr.left + sr.width / 2) + 'px');
+  white.style.setProperty('--wy', (sr.top + sr.height / 2) + 'px');
+  await wait(RM ? 200 : 1100);
+  scene.classList.add('open');
+  await wait(RM ? 200 : 1500);
+  finalLine('Verbindung… wird… getr—'); burst(380);
+  intoLight();   // der Agent geht als Silhouette ins Licht
+  await wait(RM ? 200 : 1400);
+  finalLine('⚡ N0X wurde aus dem System geworfen.', 'sys');
+  S.kicked = true; scene.classList.add('free');
+  chatBtn.classList.add('kicked');
+  if (chatEl.classList.contains('open')) chatEl.classList.add('kicked');
+  await wait(RM ? 200 : 1900);
+  white.classList.add('on');
+  await wait(RM ? 100 : 1400);
+  subtitle('');
+  showEnd();
+  chatEl.hidden = true;
+  white.classList.remove('on');
+}
+function rank() {
+  if (S.practice) return 'Geschafft!';
+  const m = S.mistakes + S.hintCount;
+  return m === 0 ? 'Phishing-Profi' : m <= 3 ? 'Wachsames Auge' : m <= 6 ? 'Auf gutem Weg' : 'Weiter üben';
+}
+function showEnd() {
+  $('#eTime').textContent = S.practice ? '—' : fmt(S.endRemain);
+  $('#eErr').textContent = S.mistakes; $('#eHint').textContent = S.hintCount; $('#eRank').textContent = rank();
+  S.inRoom = false; show('sEnd'); $('#sEnd').scrollTop = 0;
+  setTimeout(() => $('#btnAgain').focus({ preventScroll: true }), 400);
+}
+function gameOver() {
+  if (S.over || S.ended || S.practice) return;
+  S.over = true; clearInterval(S.tick); renderClock();
+  document.body.classList.remove('low');
+  closeModal(true); C.q.length = 0; agFaceFront();
+  addMsg({ who: 'hack', text: 'Zeit abgelaufen. Euer System gehört jetzt mir. 😈', cls: 'evil' });
+  flash(); burst(700);
+  setTimeout(() => { closeChat(); S.inRoom = false; show('sOver'); $('#btnPractice').focus({ preventScroll: true }); }, 1700);
+}
+function practice() {
+  S.practice = true; S.over = false; S.inRoom = true;
+  show('sRoom'); setHudH(); fitScene();
+  clearInterval(S.tick); S.tick = setInterval(tick, 250); renderClock();
+  lightPending();
+  say('Ohne Zeitlimit? Na gut. Ich habe alle Zeit der Welt. 😏');
+}
+
+/* ---------------- Intro ---------------- */
+let FAST = false;
+const iw = ms => wait(FAST ? 0 : ms);
+async function typeLine(text, cls, speed) {
+  const p = document.createElement('p'); p.className = (cls || '') + ' cursor';
+  $('#term').appendChild(p);
+  if (FAST || RM) p.textContent = text;
+  else for (let i = 1; i <= text.length; i++) { if (FAST) { p.textContent = text; break; } p.textContent = text.slice(0, i); await wait(speed); }
+  p.classList.remove('cursor');
+  return p;
+}
+async function runIntro() {
+  show('sIntro');
+  const intro = $('#sIntro'); intro.classList.add('boot');
+  await iw(RM ? 200 : 1300);
+  await typeLine('HAFENLICHT-OS 4.2 · Nachtbetrieb · 23:47', 't-sys', 14);
+  await typeLine('Sicherheitsprüfung ............ OK', 't-sys', 9);
+  await typeLine('Türsystem ..................... OK', 't-sys', 9);
+  await iw(400);
+  await typeLine('⚠ Unbekannter Zugriff erkannt', 't-warn', 18); burst(300);
+  await typeLine('⚠ Administratorrechte übernommen', 't-warn', 18); burst(450);
+  await iw(800);
+  intro.classList.add('red');
+  await typeLine('> Ich habe euer System übernommen.', 't-hack', 50);
+  await iw(500);
+  await typeLine('> Ihr kommt hier nicht raus.', 't-hack', 62);
+  burst(650);
+  await iw(1200);
+  await typeLine('[NOTFALL-PROTOKOLL] Restzugriff aktiv.', 't-ok', 16);
+  await typeLine('Drei Geräte sind manipuliert: Monitor, Diensthandy, Laptop. Entlarvt jede Falle – dann gibt das System eine Ziffer des Türcodes frei.', 't-ok', 13);
+  await typeLine('Achtung: Jeder Fehler kostet Zeit.', 't-ok', 16);
+  $('#btnSkip').hidden = true;
+  const rb = $('#btnReady'); rb.hidden = false; rb.focus({ preventScroll: true });
+  await new Promise(r => rb.addEventListener('click', r, { once: true }));
+  rb.hidden = true; FAST = false;
+  await typeLine('> Wie ihr wollt. Ihr habt 10 Minuten.', 't-hack', 42);
+  await wait(RM ? 100 : 500);
+  $('#term').style.opacity = '.15';
+  $('#bigClock').classList.add('on'); startClock(); burst(420);
+  await wait(RM ? 300 : 1600);
+  $('#bigClock').classList.add('fly');
+  enterRoom();
+  intro.classList.add('out');
+  await wait(RM ? 50 : 950);
+  intro.classList.remove('on');
+}
+function enterRoom() {
+  const r = $('#sRoom'); r.classList.add('on', 'enter');
+  S.inRoom = true; chatEl.hidden = false;
+  requestAnimationFrame(() => {
+    setHudH(); fitScene();
+    // Kamerafahrt zum Einstieg: erst die verriegelte Tür, dann der Schreibtisch
+    if (CAM.pan) { setPan(PAN_MAX); setTimeout(() => panTo(720, 2200), 1300); }
+  });
+  addMsg({ who: 'hack', text: 'Ich habe euer System übernommen. Ihr kommt hier nicht raus.' });
+  setTimeout(() => {
+    say('Tick, tack. Zehn Minuten. Mehr gebe ich euch nicht.', { cls: 'evil' });
+    sys('Untersuche Monitor, Diensthandy und Laptop. Die Pinnwand kann helfen. Jede entlarvte Falle gibt eine Ziffer für die Tür frei.');
+    if (CAM.pan) sys('Tippe auf einen Gegenstand, dann geht dein Agent hin. Wische über den Raum, um dich umzusehen.');
+    else if (matchMedia('(max-height:540px) and (min-aspect-ratio:4/3)').matches) sys('Tipp: Im Hochformat ist auf dem Handy mehr Platz zum Lesen.');
+    else if (matchMedia('(pointer:fine)').matches) sys('Klicke auf einen Gegenstand – oder steuere deinen Agenten mit ← → und untersuche mit ↑.');
+  }, 900);
+  S.lastAct = Date.now();
+}
+
+/* ---------------- Ereignisse ---------------- */
+$('#btnStart').addEventListener('click', runIntro);
+$('#btnSkip').addEventListener('click', () => { FAST = true; });
+$('#btnAgain').addEventListener('click', () => location.reload());
+$('#btnRestart').addEventListener('click', () => location.reload());
+$('#btnPractice').addEventListener('click', practice);
+$('#closeBtn').addEventListener('click', () => closeModal());
+hintBtn.addEventListener('click', () => { if (cur && HINTS[cur]) showHint(cur, true); });
+chatBtn.addEventListener('click', () => { if (chatEl.classList.contains('open')) closeChat(); else { openChat(); C.pinned = true; clearTimeout(C.t); scrollChat(); } });
+$('#chatX').addEventListener('click', closeChat);
+modal.addEventListener('click', e => { if (e.target === modal && !S.ended) closeModal(); });
+
+$$('.hot').forEach(h => {
+  h.addEventListener('click', () => requestObj(h.dataset.obj, h));
+  h.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); requestObj(h.dataset.obj, h); } });
+});
+$$('#objbar .ob').forEach(b => b.addEventListener('click', () => requestObj(b.dataset.obj, b)));
+/* Tastatur: ← → laufen, ↑ untersuchen */
+document.addEventListener('keydown', e => {
+  if (!S.inRoom || S.ended || S.over || modalOpen()) return;
+  const k = e.key;
+  if (k === 'ArrowLeft' || k === 'a' || k === 'A') { e.preventDefault(); AG.token++; walkTo(AG.x - 170); }
+  else if (k === 'ArrowRight' || k === 'd' || k === 'D') { e.preventDefault(); AG.token++; walkTo(AG.x + 170); }
+  else if (k === 'ArrowUp' || k === 'w' || k === 'W') {
+    e.preventDefault();
+    const o = nearestObj();
+    if (o) requestObj(o, $(`.hot[data-obj="${o}"]`));
+    else say('Da ist nichts. Geh näher ran. 😏');
+  }
+});
+
+/* Wischen im Raum (nur Handy hochkant) */
+let drag = null, justPanned = false;
+stage.addEventListener('pointerdown', e => {
+  if (!CAM.pan || S.ended || (e.pointerType === 'mouse' && e.button !== 0)) return;
+  stopPan(); drag = { x0: e.clientX, p0: CAM.x, moved: false, id: e.pointerId };
+});
+stage.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const dx = e.clientX - drag.x0;
+  if (!drag.moved && Math.abs(dx) > 8) { drag.moved = true; stage.classList.add('dragging'); try { stage.setPointerCapture(drag.id); } catch (x) {} }
+  if (drag.moved) { setPan(drag.p0 - dx / CAM.sc); S.lastAct = Date.now(); }
+});
+const endDrag = () => { if (drag && drag.moved) { justPanned = true; setTimeout(() => { justPanned = false; }, 80); } drag = null; stage.classList.remove('dragging'); };
+stage.addEventListener('pointerup', endDrag);
+stage.addEventListener('pointercancel', endDrag);
+stage.addEventListener('click', e => { if (justPanned) { e.stopPropagation(); e.preventDefault(); } }, true);
+$('#panL').addEventListener('click', () => panTo(CAM.x + CAM.w * .5 - CAM.w * .65));
+$('#panR').addEventListener('click', () => panTo(CAM.x + CAM.w * .5 + CAM.w * .65));
+
+box.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]'); if (!t || !box.contains(t) || t.disabled) return;
+  const v = t.dataset.v; S.lastAct = Date.now();
+  switch (t.dataset.act) {
+    case 'mail': openMail(v); break;
+    case 'back': $('#mwrap').classList.remove('reading'); S.curMail = null; drawList(); break;
+    case 'sender': revealSender(v, t); break;
+    case 'link': showLinkPrev(v); break;
+    case 'dec': decide(v, t.dataset.p === '1'); break;
+    case 'next': nextMail(); break;
+    case 'unlock': S.sms.stage = 'sms'; drawPhone(); break;
+    case 'ch': tapChunk(v, t); break;
+    case 'opt': chooseAct(+v); break;
+    case 'lap': chooseLink(v); break;
+    case 'wup': stepWheel(+v, 1); break;
+    case 'wdn': stepWheel(+v, -1); break;
+    case 'open': tryOpen(); break;
+    case 'claim': showSolvedOverlay(v); break;
+    case 'room': closeModal(); break;
+    case 'review': {
+      const ov = t.closest('.solved'); if (ov) ov.remove();
+      $$('[data-act="claim"]', box).forEach(b => { b.textContent = '✔ ' + LABEL[b.dataset.v] + ' gesichert'; });
+      break;
+    }
+  }
+});
+box.addEventListener('keydown', e => {
+  const t = e.target;
+  if ((e.key === 'Enter' || e.key === ' ') && t.matches && t.matches('span[data-act]')) { e.preventDefault(); t.click(); }
+});
+box.addEventListener('mouseover', e => { const t = e.target.closest && e.target.closest('.mlink'); if (t) showLinkPrev(t.dataset.v); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (C.pinned && chatEl.classList.contains('open')) closeChat();
+  else if (modalOpen() && !S.ended) closeModal();
+});
+document.addEventListener('pointerdown', () => { S.lastAct = Date.now(); }, true);
+let rT = null;
+window.addEventListener('resize', () => {
+  clearTimeout(rT);
+  rT = setTimeout(() => { setHudH(); fitScene(); if (cur === 'door') KEYS.forEach((k, i) => placeWheel(i, false)); }, 80);
+});
+
+/* Gewitter vor dem Fenster und Glutfunken auf dem Startbildschirm */
+function storm() {
+  setTimeout(() => {
+    if (S.inRoom && !S.ended && !modalOpen() && !document.hidden) {
+      scene.classList.remove('bolt'); void scene.getBoundingClientRect(); scene.classList.add('bolt');
+      setTimeout(() => scene.classList.remove('bolt'), 1000);
+    }
+    storm();
+  }, 15000 + Math.random() * 15000);
+}
+function embers() {
+  const box2 = $('#embers');
+  for (let i = 0; i < 22; i++) {
+    const e = document.createElement('span'); e.className = 'ember';
+    e.style.left = (Math.random() * 100).toFixed(1) + '%';
+    e.style.setProperty('--dx', ((Math.random() - .5) * 160).toFixed(0) + 'px');
+    e.style.animationDuration = (7 + Math.random() * 9).toFixed(1) + 's';
+    e.style.animationDelay = (-Math.random() * 14).toFixed(1) + 's';
+    const s = (2 + Math.random() * 3).toFixed(1) + 'px'; e.style.width = s; e.style.height = s;
+    box2.appendChild(e);
+  }
+}
+
+buildScene();
+buildAgent();
+fitScene();
+if (!RM) { storm(); embers(); }
+})();
+</script>
+</body>
+</html>
