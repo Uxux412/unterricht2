@@ -13,6 +13,7 @@ geschichte/ religion/ gemeinschaftskunde/ spiele/
 data/inhalte.js         ⚑ zentrale Liste: Fächer, Themenbereiche, Materialien
 assets/site.css         gemeinsames Aussehen
 assets/site.js          baut Kopfzeile, Navigation, Brotkrumen, Kacheln, QR-Fenster
+assets/qrcode.js        erzeugt die QR-Codes im Browser (qrcode-generator von Kazuhiko Arase, MIT-Lizenz)
 rundgemaelde/           Material: Rundgemälde von Europa 1849
 besatzung.html          Material: Strukturlegen Deutschland 1945–1949
 risiko/                 Spiel: Risiko-Begleiter (Würfeln, Rechner, Regeln)

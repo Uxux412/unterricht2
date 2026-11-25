@@ -1,0 +1,750 @@
+// Cold War Quest – Grafik: Agent KS001, geteilte Stadt mit Agentenbrücke, Häuser, Innenräume, UV-Lampe, Flaggen, Lernbilder.
+// Nutzt die Zeichenhelfer aus index.html (P, discP, cobbleStone, hash, roof3DParallelogram1280, label1280, activeCtx, TW, MAP ...).
+// Alle Funktionen werden erst zur Laufzeit aufgerufen, wenn index.html geladen ist.
+
+// ===================== Agent KS001 (Entwurf des Grafikers, Koffer verbreitert) =====================
+const KS001_SPRITE = [
+  "...............oooooooo...............",
+  ".............ooNNNNNNNNoo.............",
+  "............oNNNnnNNNNNNNo............",
+  "...........oNNnnNNNNNNNNNNo...........",
+  "...........oNNNNNNNNNNNNNNo...........",
+  "...........oNNNNNNNNNNNNNNo...........",
+  "...........oNNFFFFFFFFFFNNo...........",
+  "...........oNFFFFFFFFFFFFNo...........",
+  "...........ofFFeeFFFFeeFFfo...........",
+  "...........ofFFFFFFFFFFFFfo...........",
+  "...........ofFFFFFffFFFFFfo...........",
+  "............ofFFFFFFFFFFfo............",
+  "............ofFFFmmmmFFFfo............",
+  ".............offFFFFFFffo.............",
+  "..............ooffffffoo..............",
+  "...............oofFFfoo...............",
+  "...........ooooSWWWWWWSoooo...........",
+  ".........ooSSSSsWWRRWWsSSSSoo.........",
+  "........oSSSSSSsWWRRWWsSSSSSSo........",
+  "........oSSSSSSSsWRRWsSSSYSSSSo.......",
+  ".......oSSSSSSSSsWRRWsSSSSSSSSo.......",
+  ".......oSSsSSSSSSsRRsSSSSSSsSSo.......",
+  ".......oSSsSSSSSSSsRsSSSSSSsSSo.......",
+  ".......oSSsSSSSSSSSsSSSSSSSsSSo.......",
+  ".......oSSsSSSSSSSSuSSSSSSSsSSo.......",
+  ".......oSSsSSSSSSSSsSSSSSSSsSSo.......",
+  ".......oSSsSSSSSSSSuSSSSSSSsSSo.......",
+  ".......oSSsooooooooooooooooosSSo......",
+  ".......oFFoSSSSSSSSsSSSSSSSoFFoo......",
+  ".......offoSSSSSSSSsSSSSSSSoffGGo.....",
+  "........oooSSSSSSSSsSSSSSSSoooGGGoo...",
+  "..........oSSSSSSSSoSSSSSSSo.oCCCCCCo.",
+  "..........oSSSSSSSo.oSSSSSSoooCCCCCCo.",
+  "..........oSSSSSSSo.oSSSSSSoCCCGGCCCo.",
+  "..........oSSSSSSso.osSSSSSoCCCCCCCCo.",
+  "..........oSSSSSSso.osSSSSSoCCCCCCCCo.",
+  "..........oSSSSSSso.osSSSSSocccccccco.",
+  "..........oSSSSSSso.osSSSSSo.oooooooo.",
+  "..........oSSSSSSso.osSSSSSo..........",
+  "..........oSSSSSSso.osSSSSSo..........",
+  "..........oSSSSSSso.osSSSSSo..........",
+  "..........oSSSSSSso.osSSSSSo..........",
+  "..........osssssssso.ossssso..........",
+  "..........oKKKKKKKo.oKKKKKKo..........",
+  ".........oKKKKKKKKo.oKKKKKKKo.........",
+  ".........oKkKKKKKKo.oKKKKKKkKo........",
+  ".........ooooooooo...oooooooooo.......",
+  "......................................"
+];
+const KS001_PAL = {
+  o: "#101014", e: "#101014", N: "#16161d", n: "#3a4150", F: "#e2ab80", f: "#b87c58", m: "#9c5a48",
+  S: "#4a5566", s: "#2c3542", u: "#c9ccd2", W: "#ecebe4", R: "#8a2424", Y: "#f2d64b",
+  C: "#7a4e2a", c: "#4e3018", G: "#c9a640", K: "#121214", k: "#3c3c44"
+};
+// Optionale PNG-Sprites des Lehrers (Ordner bilder/). Fehlen sie, zeichnet das Spiel den Pixel-Agenten.
+const CW_SPRITE_IMG = { ready: false, img: null };
+(function () {
+  const img = new Image();
+  img.onload = () => { CW_SPRITE_IMG.ready = true; CW_SPRITE_IMG.img = img; if (typeof cachesBuilt !== "undefined") cachesBuilt = false; };
+  img.onerror = () => {};
+  img.src = "bilder/agent.png";
+})();
+function drawAgent(x, y, scale, flip) {
+  if (CW_SPRITE_IMG.ready) {
+    const im = CW_SPRITE_IMG.img, w = 38 * scale, h = 48 * scale;
+    ctx.save();
+    if (flip) { ctx.translate(x + w, y); ctx.scale(-1, 1); ctx.drawImage(im, 0, 0, w, h); }
+    else ctx.drawImage(im, x, y, w, h);
+    ctx.restore();
+  } else bitmapP(KS001_SPRITE, x, y, scale, KS001_PAL, flip);
+}
+
+// ===================== Stadt: Fluss, Brücke, Ost und West =====================
+const RIVER_C0 = 14, RIVER_C1 = 17, BRIDGE_R0 = 7, BRIDGE_R1 = 11;
+function isEastCol(c) { return c > RIVER_C1; }
+
+function drawRiver1280(X, Y, c, r, t) {
+  P(X, Y, TW, TW, "#2f5f99");
+  for (let py = 0; py < TW; py += 2) {
+    P(X, Y + py, TW, 1, ((py + r * 3) % 6 === 0) ? "#3a6fae" : "#2f5f99");
+  }
+  const o = Math.floor(t / 300 + c * 2 + r) % 6;
+  P(X + 4 + o * 3, Y + 9 + (r % 3), 12, 2, "#6aa3e0");
+  P(X + 22 - o * 2, Y + 26, 10, 2, "#6aa3e0");
+  P(X + 10, Y + 33, 6, 1, "#b8daf7");
+  if (c === RIVER_C0) {           // Westufer
+    for (let py = 0; py < TW; py++) {
+      const k = Math.round(Math.sin(py * 0.18 + r) * 2);
+      P(X + k, Y + py, 4, 1, "#3a5a2e");
+      P(X + 4 + k, Y + py, 3, 1, "#6b5538");
+      P(X + 7 + k, Y + py, 2, 1, "#a9d4f5");
+    }
+  }
+  if (c === RIVER_C1) {           // Ostufer (Beton-Kaimauer)
+    for (let py = 0; py < TW; py++) {
+      P(X + TW - 9, Y + py, 2, 1, "#a9d4f5");
+      P(X + TW - 7, Y + py, 7, 1, py % 10 === 0 ? "#6f7177" : "#8e9096");
+    }
+  }
+}
+
+function drawConcrete1280(X, Y, c, r) {
+  P(X, Y, TW, TW, "#7c7e84");
+  for (let iy = 0; iy < 2; iy++) for (let ix = 0; ix < 2; ix++) {
+    const v = hash(c * 2 + ix, r * 2 + iy, 9) % 3;
+    const base = ["#a3a39e", "#9b9b96", "#aaa9a3"][v];
+    const px = X + ix * 20, py = Y + iy * 20;
+    P(px + 1, py + 1, 18, 18, base);
+    P(px + 1, py + 1, 18, 1, "#bdbcb6");
+    P(px + 1, py + 18, 18, 1, "#7f7f7a");
+    if (hash(c, r, ix + iy * 2) % 7 === 0) P(px + 5, py + 8, 7, 1, "#6d6d68");
+  }
+}
+
+function drawGrassEast1280(X, Y, c, r) {
+  P(X, Y, TW, TW, "#5d7550");
+  for (let i = 0; i < 16; i++) {
+    const h = hash(c, r, i);
+    P(X + (h % 36), Y + ((h >> 6) % 36), 2, 1, ["#4d6443", "#6d855e", "#566c4a"][i % 3]);
+  }
+}
+
+function drawWallEast1280(X, Y, c, r) {
+  drawConcrete1280(X, Y, c, r);
+  P(X, Y + 4, TW, 30, "#5b5d63");
+  P(X, Y + 4, TW, 4, "#8a8c92");
+  P(X, Y + 30, TW, 4, "#3e4045");
+  for (let bx = 0; bx < TW; bx += 20) P(X + bx, Y + 8, 1, 22, "#46484d");
+  if (hash(c, r, 5) % 4 === 0) { P(X + 8, Y + 12, 22, 10, "#b03a2e"); P(X + 10, Y + 14, 18, 2, "#e8c46a"); }
+}
+
+function drawBridgeDeck1280() {
+  const x0 = RIVER_C0 * TW - 6, x1 = (RIVER_C1 + 1) * TW + 6, y0 = BRIDGE_R0 * TW, y1 = (BRIDGE_R1 + 1) * TW;
+  P(x0, y0 + 6, x1 - x0, y1 - y0 - 6, "#3b3a38");
+  for (let y = y0 + 8; y < y1 - 6; y += 10) {
+    for (let x = x0 + 2; x < x1 - 2; x += 22) {
+      const off = ((y / 10) | 0) % 2 ? 11 : 0;
+      const w = Math.min(21, x1 - 2 - (x + off));
+      if (w > 4) cobbleStone(x + off, y, w, 10, "#a8a296", "#cbc5b8", "#7d786d", "#3b3a38");
+    }
+  }
+  // Geländer Nord und Süd
+  [y0 + 2, y1 - 12].forEach(ry => {
+    P(x0, ry, x1 - x0, 10, "#1f1d1b");
+    P(x0 + 2, ry + 2, x1 - x0 - 4, 3, "#6f6a61");
+    for (let x = x0 + 6; x < x1 - 4; x += 14) P(x, ry + 5, 3, 5, "#4a4640");
+  });
+  // Mittelstreifen: weiße Grenzlinie mitten auf der Brücke
+  for (let y = y0 + 14; y < y1 - 14; y += 12) P(640 - 1, y, 2, 6, "#e8e4d8");
+  // Laternen an den Ecken
+  [[x0 + 4, y0 - 26], [x1 - 10, y0 - 26], [x0 + 4, y1 - 40], [x1 - 10, y1 - 40]].forEach(([lx, ly]) => {
+    P(lx + 2, ly + 10, 3, 30, "#1c1b1a");
+    P(lx, ly + 2, 7, 9, "#1c1b1a");
+    P(lx + 1, ly + 3, 5, 6, "#ffe6a0");
+  });
+}
+
+function drawLitfass1280(X, Y) {
+  discP(X + 20, Y + 36, 14, 4, "rgba(0,0,0,.35)");
+  P(X + 8, Y + 2, 24, 34, "#1c1a18");
+  P(X + 10, Y + 4, 20, 30, "#3c6e4a");
+  const cols = ["#e74c3c", "#f1c40f", "#3498db", "#ecf0f1"];
+  for (let i = 0; i < 4; i++) P(X + 11 + (i % 2) * 9, Y + 8 + ((i / 2) | 0) * 12, 8, 10, cols[i]);
+  P(X + 6, Y - 2, 28, 6, "#2d5a3a");
+  P(X + 14, Y - 6, 12, 4, "#2d5a3a");
+}
+function drawPlakatwand1280(X, Y) {
+  discP(X + 20, Y + 36, 16, 4, "rgba(0,0,0,.35)");
+  P(X + 1, Y + 4, 38, 28, "#2b2b2b");
+  P(X + 3, Y + 6, 34, 24, "#b3261e");
+  P(X + 7, Y + 10, 26, 3, "#f2d24b");
+  P(X + 7, Y + 16, 20, 2, "#f2e6c8");
+  P(X + 7, Y + 21, 24, 2, "#f2e6c8");
+  P(X + 28, Y + 20, 6, 6, "#f2d24b");
+  P(X + 8, Y + 32, 3, 6, "#2b2b2b"); P(X + 29, Y + 32, 3, 6, "#2b2b2b");
+}
+function drawCar1280(X, Y, body, roof) {
+  discP(X + 20, Y + 33, 18, 5, "rgba(0,0,0,.35)");
+  P(X + 2, Y + 14, 36, 16, "#141414");
+  P(X + 4, Y + 15, 32, 13, body);
+  P(X + 10, Y + 6, 20, 10, "#141414");
+  P(X + 12, Y + 8, 16, 8, roof);
+  P(X + 13, Y + 9, 6, 5, "#9ec9e8"); P(X + 21, Y + 9, 6, 5, "#9ec9e8");
+  discP(X + 10, Y + 30, 4, 4, "#111"); discP(X + 30, Y + 30, 4, 4, "#111");
+  P(X + 4, Y + 18, 32, 1, "rgba(255,255,255,.35)");
+}
+
+// ---------- Häuser ----------
+function drawLagezentrumStatic1280(X, Y) {
+  P(X - 4, Y + 114, 210, 10, "rgba(0,0,0,.32)");
+  P(X + 6, Y + 24, 188, 94, "#1a1c1e");
+  P(X + 9, Y + 27, 182, 88, "#8b8f95");
+  for (let yy = Y + 33; yy < Y + 112; yy += 12) P(X + 9, yy, 182, 1, "#6f7379");
+  for (let xx = X + 30; xx < X + 190; xx += 40) P(xx, Y + 27, 1, 88, "#73777d");
+  P(X + 2, Y + 14, 196, 14, "#1a1c1e");
+  P(X + 4, Y + 16, 192, 10, "#a3a7ad");
+  P(X + 4, Y + 16, 192, 2, "#c4c8ce");
+  [[X + 22, Y + 44], [X + 146, Y + 44]].forEach(([wx, wy]) => {
+    P(wx, wy, 34, 10, "#111315"); P(wx + 2, wy + 2, 30, 6, "#2f4a5c");
+    P(wx, wy + 26, 34, 10, "#111315"); P(wx + 2, wy + 28, 30, 6, "#2f4a5c");
+  });
+  // Tarnnetz über dem Eingang
+  for (let i = 0; i < 70; i++) {
+    const h = hash(i, 3, 11);
+    P(X + 62 + (h % 76), Y + 30 + ((h >> 7) % 18), 6, 4, ["#4e5a32", "#6b6a3b", "#3d4a2a", "#7a7448"][i % 4]);
+  }
+  P(X + 80, Y + 50, 40, 68, "#111315");
+  P(X + 83, Y + 53, 34, 65, "#5b6066");
+  P(X + 99, Y + 53, 2, 65, "#3e4247");
+  P(X + 86, Y + 80, 5, 3, "#d4d7db");
+  cobbleStone(X + 72, Y + 112, 56, 8, "#9a9a95", "#c4c4bf", "#6c6c68", "#1c1c1c");
+  // Antennenmast und Radarschüssel
+  P(X + 160, Y - 44, 4, 60, "#26282b");
+  for (let k = 0; k < 6; k++) P(X + 154 + (k % 2) * 10, Y - 36 + k * 9, 6, 2, "#26282b");
+  discP(X + 40, Y + 6, 16, 8, "#26282b");
+  discP(X + 40, Y + 5, 13, 6, "#c9cdd2");
+  P(X + 39, Y - 6, 3, 10, "#26282b");
+}
+function drawLagezentrumAnim1280(X, Y, t) {
+  const on = Math.floor(t / 600) % 2 === 0;
+  discP(X + 162, Y - 46, 5, 5, on ? "#ff3b30" : "#5a1a16");
+  if (on) discP(X + 162, Y - 46, 10, 10, "rgba(255,60,48,.25)");
+}
+
+function drawMoskauStatic1280(X, Y) {
+  P(X - 4, Y + 114, 210, 10, "rgba(0,0,0,.32)");
+  P(X + 6, Y + 28, 188, 90, "#2a1210");
+  P(X + 9, Y + 31, 182, 84, "#9c3a2c");
+  for (let yy = Y + 35; yy < Y + 112; yy += 6) {
+    const off = ((yy - Y) / 6 | 0) % 2 ? 6 : 0;
+    for (let xx = X + 9 + off; xx < X + 190; xx += 12) P(xx, yy, 1, 6, "#7d2b20");
+    P(X + 9, yy, 182, 1, "#83301f");
+  }
+  P(X + 4, Y + 24, 192, 8, "#efe4cc"); P(X + 4, Y + 30, 192, 2, "#b9ad93");
+  [X + 22, X + 52, X + 132, X + 162].forEach(wx => {
+    P(wx, Y + 48, 18, 34, "#efe4cc");
+    P(wx + 2, Y + 54, 14, 26, "#24303a");
+    discP(wx + 9, Y + 54, 7, 6, "#24303a");
+    P(wx + 8, Y + 54, 2, 26, "#efe4cc");
+  });
+  P(X + 78, Y + 46, 44, 72, "#efe4cc");
+  P(X + 82, Y + 58, 36, 60, "#3a1a10");
+  discP(X + 100, Y + 58, 18, 10, "#3a1a10");
+  P(X + 99, Y + 52, 2, 66, "#5a2c18");
+  // Mittelturm mit Zwiebelkuppel und Stern
+  P(X + 84, Y - 10, 32, 40, "#2a1210");
+  P(X + 86, Y - 8, 28, 38, "#b04a36");
+  P(X + 86, Y - 8, 28, 4, "#efe4cc");
+  for (let dy = 0; dy < 34; dy++) {
+    const w = Math.round(Math.sin(Math.min(Math.PI, (dy / 34) * Math.PI * 1.15)) * 20) + 2;
+    P(X + 100 - w, Y - 44 + dy, w * 2, 1, dy < 4 ? "#f4d35e" : (dy % 6 < 3 ? "#d9a41e" : "#b8860b"));
+  }
+  P(X + 99, Y - 56, 2, 12, "#d9a41e");
+}
+function drawRedStar(cx, cy, r, col) {
+  activeCtx.save();
+  activeCtx.fillStyle = col;
+  activeCtx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 === 0 ? r : r * 0.45;
+    activeCtx.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr);
+  }
+  activeCtx.closePath();
+  activeCtx.fill();
+  activeCtx.restore();
+}
+function drawMoskauAnim1280(X, Y, t) {
+  const glow = 0.2 + 0.15 * Math.sin(t / 400);
+  discP(X + 100, Y - 62, 12, 12, "rgba(255,60,40," + glow.toFixed(2) + ")");
+  drawRedStar(X + 100, Y - 62, 8, "#e02b20");
+}
+
+function drawBueroStatic1280(X, Y) {
+  P(X - 2, Y + 74, 86, 8, "rgba(0,0,0,.35)");
+  P(X + 2, Y + 14, 76, 64, "#1b1d22");
+  P(X + 4, Y + 16, 72, 60, "#d8d2c2");
+  P(X + 4, Y + 16, 72, 3, "#efe9da");
+  P(X, Y + 6, 80, 10, "#1b1d22");
+  P(X + 2, Y + 8, 76, 6, "#3a4a63");
+  // Schild KS1
+  P(X + 22, Y - 10, 36, 16, "#111");
+  P(X + 24, Y - 8, 32, 12, "#f2d64b");
+  activeCtx.save(); activeCtx.font = "bold 11px 'Courier New', monospace"; activeCtx.fillStyle = "#111";
+  activeCtx.textAlign = "center"; activeCtx.textBaseline = "middle"; activeCtx.fillText("KS1", X + 40, Y - 1); activeCtx.restore();
+  P(X + 44, Y + 26, 26, 22, "#1b1d22"); P(X + 46, Y + 28, 22, 18, "#3f6688");
+  P(X + 8, Y + 36, 24, 40, "#1b1d22"); P(X + 10, Y + 38, 20, 38, "#5a3b22"); P(X + 26, Y + 56, 3, 3, "#f2d64b");
+}
+function drawBueroAnim1280(X, Y, t) {
+  if (Math.floor(t / 900) % 3 !== 0) P(X + 48, Y + 30, 18, 14, "rgba(255,240,170,.55)");
+}
+
+function drawArchivFlags1280(X, Y, t) {
+  [[X + 14, "US"], [X + 180, "SU"]].forEach(([px, code]) => {
+    P(px, Y - 30, 3, 120, "#2a241e");
+    discP(px + 1, Y - 32, 3, 3, "#d9a41e");
+    for (let i = 0; i < 22; i++) {
+      const wave = Math.round(Math.sin(i * 0.45 - t / 220) * 2);
+      const col = code === "US"
+        ? (i < 9 ? null : "stripe")
+        : "#c8261b";
+      for (let j = 0; j < 14; j++) {
+        let c = "#c8261b";
+        if (code === "US") {
+          if (i < 9 && j < 8) c = (i + j) % 3 === 0 ? "#ffffff" : "#1f3a7a";
+          else c = (j >> 1) % 2 === 0 ? "#c8261b" : "#f4f1ea";
+        } else if (i >= 2 && i <= 5 && j >= 2 && j <= 5) c = (i === 3 || j === 3) ? "#f2d24b" : "#c8261b";
+        P(px + 3 + i, Y - 28 + j + wave, 1, 1, c);
+      }
+      void col;
+    }
+  });
+}
+
+function drawDoorMarker(h, t) {
+  const dx = h.door.c * TW, dy = h.door.r * TW;
+  if (CWS.solved[h.id]) {
+    P(dx + 12, dy - 16, 16, 16, "#14532d"); P(dx + 14, dy - 14, 12, 12, "#22c55e");
+    P(dx + 17, dy - 8, 3, 3, "#fff"); P(dx + 19, dy - 6, 3, 3, "#fff"); P(dx + 21, dy - 10, 3, 3, "#fff");
+  } else if (!isUnlocked(h)) {
+    discP(dx + 20, dy - 8, 9, 9, "#5a0f0a");
+    discP(dx + 20, dy - 8, 7, 7, "#b3261e");
+    P(dx + 17, dy - 10, 7, 6, "#f2d24b"); P(dx + 18, dy - 14, 5, 4, "#f2d24b"); P(dx + 19, dy - 13, 3, 3, "#b3261e");
+  } else {
+    const bob = Math.round(Math.sin(t / 220) * 3);
+    const ax = dx + 20, ay = dy - 30 + bob;
+    P(ax - 6, ay, 12, 4, "#f2d64b"); P(ax - 4, ay + 4, 8, 3, "#f2d64b"); P(ax - 2, ay + 7, 4, 3, "#f2d64b");
+  }
+}
+
+const villageCache = document.createElement("canvas");
+villageCache.width = 1280;
+villageCache.height = 760;
+
+function buildVillageCache() {
+  const prev = activeCtx;
+  activeCtx = villageCache.getContext("2d");
+  activeCtx.imageSmoothingEnabled = false;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const X = c * TW, Y = r * TW, k = MAP[r][c], east = isEastCol(c);
+      if (c >= RIVER_C0 && c <= RIVER_C1) { drawRiver1280(X, Y, c, r, 0); continue; }
+      if (k === "T" || k === ".") (east ? drawGrassEast1280 : drawGrass1280)(X, Y, c, r);
+      else if (k === "#") (east ? drawWallEast1280 : drawHedge1280)(X, Y, c, r);
+      else (east ? drawConcrete1280 : drawPath1280)(X, Y, c, r);
+      if (k === "D") {
+        cobbleStone(X + 4, Y - 2, 32, 9, "#9c988e", "#cfcbc0", "#6e6b63", "#24201c");
+        cobbleStone(X + 8, Y + 11, 24, 11, "#82412c", "#a85c43", "#57291a", "#24120a");
+      }
+    }
+  }
+  for (let r = 0; r < ROWS - 1; r++) for (let c = 0; c < COLS; c++) {
+    if (MAP[r][c] === "#" && !"#T~".includes(MAP[r + 1][c])) P(c * TW, (r + 1) * TW, TW, 8, "rgba(0,0,0,.24)");
+  }
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+    if (MAP[r][c] === "T") drawTree1280(c * TW, r * TW, c, r);
+  }
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+    const k = MAP[r][c];
+    if (k === "R") (isEastCol(c) ? drawPlakatwand1280 : drawLitfass1280)(c * TW, r * TW);
+    if (k === "A") isEastCol(c) ? drawCar1280(c * TW, r * TW, "#8fb5a8", "#dfe6e0") : drawCar1280(c * TW, r * TW, "#e58fb1", "#f6e3ea");
+  }
+  // Ost-Hälfte grauer, West-Hälfte etwas wärmer
+  activeCtx.fillStyle = "rgba(110,112,120,0.30)";
+  activeCtx.fillRect((RIVER_C1 + 1) * TW, 0, (COLS - RIVER_C1 - 1) * TW, 760);
+  activeCtx.fillStyle = "rgba(255,190,120,0.06)";
+  activeCtx.fillRect(0, 0, RIVER_C0 * TW, 760);
+
+  drawBridgeDeck1280();
+  drawBueroStatic1280(15 * TW, 8 * TW);
+  // Häuser
+  drawParliamentStatic1280(5 * TW, 2 * TW, "archiv");
+  drawLagezentrumStatic1280(22 * TW, 2 * TW);
+  drawParliamentStatic1280(5 * TW, 13 * TW, "washington");
+  drawMoskauStatic1280(22 * TW, 13 * TW);
+
+  label1280(["HAUS 1: ARCHIV", "Truman & Schdanow"], 5 * TW + 100, 2 * TW + 152);
+  label1280(["HAUS 2: LAGEZENTRUM", "Stellvertreterkriege"], 22 * TW + 100, 2 * TW + 152);
+  label1280(["HAUS 3: WASHINGTON", "Oktober 1962"], 5 * TW + 100, 13 * TW + 152);
+  label1280(["HAUS 4: MOSKAU", "Oktober 1962"], 22 * TW + 100, 13 * TW + 152);
+  label1280(["AGENTENBRÜCKE", "KS1-Büro (Finale)"], 640, 12 * TW + 18);
+  label1280(["WESTEN"], 3 * TW + 20, 6 * TW + 26);
+  label1280(["OSTEN"], 28 * TW + 20, 6 * TW + 26);
+  activeCtx = prev;
+}
+
+function renderCityAnim(t) {
+  for (let r = 0; r < ROWS; r++) {
+    if (r >= BRIDGE_R0 && r <= BRIDGE_R1) continue;
+    for (let c = RIVER_C0; c <= RIVER_C1; c++) drawRiver1280(c * TW, r * TW, c, r, t);
+  }
+  drawArchivFlags1280(5 * TW, 2 * TW, t);
+  drawParliamentAnim1280(5 * TW, 2 * TW, t, "archiv");
+  drawLagezentrumAnim1280(22 * TW, 2 * TW, t);
+  drawParliamentAnim1280(5 * TW, 13 * TW, t, "washington");
+  drawMoskauAnim1280(22 * TW, 13 * TW, t);
+  drawBueroAnim1280(15 * TW, 8 * TW, t);
+  HOUSES.forEach(h => drawDoorMarker(h, t));
+}
+
+// ===================== Innenräume nach Thema =====================
+// Die Raumgeometrie (Wände, Boden, Tisch, Infotafel, Tür) bleibt wie in BRD Quest,
+// damit Laufwege und Stationen stimmen. Jedes Haus bekommt Farben, Requisiten und ein UV-Versteck.
+function leftWallTop(x) { return 324 - (x - 40) * 0.5 - 248; }
+function rightWallTop(x) { return 24 + (x - 640) * 0.5; }
+function wallPolyLeft(g) { g.moveTo(40, 62); g.lineTo(640, -238); g.lineTo(640, 24); g.lineTo(40, 324); g.closePath(); }
+function wallPolyRight(g) { g.moveTo(640, 10); g.lineTo(1240, 310); g.lineTo(1240, 572); g.lineTo(640, 272); g.closePath(); }
+function floorPoly(g) { g.moveTo(640, 268); g.lineTo(1256, 576); g.lineTo(1256, 760); g.lineTo(24, 760); g.lineTo(24, 576); g.closePath(); }
+function tintRegion(g, polyFn, color, mode) {
+  g.save(); g.beginPath(); polyFn(g); g.clip();
+  g.globalCompositeOperation = mode; g.fillStyle = color; g.fillRect(0, 0, 1280, 760);
+  g.restore();
+}
+function leftWallPanel(x0, x1, yOff, h, col, frame) {
+  for (let x = x0; x < x1; x++) {
+    const yt = Math.round(leftWallTop(x) + yOff);
+    if (frame) { P(x, yt - 3, 1, h + 6, frame); }
+    if (!frame || (x > x0 + 2 && x < x1 - 3)) P(x, yt, 1, h, col);
+  }
+}
+function rightWallPanel(x0, x1, yOff, h, col, frame) {
+  for (let x = x0; x < x1; x++) {
+    const yt = Math.round(rightWallTop(x) + yOff);
+    if (frame) P(x, yt - 3, 1, h + 6, frame);
+    if (!frame || (x > x0 + 2 && x < x1 - 3)) P(x, yt, 1, h, col);
+  }
+}
+function shelfOverlay(colsFn) {
+  for (let dx = 32; dx <= 144; dx++) {
+    const x = 1080 + dx, yTop = Math.round(320 + dx * 0.48);
+    const i = ((dx - 32) / 10) | 0;
+    if ((dx - 32) % 10 > 1) { P(x, yTop + 22, 1, 36, colsFn(i, 0)); P(x, yTop + 78, 1, 36, colsFn(i, 1)); }
+  }
+}
+function drawLectern(x, y) {
+  discP(x, y + 34, 30, 8, "rgba(0,0,0,.35)");
+  P(x - 22, y - 30, 44, 64, "#1c0f08"); P(x - 20, y - 28, 40, 60, "#6e4222"); P(x - 20, y - 28, 40, 6, "#9c6236");
+  P(x - 26, y - 36, 52, 10, "#1c0f08"); P(x - 24, y - 34, 48, 6, "#8f5932");
+  [x - 10, x + 8].forEach(mx => { P(mx, y - 56, 2, 22, "#222"); discP(mx + 1, y - 58, 4, 5, "#3a3a3a"); });
+}
+function drawGlobe(x, y) {
+  discP(x, y + 30, 24, 7, "rgba(0,0,0,.35)");
+  P(x - 3, y + 6, 6, 24, "#3d2a18"); P(x - 14, y + 28, 28, 5, "#3d2a18");
+  discP(x, y - 8, 20, 20, "#1c1c1c"); discP(x, y - 8, 18, 18, "#2f6fb0");
+  [[-8, -14, 7, 5], [4, -4, 8, 6], [-6, 2, 5, 4], [8, -16, 4, 3]].forEach(([a, b, w, h]) => discP(x + a, y - 8 + b + 4, w, h, "#5da35a"));
+}
+function drawCrate(x, y) {
+  discP(x, y + 26, 30, 7, "rgba(0,0,0,.35)");
+  cobbleStone(x - 28, y - 18, 56, 44, "#5f6b3a", "#7d8a4c", "#3f4826", "#1a1d10");
+  P(x - 22, y - 2, 44, 3, "#3f4826");
+  P(x - 6, y - 26, 12, 8, "#2b2b2b"); P(x - 4, y - 24, 8, 4, "#56d364");
+}
+function drawSamovar(x, y) {
+  discP(x, y + 30, 26, 7, "rgba(0,0,0,.35)");
+  P(x - 16, y + 18, 32, 10, "#4a2a14");
+  discP(x, y, 16, 20, "#5a3a0a"); discP(x, y, 14, 18, "#c98d22"); discP(x - 4, y - 6, 5, 7, "#f4d35e");
+  P(x - 6, y - 30, 12, 10, "#c98d22"); P(x - 3, y - 36, 6, 6, "#5a3a0a");
+  P(x + 14, y + 2, 10, 3, "#c98d22");
+}
+function drawTeletype(x, y) {
+  discP(x + 40, y + 52, 60, 10, "rgba(0,0,0,.35)");
+  cobbleStone(x, y + 10, 84, 44, "#556070", "#7a8698", "#36404d", "#14181d");
+  P(x + 8, y + 2, 68, 14, "#2a2f36");
+  P(x + 12, y - 30, 58, 34, "#f4f1e6");
+  for (let l = 0; l < 5; l++) P(x + 16, y - 26 + l * 6, 40 + (l % 2) * 8, 2, "#59626e");
+  for (let k = 0; k < 4; k++) for (let j = 0; j < 9; j++) P(x + 10 + j * 7, y + 20 + k * 7, 5, 4, "#c9ced6");
+}
+function drawTV(x, y) {
+  discP(x + 40, y + 70, 46, 8, "rgba(0,0,0,.35)");
+  cobbleStone(x, y, 80, 62, "#6b4a2a", "#8f6a3d", "#45301a", "#1c0f08");
+  P(x + 8, y + 8, 50, 42, "#111"); P(x + 10, y + 10, 46, 38, "#33424d");
+  P(x + 62, y + 14, 10, 6, "#c9a640"); P(x + 62, y + 26, 10, 6, "#c9a640");
+  P(x + 16, y + 62, 4, 10, "#2a1a0c"); P(x + 60, y + 62, 4, 10, "#2a1a0c");
+}
+function drawWallBanner(x0, x1, yOff, h, col) {
+  rightWallPanel(x0, x1, yOff, h, col, "#3a0d08");
+  const cx = Math.round((x0 + x1) / 2), cy = Math.round(rightWallTop(cx) + yOff + h * 0.35);
+  drawRedStar(cx, cy, 14, "#f2d24b");
+}
+function drawWorldMapLeft(x0, x1, yOff, h) {
+  leftWallPanel(x0, x1, yOff, h, "#1d3b57", "#0d1620");
+  const blobs = [[0.18, 0.30, 0.10, 0.18], [0.24, 0.62, 0.06, 0.16], [0.48, 0.30, 0.08, 0.12], [0.50, 0.60, 0.07, 0.17],
+    [0.66, 0.28, 0.16, 0.16], [0.74, 0.55, 0.06, 0.08], [0.86, 0.72, 0.06, 0.07]];
+  blobs.forEach(([u, v, rw, rh]) => {
+    const x = x0 + u * (x1 - x0), y = leftWallTop(x) + yOff + v * h;
+    discP(x, y, rw * (x1 - x0), rh * h, "#4f7a4a");
+  });
+}
+function mapPinPos(u, v) {
+  const x0 = 170, x1 = 470, yOff = 26, h = 200;
+  const x = x0 + u * (x1 - x0);
+  return [Math.round(x), Math.round(leftWallTop(x) + yOff + v * h)];
+}
+
+const ROOM_THEMES = {
+  truman:        { name: "Archiv", fire: true,  uv: { x: 300, y: 624, prop: "lectern" } },
+  stellvertreter:{ name: "Lagezentrum", fire: false, uv: { x: 968, y: 640, prop: "crate" } },
+  washington:    { name: "Washington", fire: true,  uv: { x: 300, y: 624, prop: "globe" } },
+  moskau:        { name: "Moskau", fire: true,  uv: { x: 960, y: 640, prop: "samovar" } },
+  buero:         { name: "KS1-Büro", fire: false, uv: null }
+};
+const themedInteriorCaches = {};
+function buildThemedInterior(id) {
+  const cv = document.createElement("canvas");
+  cv.width = 1280; cv.height = 760;
+  const g = cv.getContext("2d");
+  g.imageSmoothingEnabled = false;
+  g.drawImage(interiorCache, 0, 0);
+  const prev = activeCtx;
+  activeCtx = g;
+  if (id === "truman") {
+    shelfOverlay((i, row) => ["#d8c9a3", "#a79a7c", "#cbb98e", "#8f8a7a", "#e3d6b4", "#b5a77f", "#9c8f6e"][(i + row * 3) % 7]);
+    leftWallPanel(470, 560, 40, 64, "#efe2be", "#4a2a14");
+    for (let l = 0; l < 5; l++) leftWallPanel(480, 548, 50 + l * 10, 2, "#6e5a3e");
+  } else if (id === "stellvertreter") {
+    tintRegion(g, wallPolyLeft, "#6f8190", "multiply");
+    tintRegion(g, wallPolyRight, "#6f8190", "multiply");
+    tintRegion(g, floorPoly, "#8b949b", "multiply");
+    drawWorldMapLeft(170, 470, 26, 200);
+    shelfOverlay((i, row) => (i + row) % 3 === 0 ? "#2a2f36" : "#59626e");
+  } else if (id === "washington") {
+    tintRegion(g, wallPolyLeft, "rgba(210,220,245,0.55)", "screen");
+    tintRegion(g, wallPolyRight, "rgba(210,220,245,0.55)", "screen");
+    g.save(); g.beginPath(); g.moveTo(650, 352); g.lineTo(1082, 548); g.lineTo(650, 744); g.lineTo(218, 548); g.closePath(); g.clip();
+    g.globalCompositeOperation = "color"; g.fillStyle = "#24479a"; g.fillRect(0, 0, 1280, 760); g.restore();
+    drawTV(40, 300);
+    rightWallPanel(700, 820, 60, 70, "#f4f1ea", "#7a6a4a");
+    for (let s = 0; s < 7; s++) rightWallPanel(704, 816, 62 + s * 10, 5, s % 2 ? "#f4f1ea" : "#c8261b");
+    rightWallPanel(704, 748, 62, 36, "#1f3a7a");
+  } else if (id === "moskau") {
+    tintRegion(g, wallPolyLeft, "#d9a093", "multiply");
+    tintRegion(g, wallPolyRight, "#d9a093", "multiply");
+    drawWallBanner(700, 820, 40, 120, "#b3261e");
+  } else if (id === "buero") {
+    tintRegion(g, wallPolyLeft, "#8e9bb0", "multiply");
+    tintRegion(g, wallPolyRight, "#8e9bb0", "multiply");
+    leftWallPanel(170, 470, 26, 200, "#2c3440", "#14181d");
+    shelfOverlay((i, row) => (i + row) % 2 ? "#7a8698" : "#566173");
+  }
+  const uv = ROOM_THEMES[id] && ROOM_THEMES[id].uv;
+  if (uv) {
+    if (uv.prop === "lectern") drawLectern(uv.x - 40, uv.y - 30);
+    if (uv.prop === "crate") drawCrate(uv.x + 34, uv.y - 14);
+    if (uv.prop === "globe") drawGlobe(uv.x - 44, uv.y - 30);
+    if (uv.prop === "samovar") drawSamovar(uv.x + 40, uv.y - 30);
+  }
+  if (id === "buero") drawTeletype(250, 150);
+  activeCtx = prev;
+  return cv;
+}
+function getThemedInterior(id) {
+  if (!themedInteriorCaches[id]) themedInteriorCaches[id] = buildThemedInterior(id);
+  return themedInteriorCaches[id];
+}
+function drawThemeAnim(id, t) {
+  const th = ROOM_THEMES[id];
+  if (th && th.fire) {
+    const f = Math.floor(t / 95) % 4;
+    discP(308, 348, 38, 16, "#d93800");
+    discP(308, 336 - f * 2, 30, 22, "#ff7700");
+    discP(308, 338 - f, 20, 16, "#ffbb24");
+    discP(308, 342, 11, 9, "#fff6b0");
+  }
+  if (id === "stellvertreter") {
+    [[0.80, 0.36, "Korea"], [0.74, 0.50, "Vietnam"], [0.58, 0.38, "Afghanistan"]].forEach(([u, v], i) => {
+      const [x, y] = mapPinPos(u, v);
+      const on = Math.floor(t / 400 + i) % 2 === 0;
+      discP(x, y, on ? 7 : 5, on ? 7 : 5, on ? "#ff3b30" : "#8a1f19");
+    });
+  }
+  if (id === "washington") {
+    const n = Math.floor(t / 120) % 5;
+    P(50, 310, 46, 38, ["#5d7a8c", "#6f8ea0", "#567385", "#7a98a8", "#61808f"][n]);
+    P(56, 318 + n * 3, 30, 2, "#c9dbe6");
+  }
+  if (id === "buero") {
+    const n = Math.floor(t / 300) % 6;
+    for (let l = 0; l <= n; l++) P(266, 126 + l * 6, 36 + (l % 2) * 10, 2, "#1f3a7a");
+  }
+}
+
+// UV-Lampe: Raum abdunkeln, Lichtkegel um den Agenten, Geheimschrift sichtbar machen.
+function drawUVLayer(t, uvOn, note, collected) {
+  if (!uvOn) return;
+  const px = intPlayer.x, py = intPlayer.y - 40;
+  ctx.save();
+  ctx.fillStyle = "rgba(10,0,30,0.74)";
+  ctx.beginPath(); ctx.rect(0, 0, 1280, 760);
+  for (let k = 0; k < 4; k++) ctx.arc(px, py, 150 - k * 18, 0, Math.PI * 2, true);
+  ctx.fill("evenodd");
+  ctx.fillStyle = "rgba(140,60,255,0.16)";
+  ctx.beginPath(); ctx.arc(px, py, 150, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  if (!note) return;
+  const d = Math.hypot(intPlayer.x - note.x, intPlayer.y - note.y);
+  const a = collected ? 0.25 : Math.max(0, 1 - d / 210);
+  if (a <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = a;
+  ctx.shadowColor = "#b8fff4"; ctx.shadowBlur = 10;
+  ctx.fillStyle = "#c9fff6";
+  ctx.font = "italic bold 22px 'Comic Sans MS', 'Segoe Print', cursive";
+  ctx.textAlign = "center";
+  ctx.fillText(collected ? "✔ Notiz im Koffer" : "Wer profitiert?", note.x, note.y - 70);
+  if (!collected) {
+    ctx.font = "bold 15px 'Segoe UI', sans-serif";
+    ctx.fillText("[E] Notiz einsammeln", note.x, note.y - 46);
+  }
+  ctx.restore();
+}
+
+// ===================== Flaggen der Bündniskarte (Stand 1962, vereinfacht) =====================
+const CW_FLAGS = {
+  US: ["USA", "NATO", 1949], GB: ["Großbritannien", "NATO", 1949], FR: ["Frankreich", "NATO", 1949],
+  CA: ["Kanada", "NATO", 1949], IT: ["Italien", "NATO", 1949], BE: ["Belgien", "NATO", 1949],
+  NL: ["Niederlande", "NATO", 1949], LU: ["Luxemburg", "NATO", 1949], DK: ["Dänemark", "NATO", 1949],
+  NO: ["Norwegen", "NATO", 1949], IS: ["Island", "NATO", 1949], PT: ["Portugal", "NATO", 1949],
+  GR: ["Griechenland", "NATO", 1952], TR: ["Türkei", "NATO", 1952], DE: ["Bundesrepublik", "NATO", 1955],
+  SU: ["Sowjetunion", "Warschauer Pakt", 1955], PL: ["Polen", "Warschauer Pakt", 1955],
+  CS: ["Tschechoslowakei", "Warschauer Pakt", 1955], HU: ["Ungarn", "Warschauer Pakt", 1955],
+  RO: ["Rumänien", "Warschauer Pakt", 1955], BG: ["Bulgarien", "Warschauer Pakt", 1955],
+  AL: ["Albanien", "Warschauer Pakt", 1955], DD: ["DDR", "Warschauer Pakt", 1955]
+};
+function drawFlag(g, code, x, y, w, h) {
+  const R = (xx, yy, ww, hh, c) => { g.fillStyle = c; g.fillRect(Math.round(x + xx), Math.round(y + yy), Math.max(1, Math.round(ww)), Math.max(1, Math.round(hh))); };
+  const hs = cols => cols.forEach((c, i) => R(0, i * h / cols.length, w, h / cols.length + 1, c));
+  const vs = cols => cols.forEach((c, i) => R(i * w / cols.length, 0, w / cols.length + 1, h, c));
+  const nordic = (bg, outer, inner) => {
+    R(0, 0, w, h, bg);
+    const cx = w * 0.32, cy = h * 0.5;
+    if (outer) { R(cx - h * 0.16, 0, h * 0.32, h, outer); R(0, cy - h * 0.16, w, h * 0.32, outer); }
+    R(cx - h * 0.09, 0, h * 0.18, h, inner); R(0, cy - h * 0.09, w, h * 0.18, inner);
+  };
+  const star = (cx, cy, r, c) => { g.save(); g.fillStyle = c; g.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.45 : r; g.lineTo(x + cx + Math.cos(a) * rr, y + cy + Math.sin(a) * rr); } g.closePath(); g.fill(); g.restore(); };
+  const union = (ww, hh) => {
+    R(0, 0, ww, hh, "#1f3a7a");
+    g.save(); g.beginPath(); g.rect(x, y, ww, hh); g.clip(); g.lineCap = "butt";
+    g.strokeStyle = "#fff"; g.lineWidth = hh * 0.22; g.beginPath(); g.moveTo(x, y); g.lineTo(x + ww, y + hh); g.moveTo(x + ww, y); g.lineTo(x, y + hh); g.stroke();
+    g.strokeStyle = "#c8102e"; g.lineWidth = hh * 0.08; g.stroke();
+    g.restore();
+    R(ww * 0.42, 0, ww * 0.16, hh, "#fff"); R(0, hh * 0.38, ww, hh * 0.24, "#fff");
+    R(ww * 0.45, 0, ww * 0.10, hh, "#c8102e"); R(0, hh * 0.42, ww, hh * 0.16, "#c8102e");
+  };
+  switch (code) {
+    case "US":
+      for (let i = 0; i < 13; i++) R(0, i * h / 13, w, h / 13 + 1, i % 2 ? "#f4f1ea" : "#b22234");
+      R(0, 0, w * 0.4, h * 7 / 13, "#1f3a7a");
+      for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) R(w * 0.04 + i * w * 0.09, h * 0.07 + j * h * 0.16, 1.5, 1.5, "#fff");
+      break;
+    case "GB": union(w, h); break;
+    case "CA": R(0, 0, w, h, "#c8102e"); union(w * 0.5, h * 0.5); R(w * 0.66, h * 0.32, w * 0.16, h * 0.36, "#e8dcc0"); break;
+    case "FR": vs(["#1f3a9a", "#f4f1ea", "#d22630"]); break;
+    case "IT": vs(["#009246", "#f4f1ea", "#ce2b37"]); break;
+    case "BE": vs(["#111", "#fdda24", "#ef3340"]); break;
+    case "RO": vs(["#002b7f", "#fcd116", "#ce1126"]); R(w * 0.42, h * 0.35, w * 0.16, h * 0.3, "#6a8f3a"); break;
+    case "NL": hs(["#ae1c28", "#f4f1ea", "#21468b"]); break;
+    case "LU": hs(["#ed2939", "#f4f1ea", "#00a1de"]); break;
+    case "HU": hs(["#cd2a3e", "#f4f1ea", "#436f4d"]); break;
+    case "BG": hs(["#f4f1ea", "#00966e", "#d62612"]); R(w * 0.08, h * 0.12, w * 0.14, h * 0.4, "#c9a640"); break;
+    case "PL": hs(["#f4f1ea", "#dc143c"]); break;
+    case "DE": hs(["#111", "#dd0000", "#ffce00"]); break;
+    case "DD": hs(["#111", "#dd0000", "#ffce00"]); g.save(); g.strokeStyle = "#ffce00"; g.lineWidth = Math.max(1, h * 0.08); g.beginPath(); g.arc(x + w / 2, y + h / 2, h * 0.22, 0, Math.PI * 2); g.stroke(); g.restore(); R(w / 2 - 1, h * 0.32, 2, h * 0.36, "#111"); break;
+    case "CS": hs(["#f4f1ea", "#d7141a"]); g.save(); g.fillStyle = "#11457e"; g.beginPath(); g.moveTo(x, y); g.lineTo(x + w * 0.5, y + h / 2); g.lineTo(x, y + h); g.closePath(); g.fill(); g.restore(); break;
+    case "DK": nordic("#c8102e", null, "#f4f1ea"); break;
+    case "NO": nordic("#ba0c2f", "#f4f1ea", "#00205b"); break;
+    case "IS": nordic("#02529c", "#f4f1ea", "#dc1e35"); break;
+    case "GR": R(0, 0, w, h, "#0d5eaf"); R(w * 0.42, 0, w * 0.16, h, "#f4f1ea"); R(0, h * 0.38, w, h * 0.24, "#f4f1ea"); break;
+    case "TR": R(0, 0, w, h, "#e30a17"); g.save(); g.fillStyle = "#fff"; g.beginPath(); g.arc(x + w * 0.38, y + h / 2, h * 0.25, 0, Math.PI * 2); g.fill(); g.fillStyle = "#e30a17"; g.beginPath(); g.arc(x + w * 0.43, y + h / 2, h * 0.2, 0, Math.PI * 2); g.fill(); g.restore(); star(w * 0.6, h / 2, h * 0.11, "#fff"); break;
+    case "PT": R(0, 0, w * 0.4, h, "#006600"); R(w * 0.4, 0, w * 0.6, h, "#ff0000"); g.save(); g.fillStyle = "#ffcc00"; g.beginPath(); g.arc(x + w * 0.4, y + h / 2, h * 0.22, 0, Math.PI * 2); g.fill(); g.restore(); break;
+    case "AL": R(0, 0, w, h, "#e41e20"); g.save(); g.fillStyle = "#111"; g.beginPath(); g.ellipse(x + w / 2, y + h * 0.58, w * 0.16, h * 0.26, 0, 0, Math.PI * 2); g.fill(); g.restore(); star(w / 2, h * 0.18, h * 0.1, "#ffd200"); break;
+    case "SU": R(0, 0, w, h, "#cc0000"); star(w * 0.18, h * 0.2, h * 0.09, "#ffd700"); R(w * 0.12, h * 0.34, w * 0.12, h * 0.06, "#ffd700"); R(w * 0.16, h * 0.3, w * 0.04, h * 0.18, "#ffd700"); break;
+    default: R(0, 0, w, h, "#999");
+  }
+  g.strokeStyle = "rgba(0,0,0,.45)"; g.lineWidth = 1; g.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+}
+
+// ===================== Lernbilder (selbst gezeichnet, keine historischen Karikaturen) =====================
+function drawLernbild(g, which, W, H) {
+  g.save();
+  g.clearRect(0, 0, W, H);
+  const sx = W / 480, sy = H / 300;
+  g.scale(sx, sy);
+  const rect = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(x, y, w, h); };
+  const circ = (x, y, r, c) => { g.fillStyle = c; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); };
+  const missile = (x, y, s, ang) => {
+    g.save(); g.translate(x, y); g.rotate(ang || 0);
+    rect(-3 * s, -16 * s, 6 * s, 22 * s, "#c9ccd2");
+    g.fillStyle = "#c0392b"; g.beginPath(); g.moveTo(-3 * s, -16 * s); g.lineTo(0, -24 * s); g.lineTo(3 * s, -16 * s); g.fill();
+    rect(-5 * s, 2 * s, 10 * s, 4 * s, "#7f8c8d");
+    g.restore();
+  };
+  const bear = (x, y, s) => {
+    circ(x, y, 26 * s, "#6b4226"); circ(x, y - 30 * s, 17 * s, "#6b4226");
+    circ(x - 12 * s, y - 44 * s, 6 * s, "#6b4226"); circ(x + 12 * s, y - 44 * s, 6 * s, "#6b4226");
+    circ(x, y - 26 * s, 7 * s, "#a0704a"); circ(x - 6 * s, y - 34 * s, 2 * s, "#111"); circ(x + 6 * s, y - 34 * s, 2 * s, "#111"); circ(x, y - 27 * s, 2.5 * s, "#111");
+  };
+  const person = (x, y, suit) => {
+    circ(x, y - 46, 9, "#e2ab80"); rect(x - 9, y - 58, 18, 6, "#2a2a2a");
+    rect(x - 11, y - 36, 22, 30, suit); rect(x - 2, y - 36, 4, 14, "#8a2424");
+    rect(x - 10, y - 6, 8, 26, "#2c3542"); rect(x + 2, y - 6, 8, 26, "#2c3542");
+  };
+  if (which === "washington") {
+    rect(0, 0, 480, 300, "#cfe6f5");
+    rect(0, 170, 480, 130, "#4f8fc9");
+    for (let i = 0; i < 12; i++) rect(150 + i * 26, 205 + (i % 2) * 4, 18, 2, "#9cc6ea");
+    rect(0, 120, 150, 180, "#efe7d6"); rect(0, 116, 150, 8, "#8b6b45");
+    for (let i = 0; i < 7; i++) rect(8 + i * 20, 170, 4, 60, "#8b6b45");
+    rect(0, 168, 150, 5, "#8b6b45");
+    person(70, 160, "#4a5566");
+    rect(84, 112, 22, 10, "#222"); circ(108, 117, 6, "#333");
+    rect(20, 200, 60, 6, "#6b4a2a"); rect(30, 206, 6, 30, "#6b4a2a"); rect(66, 206, 6, 30, "#6b4a2a");
+    circ(50, 194, 9, "#e02b20"); rect(46, 182, 8, 4, "#444");
+    rect(92, 210, 54, 26, "#f4f1e6"); g.fillStyle = "#222"; g.font = "bold 9px sans-serif"; g.fillText("JEDER START =", 95, 221); g.fillText("ANGRIFF DER UdSSR", 95, 232);
+    for (let i = 0; i < 6; i++) { const x = 190 + i * 34, y = 180 + (i % 2) * 8; rect(x, y, 26, 8, "#5d6670"); rect(x + 8, y - 6, 8, 6, "#5d6670"); if (i < 5) rect(x + 26, y + 3, 8, 2, "#2c2c2c"); }
+    g.fillStyle = "#e8c86a"; g.beginPath(); g.ellipse(400, 200, 70, 22, 0, 0, Math.PI * 2); g.fill();
+    rect(396, 140, 6, 58, "#7a5230"); circ(386, 138, 14, "#3f8f3a"); circ(410, 136, 14, "#3f8f3a"); circ(398, 128, 12, "#4fa548");
+    bear(440, 196, 0.8);
+    missile(360, 196, 0.9); missile(375, 192, 0.9); missile(420, 186, 0.9);
+    rect(300, 250, 90, 18, "#f4f1e6"); g.fillStyle = "#222"; g.font = "bold 11px sans-serif"; g.fillText("90 MEILEN", 312, 263);
+  } else if (which === "moskau") {
+    rect(0, 0, 480, 300, "#dfe8ef");
+    rect(0, 200, 480, 100, "#f4f7fa");
+    g.fillStyle = "#cfd8df"; g.beginPath(); g.moveTo(120, 210); g.quadraticCurveTo(220, 40, 320, 210); g.fill();
+    g.fillStyle = "#3a3f45"; g.beginPath(); g.ellipse(220, 190, 46, 34, 0, Math.PI, 0); g.fill();
+    bear(220, 205, 1);
+    const fence = [[110, 230], [140, 252], [180, 262], [260, 262], [300, 252], [330, 230], [330, 180], [110, 180]];
+    fence.forEach(([x, y], i) => missile(x, y, 1, Math.atan2(205 - y, 220 - x) + Math.PI / 2));
+    rect(268, 270, 58, 14, "#f4f1e6"); g.fillStyle = "#222"; g.font = "bold 10px sans-serif"; g.fillText("TÜRKEI", 274, 281);
+    rect(66, 160, 58, 14, "#f4f1e6"); g.fillStyle = "#222"; g.fillText("ITALIEN", 70, 171);
+    person(318, 290, "#4a5566"); person(352, 290, "#6b6a3b");
+    rect(380, 170, 100, 60, "#5c9bd1"); g.fillStyle = "#e8c86a"; g.beginPath(); g.ellipse(440, 215, 30, 10, 0, 0, Math.PI * 2); g.fill();
+    rect(438, 186, 4, 28, "#7a5230"); circ(440, 184, 9, "#3f8f3a");
+    g.strokeStyle = "#6b4226"; g.lineWidth = 9; g.lineCap = "round"; g.beginPath(); g.moveTo(240, 190); g.quadraticCurveTo(360, 120, 432, 168); g.stroke();
+    circ(436, 170, 9, "#6b4226");
+    g.strokeStyle = "#a8803f"; g.lineWidth = 4; g.beginPath(); g.moveTo(196, 196); g.lineTo(20, 120); g.stroke();
+    circ(105, 156, 11, "#a8803f"); circ(100, 152, 5, "#7d5d2a");
+    g.fillStyle = "#4a3a24"; g.beginPath(); g.moveTo(10, 110); g.lineTo(34, 96); g.lineTo(30, 124); g.fill(); circ(20, 98, 6, "#f4f1ea");
+  }
+  g.restore();
+  g.save();
+  g.fillStyle = "rgba(0,0,0,.55)"; g.fillRect(0, H - 18, W, 18);
+  g.fillStyle = "#fff"; g.font = "bold " + Math.round(11 * Math.min(sx, 1.4)) + "px sans-serif";
+  g.fillText("Lernbild (2026), selbst gezeichnet – keine historische Karikatur", 8, H - 5);
+  g.restore();
+}

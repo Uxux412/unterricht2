@@ -20,6 +20,16 @@
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  // QR-Code als Bild (SVG), erzeugt direkt im Browser mit assets/qrcode.js.
+  // Es geht keine Anfrage an einen fremden Dienst.
+  function qrBildAdresse(text) {
+    const code = qrcode(0, 'M');   // 0 = Größe passend zur Textlänge, 'M' = mittlere Fehlerkorrektur
+    code.addData(text);
+    code.make();
+    const svg = code.createSvgTag({ cellSize: 10, margin: 20 });   // 10 px je Kästchen, 2 Kästchen weißer Rand
+    return 'data:image/svg+xml,' + encodeURIComponent(svg);
+  }
+
   function datumDe(iso) {
     const [j, m, t] = iso.split('-');
     return `${Number(t)}.${Number(m)}.${j}`;
@@ -153,8 +163,7 @@
       const m = D.materialien.find(x => x.id === id);
       const url = new URL(/^https?:/.test(m.pfad) ? m.pfad : wurzel + m.pfad, window.location.href).href;
       document.getElementById('qrTitel').innerText = m.name;
-      document.getElementById('qrBild').src =
-        `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=10&data=${encodeURIComponent(url)}`;
+      document.getElementById('qrBild').src = qrBildAdresse(url);
       document.getElementById('qrUrl').innerText = url;
       document.getElementById('qrFenster').classList.add('offen');
     },
