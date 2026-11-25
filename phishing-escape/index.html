@@ -680,8 +680,8 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
           <li><b>Ziel:</b> Phishing an Absender, Link, Druck und Datenabfrage erkennen und richtig reagieren.</li>
           <li><b>Ablauf:</b> 10 Minuten spielen, danach ca. 10 Minuten Besprechung der drei Regeln vom Schlussbildschirm.</li>
           <li>Die Ziffern des Türcodes werden bei jedem Spiel neu ausgelost. Abschreiben zwischen Gruppen hilft nicht.</li>
-          <li>Fehler kosten zunehmend Zeit (10, 20, 30 … höchstens 60 Sekunden), ein Tipp 20 Sekunden. Wer nur rät, schafft es nicht. Läuft die Zeit ab, kann man ohne Zeitlimit weiterspielen.</li>
-          <li>Für Schnelle: Nach dem Ausbruch wartet der Bonus <b>„Level Beta“</b> mit vier kniffligen Fällen (Messenger, QR-Code, gefälschter Firmen-Absender, echter Bestätigungscode).</li>
+          <li>Fehler kosten zunehmend Zeit (der erste 10 Sekunden, der zweite 20, der dritte 30 …), ein Tipp nur 20 Sekunden. Wer nur rät, schafft es nicht. Läuft die Zeit ab, kann man ohne Zeitlimit weiterspielen.</li>
+          <li>Für Schnelle: Nach dem Ausbruch wartet das <b>„Profi-Level“</b> mit fünf kniffligen Fällen (Messenger-Trick, echte Paketnachricht, QR-Code-Betrug, echter Bestätigungscode, gefälschter Firmen-Absender).</li>
           <li>Alle Firmen, Namen, Adressen und Nummern sind erfunden, außer dem Sperr-Notruf 116 116. Keine Anmeldung, es wird nichts gespeichert, keine Töne.</li>
           <li><b>Fragen fürs Gespräch:</b> Hast du unter Zeitdruck schlechter geprüft – und warum setzen Betrüger genau darauf? Welche Falle war am schwersten? Woran erkennt man die echte Adresse in einem Link? Was tust du, wenn du schon geklickt hast? Welche Phishing-Nachrichten kennst du selbst (Spielkonto, Messenger, Gewinnspiel)?</li>
           <li>Für langsam Lesende oder Kinder mit Deutsch als Zweitsprache: <b>„Ohne Zeitlimit spielen“</b> unter dem Startknopf.</li>
@@ -993,15 +993,15 @@ body.low #vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(
     <h2>Die 3 wichtigsten Regeln gegen Phishing</h2>
     <p class="defi"><b>Phishing</b> (sprich: Fisching) heißt „Passwort-Fischen“: Betrüger angeln mit gefälschten Mails, SMS oder Nachrichten nach Passwörtern, Bankdaten oder Geld.</p>
     <ol class="rules">
-      <li><div class="rn">1</div><h3>Absender und Link prüfen</h3><p>Ein Name wie „FlinkPaket“ ist schnell gefälscht. Schau auf die Adresse dahinter: Passt sie nicht, ist es Betrug. Passt sie, ist das noch kein Beweis. Bei Links zählt der Teil zwischen „https://“ und dem nächsten „/“: Ganz am Ende muss genau der echte Name stehen, zum Beispiel <b>talbank.de</b>.</p></li>
+      <li><div class="rn">1</div><h3>Absender und Link prüfen</h3><p>Ein Name wie „FlinkPaket“ ist schnell gefälscht. Schau auf die Adresse dahinter: Passt sie nicht, ist es Betrug. Passt sie, ist das noch kein Beweis. Bei Links zählt der Teil zwischen „http(s)://“ und dem nächsten „/“. Er muss genau auf den echten Namen enden, davor darf höchstens ein Punkt stehen: <b>talbank.de</b> und <b>www.talbank.de</b> sind echt, <b>konto-talbank.de</b> und <b>talbank.de.konto24.com</b> nicht.</p></li>
       <li><div class="rn">2</div><h3>Druck ist ein Alarmsignal</h3><p>Drohung, kurze Frist, Gewinn oder „sag es niemandem“: Wer dich hetzt, will, dass du nicht nachdenkst. Erst einmal nichts tun.</p></li>
       <li><div class="rn">3</div><h3>Nie Passwort, PIN oder TAN über einen Link</h3><p>Echte Banken, Firmen und Chefs fragen so etwas nie per Mail oder SMS. Im Zweifel selbst die echte App öffnen oder über eine bekannte Nummer anrufen.</p></li>
     </ol>
     <div class="sos"><b>Schon draufgeklickt oder Daten eingegeben?</b> Kein Grund, sich zu schämen, aber schnell handeln: Passwort ändern, die Bank anrufen, Karte und Online-Banking sperren lassen (Sperr-Notruf <b>116 116</b>). Im Betrieb sofort die IT informieren.</div>
     <section class="beta" aria-labelledby="betaT">
-      <h2 class="beta-head"><span class="sr" id="betaT">Bonus: Level Beta</span><span id="betaPx"></span></h2>
+      <h2 class="beta-head"><span class="sr" id="betaT">Bonus: Profi-Level</span><span id="betaPx"></span></h2>
       <p class="beta-lead">Bonus für Profis: fünf gut getarnte Fälle, ohne Zeitdruck. Echt oder Falle?</p>
-      <button class="btn btn-ice" id="btnBeta">▶ Level Beta starten</button>
+      <button class="btn btn-ice" id="btnBeta">▶ Profi-Level starten</button>
       <div class="beta-box" id="betaBox" hidden aria-live="polite"></div>
     </section>
     <div class="end-actions"><button class="btn btn-ice" id="btnAgain">↻ Nochmal spielen</button></div>
@@ -1082,7 +1082,7 @@ const MAILS = [
       '{LINK}',
       'Dein Spielwolke-Team'],
     link: { t: 'Konto jetzt retten', url: 'http://spielwolke-konto-check.com/login', btn: true },
-    why: ['Absender: <code>spielwolke-sicherheit.net</code>. Angehängte Wörter wie „-sicherheit“ sind ein typischer Trick.',
+    why: ['Absender: <code>spielwolke-sicherheit.net</code>. Die echte Adresse kennst du hier nicht, aber angehängte Wörter wie „-sicherheit“ sind ein typischer Trick. Wenn du nicht vergleichen kannst, zählen die anderen Warnzeichen umso mehr.',
       '„Hallo Spieler“ statt deines Namens.',
       'Drohung und Frist: „in 24 Stunden … alles weg“.',
       'Fragt nach deinem Passwort. Das macht kein seriöser Anbieter per Mail.',
@@ -1122,7 +1122,7 @@ const MAILS = [
       'Dein FlinkPaket-Team'],
     link: { t: 'Sendung verfolgen', url: 'https://www.flinkpaket.de/sendung/FP44712290DE', btn: false },
     why: ['Absender passt: <code>flinkpaket.de</code>.',
-      'Der Link führt zu <code>flinkpaket.de</code>: Das steht ganz am Ende vor dem nächsten „/“.',
+      'Der Link führt zu <code>flinkpaket.de</code>: Genau das steht am Ende vor dem nächsten „/“, davor nur „www.“.',
       'Dein voller Name und eine Sendungsnummer.',
       'Kein Druck, keine Zahlung, keine Daten.',
       'Ganz sicher gehst du, wenn du die Nummer selbst in der App eingibst.'] },
@@ -1174,9 +1174,9 @@ const ACT = [
 ];
 const LINKS = [
   { id: 'a', ok: false, pre: 'https://talbank.de.', dom: 'konto-talbank.com', post: '/anmelden',
-    x: '✖ Fälschung! „talbank.de“ steht hier nur vorne als Tarnung. Entscheidend ist, was ganz am Ende vor dem nächsten „/“ steht: <b>konto-talbank.com</b>. Übrigens hat auch diese Seite ein Schloss 🔒. Das heißt nur „verschlüsselt“, nicht „echt“.' },
+    x: '✖ Fälschung! „talbank.de“ steht hier nur vorne als Tarnung. Entscheidend ist, worauf der Teil vor dem nächsten „/“ endet: <b>konto-talbank.com</b>. Übrigens hat auch diese Seite ein Schloss 🔒. Das heißt nur „verschlüsselt“, nicht „echt“.' },
   { id: 'b', ok: true, pre: 'https://www.', dom: 'talbank.de', post: '/anmelden',
-    x: '✔ Richtig! Ganz am Ende vor dem „/“ steht genau <b>talbank.de</b>, die Adresse von der Pinnwand. Noch sicherer: die Adresse selbst eintippen oder die echte Banking-App nutzen.' },
+    x: '✔ Richtig! Vor dem „/“ steht genau <b>www.talbank.de</b>: am Ende talbank.de, davor nur „www.“. Das ist die Adresse von der Pinnwand. Noch sicherer: die Adresse selbst eintippen oder die echte Banking-App nutzen.' },
   { id: 'c', ok: false, pre: 'https://www.', dom: 'ta1bank.de', post: '/anmelden',
     x: '✖ Fälschung! Schau genau hin: eine <b>Ziffer 1</b> statt des Buchstabens l. „ta1bank.de“ ist eine völlig andere Adresse und sieht nur fast gleich aus.' }
 ];
@@ -1185,7 +1185,7 @@ const LK = {}; LINKS.forEach(l => { LK[l.id] = l; });
 const HINTS = {
   monitor: 'Tippe in jeder Mail auf den Absender: Erst die Adresse hinter dem Namen verrät, wer wirklich schreibt. Die Firmenadresse steht an der Pinnwand. Misstrauisch machen außerdem: Drohung, Eile, Geheimhaltung und Fragen nach Daten oder Geld.',
   phone: 'Fünf Fragen helfen: Wer schreibt? Wie wirst du angesprochen? Wie viel Zeit bleibt dir? Was sollst du verraten? Wohin führt der Link?',
-  laptop: 'Die echte Adresse ist www.talbank.de (Pinnwand). Schau auf den Teil zwischen „https://“ und dem nächsten „/“. Ganz am Ende davon muss genau talbank.de stehen, Buchstabe für Buchstabe.',
+  laptop: 'Die echte Adresse ist www.talbank.de (Pinnwand). Schau auf den Teil zwischen „https://“ und dem nächsten „/“. Er muss genau auf talbank.de enden, Buchstabe für Buchstabe, und davor darf höchstens „www.“ stehen.',
   door: 'Jedes befreite Gerät lässt eine Ziffer über der Tür aufleuchten. Reihenfolge am Schloss: Monitor – Handy – Laptop.'
 };
 
@@ -1574,7 +1574,7 @@ function tick() {
     });
     if (s <= 0) { gameOver(); return; }
   }
-  if (S.inRoom && Date.now() - S.lastAct > 75000) { S.lastAct = Date.now(); say(rnd(H.idle)); }
+  if (S.inRoom && Date.now() - S.lastAct > 75000) { S.lastAct = Date.now(); say(rnd(S.practice ? H.idle.slice(0, 2) : H.idle)); }
 }
 function penalty(sec) {
   if (S.practice || S.ended || S.over || !S.deadline) return;
@@ -1660,13 +1660,13 @@ function flash() {
   clearTimeout(S.hitT); S.hitT = setTimeout(() => document.body.classList.remove('hit'), 480);
 }
 function burst(ms) { if (RM) return; document.body.classList.add('burst'); clearTimeout(S.bT); S.bT = setTimeout(() => document.body.classList.remove('burst'), ms || 420); }
-/* Jeder weitere Fehler kostet mehr Zeit (10, 20, 30 … höchstens 60 s): Raten lohnt sich nicht. */
+/* Jeder weitere Fehler kostet mehr Zeit (10, 20, 30 … s): Wer nur rät, schafft es nicht. */
 function fail(line) {
-  S.mistakes++; penalty(Math.min(60, PEN * S.mistakes)); flash();
-  if (S.mistakes === 3) setTimeout(() => say('Merkt ihr was? Jeder Fehler kostet jetzt mehr Zeit. Ratet ruhig weiter. 😈', { cls: 'evil' }), 900);
+  S.mistakes++; penalty(PEN * S.mistakes); flash();
+  if (S.mistakes === 3 && !S.practice) setTimeout(() => say('Merkt ihr was? Jeder Fehler kostet jetzt mehr Zeit. Ratet ruhig weiter. 😈', { cls: 'evil' }), 900);
   if (!RM) { const g = $('#ghost'); g.classList.remove('go'); void g.offsetWidth; g.classList.add('go'); }
   let t = line;
-  if (!t) { do { t = rnd(H.taunt); } while (t === S.lastTaunt); S.lastTaunt = t; }
+  if (!t) { const pool = S.practice ? H.taunt.filter(x => !/Zeit|Tick/.test(x)) : H.taunt; do { t = rnd(pool); } while (t === S.lastTaunt && pool.length > 1); S.lastTaunt = t; }
   say(t, { cls: 'evil' });
 }
 function good(line, gap) {
@@ -1720,7 +1720,7 @@ function closeModal(silent) {
   }, RM ? 10 : 250);
 }
 function showHint(key, charge) {
-  if (charge && !S.hints[key]) { S.hints[key] = true; S.hintCount++; penalty(HINT_PEN); say('Tipps? Wie süß. Kosten aber Zeit. 😏'); }
+  if (charge && !S.hints[key]) { S.hints[key] = true; S.hintCount++; penalty(HINT_PEN); say(S.practice ? 'Tipps? Wie süß. 😏' : 'Tipps? Wie süß. Kosten aber Zeit. 😏'); }
   mHint.innerHTML = '<span class="hint-agent">' + spriteSVG('read') + '</span><div><b>AUS DEM DOSSIER</b><br>' + HINTS[key] + '</div>';
   mHint.hidden = false; hintBtn.textContent = '💡 Tipp';
 }
@@ -2105,7 +2105,7 @@ function practice() {
   say('Ohne Zeitlimit? Na gut. Ich habe alle Zeit der Welt. 😏');
 }
 
-/* ---------------- Bonus: Level Beta ---------------- */
+/* ---------------- Bonus: Profi-Level ---------------- */
 const BETA = [
   { from: 'WhatsApp · unbekannte Nummer', msg: 'Hallo Mama, das ist meine neue Nummer. Mein Handy ist kaputt. Kannst du mir schnell 480 € überweisen? Ich erkläre dir alles später. ❤️', falle: true,
     x: 'Der „Hallo Mama“-Trick: neue Nummer, Geldnot, Eile. Immer zuerst über die alte, bekannte Nummer anrufen und nachfragen.' },
@@ -2122,7 +2122,8 @@ const BT = { i: 0, ok: 0, done: false };
 function betaStart() { BT.i = 0; BT.ok = 0; $('#btnBeta').hidden = true; $('#betaBox').hidden = false; betaShow(); }
 function betaShow() {
   const c = BETA[BT.i]; BT.done = false;
-  $('#betaBox').innerHTML = `<p class="bcount">FALL ${BT.i + 1} VON ${BETA.length}</p><p class="bfrom">${c.from}</p><div class="bmsg">${c.msg}</div>${c.note ? `<p class="bnote">${c.note}</p>` : ''}<div class="bbtns"><button class="bok" data-b="0">✔ Echt</button><button class="bph" data-b="1">🎣 Falle</button></div><div id="bres"></div>`;
+  $('#betaBox').innerHTML = `<p class="bcount">FALL ${BT.i + 1} VON ${BETA.length}</p><p class="bfrom">${c.from}</p><div class="bmsg">${c.msg}</div>${c.note ? `<p class="bnote">${c.note}</p>` : ''}<div class="bbtns"><button class="bph" data-b="1">🎣 Falle</button><button class="bok" data-b="0">✔ Echt</button></div><div id="bres"></div>`;
+  $('#betaBox .bbtns button').focus({ preventScroll: true });
 }
 function betaAnswer(falle) {
   if (BT.done) return; BT.done = true;
@@ -2130,10 +2131,12 @@ function betaAnswer(falle) {
   $$('#betaBox .bbtns button').forEach(b => { b.disabled = true; });
   const last = BT.i === BETA.length - 1;
   $('#bres').innerHTML = `<div class="bres ${ok ? 'ok' : 'bad'}"><b>${ok ? '✔ Richtig!' : '✖ Daneben!'}</b> ${c.x}</div><button class="btn btn-ice" data-bn="1">${last ? 'Auswertung' : 'Nächster Fall →'}</button>`;
+  $('#bres .btn').focus({ preventScroll: true });
 }
 function betaEnd() {
   const gut = BT.ok >= 4;
-  $('#betaBox').innerHTML = `<div class="bres ${gut ? 'ok' : 'bad'}">${pxText(gut ? 'LEVEL BETA GESCHAFFT' : 'LEVEL BETA: NOCHMAL', 'stamp ' + (gut ? 'ok' : 'bad'))}<p>${BT.ok} von ${BETA.length} Fällen richtig. ${gut ? 'Du erkennst auch gut getarnte Fallen.' : 'Lies die Erklärungen nochmal: Die Tricks werden immer raffinierter.'}</p></div><button class="btn btn-ghost" data-br="1">↻ Level Beta nochmal</button>`;
+  $('#betaBox').innerHTML = `<div class="bres ${gut ? 'ok' : 'bad'}">${pxText(gut ? 'PROFI-LEVEL GESCHAFFT' : 'PROFI-LEVEL: NOCHMAL', 'stamp ' + (gut ? 'ok' : 'bad'))}<p>${BT.ok} von ${BETA.length} Fällen richtig. ${gut ? 'Du erkennst auch gut getarnte Fallen.' : 'Lies die Erklärungen nochmal: Die Tricks werden immer raffinierter.'}</p></div><button class="btn btn-ghost" data-br="1">↻ Profi-Level nochmal</button>`;
+  $('#betaBox [data-br]').focus({ preventScroll: true });
 }
 
 /* ---------------- Intro ---------------- */
@@ -2181,6 +2184,7 @@ async function runIntro() {
   await typeLine(S.practice ? '> Wie ihr wollt. Lasst euch Zeit. Ich habe alle Zeit der Welt.' : '> Wie ihr wollt. Ihr habt 10 Minuten.', 't-hack', 42);
   await wait(RM ? 100 : 500);
   $('#term').style.opacity = '.15';
+  if (S.practice) setPx($('#bigClock span'), '∞');
   $('#bigClock').classList.add('on'); startClock(); burst(420);
   await wait(RM ? 300 : 1600);
   $('#bigClock').classList.add('fly');
@@ -2339,7 +2343,7 @@ function buildPixel() {
   $('#titlePx').innerHTML = pxText('NACHTSCHICHT', 'neon');
   $('#overPx').innerHTML = pxText('ZEIT ABGELAUFEN', 'neon');
   $('#endPx').innerHTML = pxText('IHR SEID', 'ice') + pxText('DRAUSSEN!', 'ice');
-  $('#betaPx').innerHTML = pxText('BONUS: LEVEL BETA', 'ice');
+  $('#betaPx').innerHTML = pxText('BONUS: PROFI-LEVEL', 'ice');
   $('#akteTab').innerHTML = pxText('AKTE NR. 23-47');
   $('#akteStamp').innerHTML = pxText('KLASSIFIZIERT');
   setPx($('#bigClock span'), '10:00');
