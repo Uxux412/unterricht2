@@ -35,6 +35,10 @@ const out = path.join(__dirname, '..', 'handy-check-ergebnis'); fs.mkdirSync(out
       const intro = await p.$('#qiOverlay');
       if (intro && await intro.isVisible()) { for (let i = 0; i < 8 && await intro.isVisible(); i++) { await p.tap('#qiNext'); await p.waitForTimeout(150); } await shot('2-intro-zu'); }
       else befund.push('Kein Infotext beim Start sichtbar');
+      // Startfrage (z. B. Vermutung in Cold War Quest) beantworten, falls sie offen ist
+      await p.waitForTimeout(400);
+      const startBtn = await p.$('#modal[style*="flex"] #board button');
+      if (startBtn) { await startBtn.tap(); await p.waitForTimeout(200); }
       const pb = await p.$('.pb[data-dx="1"]');
       if (pb) { await pb.tap(); await pb.tap(); await p.waitForTimeout(300); await shot('3-nach-tippen'); }
       js.forEach(m => befund.push('JS-Fehler: ' + m));

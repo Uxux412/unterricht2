@@ -156,6 +156,15 @@
   #leitfrage { width: 100%; font-size: 12.5px; font-weight: bold; color: #ffe066; background: #1b2633; border: 1px solid #3b4b5e;
                border-radius: 6px; padding: 4px 8px; order: 5; line-height: 1.35; }
   .rot { color: #ff6b6b; text-decoration: underline wavy #ff6b6b; }
+  /* Kleine Handys im Hochformat (z. B. iPhone SE): Steuerung muss ganz sichtbar bleiben */
+  @media (max-width: 780px) and (max-height: 620px) and (orientation: portrait) {
+    #hud small { display: none; }
+    #leitfrage { font-size: 11px; padding: 2px 6px; }
+    #pad { padding: 6px 10px; }
+    .dpad { grid-template-rows: repeat(2, 44px); gap: 4px; }
+    #bE { height: 60px; }
+    #footerBar { padding: 2px 6px; }
+  }
   .hudBtn.on { background: #6d28d9; border-color: #c4b5fd; }
   .cw-lock { display: flex; gap: 6px; justify-content: center; margin: 4px 0 8px; }
   .cw-dial { width: 30px; height: 30px; border-radius: 50%; background: #3a2312; color: #f2d64b; display: flex; align-items: center;
