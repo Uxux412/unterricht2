@@ -682,7 +682,30 @@ function drawFlag(g, code, x, y, w, h) {
 }
 
 // ===================== Lernbilder (selbst gezeichnet, keine historischen Karikaturen) =====================
+// KI-erzeugte Lernbilder (Gemini, 2026). Fehlt eine Datei, wird die alte Zeichnung genutzt.
+const CW_LERNBILD_SRC = { washington: "bilder/lernbild-washington.webp" };
+const CW_LERNBILD = {};
+Object.keys(CW_LERNBILD_SRC).forEach(k => { const im = new Image(); im.src = CW_LERNBILD_SRC[k]; CW_LERNBILD[k] = im; });
+// Zeichnet das Lernbild; ist das Bild noch nicht geladen, wird nach dem Laden onReady aufgerufen.
+function drawLernbildReady(g, which, W, H, onReady) {
+  const im = CW_LERNBILD[which];
+  if (im && !im.complete && onReady) im.addEventListener("load", onReady, { once: true });
+  drawLernbild(g, which, W, H);
+}
 function drawLernbild(g, which, W, H) {
+  const im = CW_LERNBILD[which];
+  if (im && im.complete && im.naturalWidth) {
+    g.save();
+    g.imageSmoothingEnabled = true;
+    g.drawImage(im, 0, 0, W, H);
+    // eigene Fußleiste über die im Bild eingebrannte legen
+    const bh = Math.round(H * 0.095);
+    g.fillStyle = "#1c2230"; g.fillRect(0, H - bh, W, bh);
+    g.fillStyle = "#f3e9cf"; g.font = "bold " + Math.round(bh * 0.42) + "px 'Segoe UI', sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+    g.fillText("Lernbild (2026), KI-erzeugt – keine historische Quelle", W / 2, H - bh / 2);
+    g.restore();
+    return;
+  }
   g.save();
   g.clearRect(0, 0, W, H);
   const sx = W / 480, sy = H / 300;

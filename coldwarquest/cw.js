@@ -186,21 +186,21 @@ window.CW = {
       game: {
         bild: "washington",
         hotspots: [
-          { x: 100, y: 117, r: 28, label: "Fernglas",
+          { x: 121, y: 218, r: 46, label: "Luftbilder",
             frage: "Worauf stützt Kennedy seine Anklage?",
             options: [
               { t: "Auf Beweise aus der Luftaufklärung („eindeutige Beweise“).", ok: true, fb: "Richtig: Am 14.10.1962 fotografierte ein U-2-Flugzeug die Raketenstellungen. Kennedy spricht von „eindeutigen Beweisen“." },
               { t: "Auf eine Rede Chruschtschows, in der er die Raketen ankündigt.", ok: false, fb: "Nein – Kennedy beruft sich auf eigene Beweise, nicht auf Moskau." },
               { t: "Auf Gerüchte von Flüchtlingen aus Kuba („zuverlässige Hinweise“).", ok: false, fb: "Kennedy betont gerade das Gegenteil: „eindeutige Beweise“." }
             ] },
-          { x: 270, y: 186, r: 42, label: "Schiffskette",
+          { x: 284, y: 98, r: 48, label: "Seekarte",
             frage: "Welchen Schritt wählt Kennedy – zwischen Nichtstun und Angriff?",
             options: [
               { t: "Eine „Quarantäne“: Kriegsschiffe kontrollieren die Schiffe auf dem Weg nach Kuba.", ok: true, fb: "Richtig: Washington spricht bewusst von „Quarantäne“, nicht von Blockade – eine Blockade wäre rechtlich eine Kriegshandlung." },
               { t: "Einen sofortigen Luftangriff auf die Raketenstellungen, danach eine Landung auf Kuba.", ok: false, fb: "Den gab es nicht. Kennedy wählt bewusst einen Mittelweg." },
               { t: "Er wartet ab und tut nichts, bis die UNO über die Raketen entschieden hat.", ok: false, fb: "Nein – er handelt, aber ohne zu schießen." }
             ] },
-          { x: 50, y: 194, r: 26, label: "Roter Knopf",
+          { x: 428, y: 118, r: 40, label: "Fenster zum Flugplatz",
             frage: "Womit droht Kennedy, falls von Kuba aus eine Atomrakete abgefeuert wird?",
             options: [
               { t: "Mit einem vollen Gegenschlag gegen die Sowjetunion.", ok: true, fb: "Richtig: Jede Rakete von Kuba gilt als Angriff der Sowjetunion – Moskau würde selbst getroffen." },

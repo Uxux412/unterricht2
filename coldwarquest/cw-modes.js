@@ -157,12 +157,13 @@
     root.innerHTML = "";
     const wrap = el(root, "div", null, "cw-pic");
     const cv = el(wrap, "canvas");
-    cv.width = 480; cv.height = 300;
+    cv.width = 960; cv.height = 600;
     const pg = cv.getContext("2d");
     const list = el(root, "div", null, "cw-spotlist");
     const panel = el(root, "div");
     function draw() {
-      drawLernbild(pg, g.bild, 480, 300);
+      pg.setTransform(2, 0, 0, 2, 0, 0);
+      drawLernbildReady(pg, g.bild, 480, 300, draw);
       g.hotspots.forEach((h, i) => {
         pg.save();
         pg.lineWidth = 3;
@@ -216,8 +217,8 @@
     el(root, "div", "🪞 <b>Vergleichstisch:</b> Leg die Lernbilder aus Washington und Moskau nebeneinander.", "qm-step");
     const pics = el(root, "div", null, "cw-pics2");
     ["washington", "moskau"].forEach(w => {
-      const c = el(pics, "canvas"); c.width = 480; c.height = 300;
-      drawLernbild(c.getContext("2d"), w, 480, 300);
+      const c = el(pics, "canvas"); c.width = 960; c.height = 600;
+      const cg = c.getContext("2d"); cg.setTransform(2, 0, 0, 2, 0, 0); drawLernbildReady(cg, w, 480, 300, () => drawLernbild(cg, w, 480, 300));
     });
     el(root, "div", "Jede Seite sieht sich als Verteidiger – und die andere als Aggressor. Beide fordern Sicherheit, beide warnen vor einem Atomkrieg, den niemand gewinnen kann.", "qm-card");
     weiter(root, "Weiter zum Fernschreiber ▶", () => step2());
