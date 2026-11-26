@@ -265,21 +265,21 @@ window.CW = {
       game: {
         bild: "moskau",
         hotspots: [
-          { x: 300, y: 262, r: 36, label: "Raketenzaun",
-            frage: "Welches Argument steckt hinter dem Raketenzaun mit den beiden Wachposten?",
+          { x: 80, y: 150, r: 56, label: "Grenzkarte Türkei",
+            frage: "Welches Argument steckt hinter der Grenzkarte mit den Raketen und den beiden Wachposten?",
             options: [
               { t: "Die USA haben selbst Raketen direkt an der sowjetischen Grenze – in der Türkei.", ok: true, fb: "Richtig: „Die Türkei grenzt an uns; unsere Wachposten … sehen einander.“ (Karte 3)" },
               { t: "Die UNO kreist die Sowjetunion mit Truppen ein – die Wachposten sind Blauhelme.", ok: false, fb: "Von der UNO ist hier keine Rede – lies Karte 3." },
-              { t: "Die Raketen im Zaun gehören der Sowjetunion und schützen sie vor der Türkei.", ok: false, fb: "Schau auf die Schilder: Türkei, Italien – das sind US-Raketen." }
+              { t: "Die Raketen im Zaun gehören der Sowjetunion und schützen sie vor der Türkei.", ok: false, fb: "Schau auf die Karte: Die Raketen stehen in der Türkei und zielen auf die Sowjetunion – das sind US-Raketen." }
             ] },
-          { x: 436, y: 178, r: 32, label: "Pfote über der Insel",
+          { x: 425, y: 125, r: 46, label: "Schirm über Kuba",
             frage: "Wie stellt Moskau seine Rolle auf Kuba dar?",
             options: [
               { t: "Als Beschützer Kubas vor einem US-Angriff wie 1961 in der Schweinebucht.", ok: true, fb: "Richtig: Moskau sieht sich als Schutzmacht Kubas (Karte 1)." },
               { t: "Als Angreifer, der die USA mit Raketen vor ihrer Küste bedrohen will.", ok: false, fb: "So sieht es Washington – nicht Moskau." },
               { t: "Als neutraler Beobachter, der zwischen Kuba und den USA vermitteln will.", ok: false, fb: "Neutral ist hier niemand." }
             ] },
-          { x: 105, y: 156, r: 24, label: "Knoten",
+          { x: 262, y: 142, r: 40, label: "Seil mit Knoten",
             frage: "Wovor warnt Chruschtschow mit dem Bild vom Knoten?",
             options: [
               { t: "Dass der Konflikt außer Kontrolle gerät, bis ihn niemand mehr lösen kann.", ok: true, fb: "Richtig. Am Ende des Briefs bietet er an: „Lassen Sie uns Maßnahmen ergreifen, um diesen Knoten zu lösen. Wir sind dazu bereit.“" },

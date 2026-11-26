@@ -744,7 +744,7 @@ function drawFlag(g, code, x, y, w, h) {
 
 // ===================== Lernbilder (selbst gezeichnet, keine historischen Karikaturen) =====================
 // KI-erzeugte Lernbilder (Gemini, 2026). Fehlt eine Datei, wird die alte Zeichnung genutzt.
-const CW_LERNBILD_SRC = { washington: "bilder/lernbild-washington.webp" };
+const CW_LERNBILD_SRC = { washington: "bilder/lernbild-washington.webp", moskau: "bilder/lernbild-moskau.webp" };
 const CW_LERNBILD = {};
 Object.keys(CW_LERNBILD_SRC).forEach(k => { const im = new Image(); im.src = CW_LERNBILD_SRC[k]; CW_LERNBILD[k] = im; });
 // Zeichnet das Lernbild; ist das Bild noch nicht geladen, wird nach dem Laden onReady aufgerufen.
