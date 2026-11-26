@@ -46,14 +46,14 @@ window.CW = {
       infoSource: "📖 Infotafel · Quellen in eigener Arbeitsübersetzung, Original zum Aufklappen",
       infoLead: "Lies die drei Karten. Danach knackst du am Tisch das Schloss.",
       infoCards: [
-        { heading: "📅 1947: Was passiert?", max: 35,
-          text: "<strong>März:</strong> Truman bittet den Kongress um 400 Mio. Dollar für Griechenland und die Türkei. Damit beginnt die Politik der <strong>Eindämmung</strong> (containment). <strong>Juni:</strong> Marshallplan. <strong>September:</strong> Moskau antwortet mit Schdanows Rede bei der Gründung des Kominform." },
-        { heading: "📜 Truman vor dem US-Kongress, 12.3.1947", max: 65,
-          text: "„Fast jede Nation muss zwischen alternativen Lebensformen wählen. […] Die eine gründet sich auf den Willen der Mehrheit und zeichnet sich aus durch freie Institutionen, repräsentative Regierung, freie Wahlen […]. Die zweite gründet sich auf den Willen einer Minderheit […]. Sie stützt sich auf Terror und Unterdrückung […]. […] es muss die Politik der Vereinigten Staaten sein, freie Völker zu unterstützen, die sich der versuchten Unterwerfung […] widersetzen.“",
+        { heading: "📅 1947: Was passiert?", max: 48,
+          text: "<strong>März:</strong> Truman bittet den Kongress um 400 Mio. Dollar, vor allem Wirtschaftshilfe, für Griechenland und die Türkei. Damit beginnt die Politik der <strong>Eindämmung</strong> (containment). <strong>Juni:</strong> Marshallplan (Wirtschaftshilfe für Europa). <strong>September:</strong> Moskau antwortet mit Schdanows Rede bei der Gründung des Kominform (Bund kommunistischer Parteien)." },
+        { heading: "📜 Truman vor dem US-Kongress, 12.3.1947", max: 80,
+          text: "„Fast jede Nation muss zwischen alternativen Lebensformen wählen. […] Die eine gründet sich auf den Willen der Mehrheit und zeichnet sich aus durch freie Institutionen, repräsentative Regierung, freie Wahlen […]. Die zweite gründet sich auf den Willen einer Minderheit […]. Sie stützt sich auf Terror und Unterdrückung, eine kontrollierte Presse und Rundfunk, manipulierte Wahlen und die Unterdrückung persönlicher Freiheiten. […] es muss die Politik der Vereinigten Staaten sein, freie Völker zu unterstützen, die sich der versuchten Unterwerfung […] widersetzen.“",
           quelle: "Rede vor dem Kongress, 12.3.1947, Auszug, eigene Arbeitsübersetzung. Original: Avalon Project (Yale Law School). Als Rede des US-Präsidenten gemeinfrei.",
           orig: "“At the present moment in world history nearly every nation must choose between alternative ways of life. The choice is too often not a free one. One way of life is based upon the will of the majority, and is distinguished by free institutions, representative government, free elections, guarantees of individual liberty, freedom of speech and religion, and freedom from political oppression. The second way of life is based upon the will of a minority forcibly imposed upon the majority. It relies upon terror and oppression, a controlled press and radio; fixed elections, and the suppression of personal freedoms. I believe that it must be the policy of the United States to support free peoples who are resisting attempted subjugation by armed minorities or by outside pressures.”" },
-        { heading: "📜 Schdanow bei der Gründung des Kominform, 22.9.1947", max: 65,
-          text: "„[…] zwei Hauptlager: das imperialistische und antidemokratische Lager einerseits und das antiimperialistische und demokratische Lager andererseits. Die wichtigste treibende Kraft des imperialistischen Lagers sind die USA. […] Das Hauptziel des imperialistischen Lagers ist es, […] einen neuen imperialistischen Krieg anzuzetteln […]. Das Ziel dieses Lagers [des antiimperialistischen] ist es, der Gefahr neuer Kriege […] entgegenzutreten, die Demokratie zu stärken […].“",
+        { heading: "📜 Schdanow bei der Gründung des Kominform, 22.9.1947", max: 80,
+          text: "„[…] zwei Hauptlager: das imperialistische und antidemokratische Lager einerseits und das antiimperialistische und demokratische Lager andererseits. Die wichtigste treibende Kraft des imperialistischen Lagers sind die USA. […] Das Hauptziel des imperialistischen Lagers ist es, […] einen neuen imperialistischen Krieg anzuzetteln […]. Das Ziel dieses Lagers [des antiimperialistischen] ist es, der Gefahr neuer Kriege […] entgegenzutreten, die Demokratie zu stärken und die Überreste des Faschismus auszurotten.“",
           quelle: "Bericht auf der Gründungskonferenz des Kominform, 22.9.1947, Auszug, eigene Arbeitsübersetzung nach der englischen Fassung der US-Regierung (1948). Schdanow starb 1948; der Text ist gemeinfrei.",
           orig: "“… two major camps; the imperialist and anti-democratic camp, on the one hand, and the anti-imperialist and democratic camp, on the other. The principal driving force of the imperialist camp is the USA. […] The cardinal purpose of the imperialist camp is to strengthen imperialism, to hatch a new imperialist war, to combat Socialism and democracy, and to support reactionary and anti-democratic pro-fascist regimes and movements everywhere. […] The purpose of this camp is to resist the threat of new wars and imperialist expansion, to strengthen democracy and to extirpate the vestiges of fascism.”" }
       ],
@@ -81,7 +81,7 @@ window.CW = {
         accept: ["DEMOKRATIE", "DEMOKRATISCH", "DEMOKRATISCHE"], code: "DEMOKRATIE",
         tipps: ["Lies Karte 3: Wie nennt Schdanow das „antiimperialistische“ Lager noch?",
                 "Truman beschreibt den Willen der Mehrheit und freie Wahlen. Wie heißt diese Staatsform?"],
-        erklaerung: "Beide Seiten beanspruchen die Demokratie für sich. Genau deshalb hält jede Seite die andere für die Bedrohung."
+        erklaerung: "Beide Seiten beanspruchen die Demokratie für sich: Jede sieht sich als ihre Verteidigerin – und die andere als Bedrohung."
       },
       uv: { text: "Wer profitiert? Truman braucht vom Kongress 400 Mio. Dollar. Schdanow spricht vor den kommunistischen Parteien, die Moskau im Kominform zusammenführt. Was nützt beiden Rednern ein klares Feindbild?" },
       beweis: { icon: "📜", name: "Doppelrede", text: "Zwei Redemanuskripte von 1947, mit einer Büroklammer zusammengeheftet." },
@@ -123,12 +123,12 @@ window.CW = {
           { name: "Korea 1950–1953", antworten: [
             [{ t: "Nordkorea gegen Südkorea", ok: true }, { t: "Vietnam gegen Frankreich", fb: "Das ist die Vorgeschichte von Vietnam." }, { t: "Regierung gegen Mudschaheddin", fb: "Das gehört zu Afghanistan." }],
             [{ t: "Die USA (mit UN-Truppen) und China mit Soldaten, die UdSSR lieferte Waffen", ok: true }, { t: "Die UdSSR mit eigenen Soldaten, die USA und China lieferten nur Waffen", fb: "Andersherum: In Korea führten die USA die UN-Truppen, die UdSSR lieferte Waffen." }, { t: "Keine Supermacht schickte Soldaten, beide lieferten nur Geld und Waffen", fb: "Doch – lies die Akte noch einmal." }],
-            [{ t: "Waffenstillstand 1953, Korea bleibt geteilt", ok: true }, { t: "Abzug der USA 1953, Sieg des Nordens, Korea wird vereint", fb: "Das war Vietnam." }, { t: "Abzug der UdSSR 1953, der Süden übernimmt ganz Korea", fb: "Das war Afghanistan." }]
+            [{ t: "Waffenstillstand 1953, Korea bleibt geteilt", ok: true }, { t: "Abzug der USA 1953, Sieg des Nordens, Korea wird vereint", fb: "Nein – Korea ist bis heute geteilt. Der Abzug der USA mit Sieg des Nordens war Vietnam." }, { t: "Abzug der UdSSR 1953, der Süden übernimmt ganz Korea", fb: "Nein – 1953 gab es einen Waffenstillstand, Korea blieb geteilt." }]
           ] },
           { name: "Vietnam 1946–1975", antworten: [
             [{ t: "Nordvietnam gegen Südvietnam", ok: true }, { t: "Nordkorea gegen Südkorea", fb: "Das war Korea." }, { t: "Regierung gegen Mudschaheddin", fb: "Das gehört zu Afghanistan." }],
             [{ t: "Die USA mit eigenen Soldaten, UdSSR und China lieferten Waffen", ok: true }, { t: "Die UdSSR mit eigenen Soldaten, die USA und China lieferten Waffen", fb: "Andersherum – wer schickt ab 1965 eigene Soldaten?" }, { t: "Nur Frankreich kämpfte, die Supermächte hielten sich ganz heraus", fb: "Frankreich kämpfte bis 1954 – danach kamen die USA." }],
-            [{ t: "Abzug der USA 1973, Sieg des Nordens 1975", ok: true }, { t: "Waffenstillstand, das Land bleibt geteilt", fb: "Das war Korea." }, { t: "Abzug der UdSSR 1975, das Land bleibt bis heute geteilt", fb: "Das war Afghanistan." }]
+            [{ t: "Abzug der USA 1973, Sieg des Nordens 1975", ok: true }, { t: "Waffenstillstand, das Land bleibt geteilt", fb: "Das war Korea." }, { t: "Abzug der UdSSR 1975, das Land bleibt bis heute geteilt", fb: "Nein – die UdSSR hatte in Vietnam keine Truppen. 1975 siegte der Norden, Vietnam wurde vereint." }]
           ] },
           { name: "Afghanistan 1979–1989", antworten: [
             [{ t: "Kommunistische Regierung gegen Aufständische (Mudschaheddin)", ok: true }, { t: "Nordkorea gegen Südkorea, geteilt am 38. Breitengrad", fb: "Das war Korea." }, { t: "Nordvietnam gegen Südvietnam nach dem Abzug Frankreichs", fb: "Das war Vietnam." }],
@@ -172,10 +172,10 @@ window.CW = {
       infoCards: [
         { heading: "⏱️ Wettrüsten 1945–1962", max: 35,
           text: "<strong>1945</strong> US-Atombomben auf Hiroshima und Nagasaki · <strong>1949</strong> erste sowjetische Atombombe · <strong>ab 1952</strong> Wasserstoffbomben · <strong>1957</strong> Sputnik: Sowjetische Raketen könnten nun die USA erreichen · <strong>Oktober 1962</strong> Raketen auf Kuba, 90 Meilen vor den USA." },
-        { heading: "📺 Kennedy im Fernsehen, 22.10.1962 (1)", max: 65,
-          text: "„Innerhalb der vergangenen Woche haben eindeutige Beweise belegt, dass auf dieser gefangenen Insel gerade eine Reihe von Stellungen für Angriffsraketen vorbereitet wird. […] Drittens: Es wird die Politik dieser Nation sein, jede Atomrakete, die von Kuba aus gegen irgendeine Nation der westlichen Hemisphäre abgefeuert wird, als Angriff der Sowjetunion auf die Vereinigten Staaten zu betrachten, der einen vollen Vergeltungsschlag gegen die Sowjetunion erfordert.“",
+        { heading: "📺 Kennedy im Fernsehen, 22.10.1962 (1)", max: 90,
+          text: "„Innerhalb der vergangenen Woche haben eindeutige Beweise belegt, dass auf dieser gefangenen Insel gerade eine Reihe von Stellungen für Angriffsraketen vorbereitet wird. […] Erstens: Um diesen offensiven Aufbau zu stoppen, wird eine strikte Quarantäne für alle offensiven Militärgüter auf dem Weg nach Kuba eingeleitet. […] Drittens: Es wird die Politik dieser Nation sein, jede Atomrakete, die von Kuba aus gegen irgendeine Nation der westlichen Hemisphäre abgefeuert wird, als Angriff der Sowjetunion auf die Vereinigten Staaten zu betrachten, der einen vollen Vergeltungsschlag gegen die Sowjetunion erfordert.“",
           quelle: "Fernsehansprache, 22.10.1962, Auszug, eigene Arbeitsübersetzung. Original: Wikisource, Teaching American History. Als Rede des US-Präsidenten gemeinfrei.",
-          orig: "“Within the past week, unmistakable evidence has established the fact that a series of offensive missile sites is now in preparation on that imprisoned island. […] Third: It shall be the policy of this Nation to regard any nuclear missile launched from Cuba against any nation in the Western Hemisphere as an attack by the Soviet Union on the United States, requiring a full retaliatory response upon the Soviet Union.”" },
+          orig: "“Within the past week, unmistakable evidence has established the fact that a series of offensive missile sites is now in preparation on that imprisoned island. […] First: To halt this offensive buildup, a strict quarantine on all offensive military equipment under shipment to Cuba is being initiated. […] Third: It shall be the policy of this Nation to regard any nuclear missile launched from Cuba against any nation in the Western Hemisphere as an attack by the Soviet Union on the United States, requiring a full retaliatory response upon the Soviet Union.”" },
         { heading: "📺 Kennedy im Fernsehen, 22.10.1962 (2)", max: 65,
           text: "„Wir werden die Kosten eines weltweiten Atomkriegs, in dem selbst die Früchte des Sieges in unserem Mund zu Asche würden, nicht vorschnell oder unnötig riskieren – aber wir werden auch zu keinem Zeitpunkt vor diesem Risiko zurückschrecken, wenn man sich ihm stellen muss.“",
           quelle: "Wie Karte 2.",
@@ -209,7 +209,7 @@ window.CW = {
             ] }
         ],
         schluss: {
-          frage: "Und jetzt Quellenkritik: Was verschweigt Kennedy in seiner Rede?",
+          frage: "Und jetzt Quellenkritik: Was könnte Kennedy in seiner Rede verschweigen? Stell eine Vermutung auf – in Moskau (Haus 4) prüfst du sie.",
           options: [
             { t: "Dass die USA selbst Atomraketen in der Türkei haben – direkt an der sowjetischen Grenze.", ok: true, fb: "Richtig: Die Türkei kommt in der ganzen Rede nicht vor. Genau dieses Argument wird Moskau anführen – auf nach Haus 4!" },
             { t: "Dass auf Kuba sowjetische Raketen aufgebaut werden – nur 90 Meilen vor der Küste der USA.", ok: false, fb: "Das sagt er ja gerade." },
@@ -308,7 +308,7 @@ window.CW = {
       funkspruch: "ZENTRALE AN KS001: Beide Akten liegen vor. LAGE: knapp unter dem Siedepunkt. Leg die Beweise aus Washington und Moskau nebeneinander. Fällt dir etwas auf? Komm ins KS1-Büro auf der Agentenbrücke.",
       bonus: {
         titel: "Bonus-Akte: Schwarzer Samstag, 27.10.1962",
-        text: "Am selben Tag wird über Kuba ein US-Aufklärungsflugzeug (U-2) abgeschossen. Auf See werfen US-Zerstörer Übungs-Wasserbomben neben das sowjetische U-Boot B-59. Kapitän und Politoffizier glauben, der Krieg habe begonnen, und wollen einen Atomtorpedo abfeuern. Dafür müssen drei Offiziere zustimmen – Wassili Archipow sagt Nein.",
+        text: "Am selben Tag wird über Kuba ein US-Aufklärungsflugzeug (U-2) abgeschossen. Auf See werfen US-Zerstörer Übungs-Wasserbomben neben das sowjetische U-Boot B-59. Kapitän und Politoffizier glauben, der Krieg habe begonnen, und wollen einen Atomtorpedo abfeuern. Dafür müssen drei Offiziere zustimmen – Wassili Archipow sagt Nein. (So berichteten es Beteiligte Jahrzehnte später; Einzelheiten sind umstritten.)",
         frage: "Was zeigt der „Schwarze Samstag“?",
         options: [
           { t: "Ein einziger Zwischenfall hätte den Krieg auslösen können, auch wenn ihn keine Regierung wollte.", ok: true, fb: "Richtig: Abschreckung allein garantierte nichts. Am 27.10.1962 hing viel an einzelnen Menschen." },

@@ -5,10 +5,10 @@
   const S = { solved: {}, uv: {}, bonus: {}, vermutung: null, twist1: false };
   try {
     const raw = localStorage.getItem(CW.key);
-    if (raw) { const d = JSON.parse(raw); ["solved", "uv", "bonus"].forEach(k => { if (d[k]) S[k] = d[k]; }); S.vermutung = d.vermutung || null; S.twist1 = !!d.twist1; }
+    if (raw) { const d = JSON.parse(raw); ["solved", "uv", "bonus"].forEach(k => { if (d[k]) S[k] = d[k]; }); S.vermutung = d.vermutung || null; S.antwort = d.antwort || ""; S.twist1 = !!d.twist1; }
   } catch (e) {}
   S.save = function () {
-    try { localStorage.setItem(CW.key, JSON.stringify({ solved: S.solved, uv: S.uv, bonus: S.bonus, vermutung: S.vermutung, twist1: S.twist1 })); } catch (e) {}
+    try { localStorage.setItem(CW.key, JSON.stringify({ solved: S.solved, uv: S.uv, bonus: S.bonus, vermutung: S.vermutung, twist1: S.twist1, antwort: S.antwort || "" })); } catch (e) {}
   };
   S.reset = function () { try { localStorage.removeItem(CW.key); } catch (e) {} };
   S.solvedCount = function () { return CW.order.filter(id => S.solved[id]).length; };
@@ -30,6 +30,19 @@
   function norm(s) {
     return String(s || "").toUpperCase().replace(/Ä/g, "AE").replace(/Ö/g, "OE").replace(/Ü/g, "UE").replace(/ß/g, "SS").replace(/[^A-Z]/g, "");
   }
+  // Nach einer falschen Antwort sperren die Knöpfe kurz: Raten kostet Zeit, Lesen lohnt sich.
+  const LOCK_S = 4;
+  function lockButtons(buttons, fb) {
+    buttons.forEach(x => { if (!x.classList.contains("ok")) { x.disabled = true; x.dataset.lock = "1"; } });
+    let n = LOCK_S;
+    const tick = el(fb, "div", "⏳ Funkstille: " + n + " s – lies in der Zwischenzeit nach.", "cw-lock-tick");
+    const iv = setInterval(() => {
+      n--;
+      if (n > 0) { tick.textContent = "⏳ Funkstille: " + n + " s – lies in der Zwischenzeit nach."; return; }
+      clearInterval(iv); tick.remove();
+      buttons.forEach(x => { if (x.dataset.lock) { x.disabled = false; delete x.dataset.lock; } });
+    }, 1000);
+  }
   function mcQuestion(parent, frage, options, onRight) {
     const card = el(parent, "div", null, "qm-card");
     el(card, "div", frage, "qm-step");
@@ -40,7 +53,7 @@
       b.addEventListener("click", () => {
         if (b.disabled) return;
         fb.innerHTML = o.fb || (o.ok ? "✔ Richtig." : "Nicht ganz – lies noch einmal nach.");
-        if (!o.ok) { b.className = "bad"; fb.className = "qm-fb bad"; return; }
+        if (!o.ok) { b.className = "bad"; fb.className = "qm-fb bad"; lockButtons([].slice.call(opts.children), fb); return; }
         b.className = "ok"; fb.className = "qm-fb ok";
         [].forEach.call(opts.children, x => { x.disabled = true; });
         onRight();
@@ -73,7 +86,7 @@
     const lock = el(root, "div", null, "cw-lock");
     const dials = g.items.map((_, i) => el(lock, "span", String(i + 1), "cw-dial"));
     const fbAll = el(root, "div", "Stell alle sechs Rädchen richtig ein. Bei jedem Fehler bekommst du eine Erklärung.", "qm-fb");
-    let solvedN = 0;
+    let solvedN = 0, errors = 0;
     order.forEach((idx, k) => {
       const it = g.items[idx];
       const card = el(root, "div", null, "qm-card");
@@ -85,7 +98,17 @@
         const b = btn(opts, label);
         b.addEventListener("click", () => {
           if (b.disabled) return;
-          if (side !== it.a) { b.className = "bad"; fb.className = "qm-fb bad"; fb.innerHTML = "✘ " + it.bad; return; }
+          if (side !== it.a) {
+            b.className = "bad"; fb.className = "qm-fb bad"; fb.innerHTML = "✘ " + it.bad;
+            errors++;
+            if (errors >= 3) {
+              fbAll.className = "qm-fb bad";
+              fbAll.innerHTML = "🚨 Alarm: Drei Rädchen falsch – das Schloss verriegelt sich und mischt neu. Lies die Karten auf der Infotafel genau!";
+              [].forEach.call(root.querySelectorAll("button"), x => { x.disabled = true; });
+              setTimeout(() => { delete d._order; M.schloss(root, d, done, onDone); }, 3500);
+            }
+            return;
+          }
           b.className = "ok"; fb.className = "qm-fb ok"; fb.innerHTML = "✔ " + it.ok;
           [].forEach.call(opts.children, x => { x.disabled = true; });
           dials[k].classList.add("on");
@@ -191,7 +214,7 @@
       const c = el(pics, "canvas"); c.width = 480; c.height = 300;
       drawLernbild(c.getContext("2d"), w, 480, 300);
     });
-    el(root, "div", "Jede Seite sieht sich als Verteidiger – und die andere als Aggressor. Beide fordern Sicherheit, beide drohen mit Vergeltung.", "qm-card");
+    el(root, "div", "Jede Seite sieht sich als Verteidiger – und die andere als Aggressor. Beide fordern Sicherheit, beide warnen vor einem Atomkrieg, den niemand gewinnen kann.", "qm-card");
     weiter(root, "Weiter zum Fernschreiber ▶", () => step2());
     function step2() {
       root.innerHTML = "";
@@ -206,13 +229,27 @@
         const b = btn(opts, bs.t);
         b.addEventListener("click", () => {
           if (b.disabled) return;
-          if (!bs.ok) { b.className = "bad"; fb.className = "qm-fb bad"; fb.innerHTML = "✘ " + bs.fb; return; }
+          if (!bs.ok) { b.className = "bad"; fb.className = "qm-fb bad"; fb.innerHTML = "✘ " + bs.fb; lockButtons([].slice.call(opts.children), fb); return; }
           b.className = "ok"; b.disabled = true; chosen.push(bs);
           fb.className = "qm-fb ok"; fb.innerHTML = "✔ Belegt durch " + bs.beleg + ".";
           el(answer, "div", "✔ " + bs.t + " <small>(" + bs.beleg + ")</small>");
           if (chosen.length === need) {
             [].forEach.call(opts.children, x => { x.disabled = true; });
-            weiter(root, "📠 Antwort senden", () => showResult(root, d, chosen, onSolved));
+            const eigen = el(root, "div", null, "qm-card");
+            el(eigen, "div", "✍️ <b>Jetzt du:</b> Schreib die Antwort auf die Leitfrage in 1–2 eigenen Sätzen. Nenne mindestens zwei Gründe. (Sie kommt in dein Dossier.)", "qm-step");
+            const ta = el(eigen, "textarea"); ta.rows = 4; ta.className = "cw-eigen"; ta.value = CWS.antwort || "";
+            ta.setAttribute("aria-label", "Eigene Antwort auf die Leitfrage");
+            ta.addEventListener("keydown", e => e.stopPropagation());
+            const hint = el(eigen, "div", "", "qm-fb");
+            const w = el(root, "div", null, "btns");
+            const send = btn(w, "📠 Antwort senden");
+            send.addEventListener("click", () => {
+              const words = ta.value.trim().split(/\s+/).filter(Boolean).length;
+              if (words < 12) { hint.className = "qm-fb bad"; hint.textContent = "Die Zentrale braucht mehr: mindestens 12 Wörter, zwei Gründe. (" + words + " Wörter bisher)"; return; }
+              if (send.disabled) return; send.disabled = true;
+              CWS.antwort = ta.value.trim(); CWS.save();
+              showResult(root, d, chosen, onSolved);
+            });
           }
         });
       });
@@ -222,7 +259,7 @@
     const g = d.game;
     root.innerHTML = "";
     if (chosen) {
-      el(root, "div", "<b>Deine Antwort:</b> " + g.satzanfang + " " + chosen.map(c => c.t.replace(/^…\s*/, "")).join(" – und weil "), "qm-card");
+      el(root, "div", "<b>Deine Antwort:</b> " + esc(CWS.antwort || ""), "qm-card");
     }
     el(root, "div", "<b>Zum Vergleich – die Antwort der Zentrale:</b><br>" + g.musterantwort, "qm-sum");
     el(root, "div", g.nachtrag, "cw-funk");
@@ -379,6 +416,7 @@
         if (fl.length >= 23) el(board, "div", "<h4>✍️ Merksatz Bündnisse</h4>" + CW.flagMerksatz, "qm-sum");
         const w = el(board, "div", null, "btns");
         btn(w, "🖨️ Dossier drucken").addEventListener("click", () => CWPrint.dossier());
+        if (CWS.solved.buero) btn(w, "🖨️ Urkunde drucken").addEventListener("click", () => CWPrint.urkunde(CW.ranks[CWS.solvedCount()], CWS.flags().length));
         btn(w, "Schließen").addEventListener("click", () => closeBoard());
       });
     }
@@ -424,7 +462,7 @@
       h += "<h2>6 Quellenkritik: Wer profitiert?</h2>";
       CW.order.slice(0, 4).forEach(id => { if (CWS.uv[id]) h += "<p>🔦 " + CW.content[id].uv.text + "</p>"; });
       h += lines(2);
-      h += "<h2>7 Meine Antwort auf die Leitfrage</h2>" + lines(4) + "<p><b>Einschränkung:</b></p>" + lines(2);
+      h += "<h2>7 Meine Antwort auf die Leitfrage</h2>" + (CWS.antwort ? "<p>" + esc(CWS.antwort) + "</p>" + lines(1) : lines(4)) + "<p><b>Einschränkung:</b></p>" + lines(2);
       h += "<h2>8 Urteil (Sicherungsstunde)</h2><p>Beurteile, ob „Kalter Krieg“ eine treffende Bezeichnung ist.</p>" + lines(4);
       this.show(h);
     },
