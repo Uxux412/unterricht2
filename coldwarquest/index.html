@@ -674,8 +674,8 @@ function enterHouse(h) {
   current = h;
   scene = "interior";
   modalOpen = false;
-  intPlayer.x = 804;
-  intPlayer.y = 460;
+  intPlayer.x = 856;
+  intPlayer.y = 560;
   intPlayer.dir = "left";
   roomTitleTxt.textContent = "🏛️ " + h.name + (solved[h.id] ? " 🛡️" : "");
   roomHudEl.style.display = "flex";
@@ -1158,7 +1158,7 @@ function selfTest() {
     }
   });
 
-  const spawnPt = [804, 460];
+  const spawnPt = [856, 560];
   if (!isInteriorWalkable(spawnPt[0], spawnPt[1])) errors.push("Innenraum-Spawn nicht begehbar");
   if (nearInteriorStation(spawnPt[0], spawnPt[1])?.id === "exit") errors.push("Innenraum-Spawn liegt an der Ausgangstür");
   ROOM_STATIONS.forEach(st => {
@@ -1175,7 +1175,7 @@ function selfTest() {
     }
   });
 
-  const rSeen = new Set(["804,460"]), rq = [[804, 460]];
+  const rSeen = new Set(["856,560"]), rq = [[856, 560]];
   let reachedInfo = false, reachedQuiz = false, reachedExit = false;
   while (rq.length) {
     const [rx, ry] = rq.shift();
@@ -2016,7 +2016,7 @@ function drawPlayer1280(t) {
   const flipLeft = player.dir === "left";
 
   discP(x + 18, player.r * TW + 34, 15, 5, "rgba(0,0,0,.38)");
-  drawAgent(x, y, 1, flipLeft);
+  drawAgentKS(x, y, 1, player.dir, t - lastStepTime < 240, t);
 }
 
 function drawInteriorPlayer1280(t) {
@@ -2027,7 +2027,7 @@ function drawInteriorPlayer1280(t) {
   const flipLeft = intPlayer.dir === "left";
 
   discP(intPlayer.x, intPlayer.y + 4, 28, 9, "rgba(0,0,0,.42)");
-  drawAgent(px, py, 2, flipLeft);
+  drawAgentKS(px, py, 2, intPlayer.dir, moving, t);
 }
 
 function drawInteriorStations1280(t) {
