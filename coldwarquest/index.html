@@ -760,12 +760,11 @@ canvas.addEventListener("pointermove", e => {
   canvas.style.cursor = st ? "pointer" : "default";
 });
 
-// Touch: Öffnet ein Fingertipp (pointerdown) ein Fenster, landet der folgende click sonst auf einem Knopf darin
+// Touch: Öffnet ein Fingertipp (pointerdown) ein Fenster, landet der folgende click (oder ein Doppeltipp) sonst auf einem Knopf darin
 function swallowGhostClick() {
-  const stop = ev => { ev.stopImmediatePropagation(); ev.preventDefault(); done(); };
-  const done = () => { document.removeEventListener("click", stop, true); clearTimeout(tm); };
-  const tm = setTimeout(done, 700);
+  const stop = ev => { ev.stopImmediatePropagation(); ev.preventDefault(); };
   document.addEventListener("click", stop, true);
+  setTimeout(() => document.removeEventListener("click", stop, true), 450);
 }
 canvas.addEventListener("pointerdown", e => {
   if (modalOpen) return;
@@ -1038,6 +1037,7 @@ window.addEventListener("keydown", e => {
     }
     return;
   }
+  if (e.ctrlKey || e.metaKey || e.altKey) return; // Browser-Kürzel (Strg+S, Strg+D …) nicht abfangen
   if (victoryEl.style.display === "flex") {
     if (e.code === "Escape") victoryEl.style.display = "none";
     return;
