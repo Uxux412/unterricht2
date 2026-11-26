@@ -191,6 +191,11 @@
   .cw-twist { border-left: 5px solid #c0392b; }
   #board .qm-card, #printArea { overflow-wrap: anywhere; } /* sehr lange Wörter in der eigenen Antwort */
   .cw-lock-tick { font-size: 12.5px; margin-top: 4px; color: #7a4b00; }
+  .cw-nachlesen { margin: 8px 0; }
+  .cw-nachlesen > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; padding: 6px 12px; border: 2px dashed #8a6a3a; border-radius: 8px; font-weight: bold; color: #5e3a1e; background: #fff6df; list-style: none; }
+  .cw-nachlesen > summary::-webkit-details-marker { display: none; }
+  .cw-nachlesen[open] > summary { background: #f3e2b8; }
+  .cw-nachlesen .infoCard { margin-top: 6px; }
   .cw-tipp { font-size: 12.5px; color: #fde68a; margin-top: 6px; min-height: 16px; }
   .cw-mono { font-family: 'Courier New', monospace; letter-spacing: 2px; }
   .cw-funk { background: #0b1a5c; color: #e8f0ff; font: 13px/1.45 'Courier New', monospace; border: 3px solid #fff;
@@ -880,10 +885,10 @@ function openStationModal(h, forceReset, startTab) {
   const badge = add(infoView, "div", d.infoSource);
   badge.className = "infoSourceBadge";
   add(infoView, "p", d.infoLead);
-  d.infoCards.forEach(ic => {
+  d.infoCards.forEach((ic, ci) => {
     const card = add(infoView, "div");
     card.className = "infoCard";
-    add(card, "h4", ic.heading);
+    add(card, "h4", "Karte " + (ci + 1) + " · " + ic.heading);
     const p = document.createElement("div");
     p.innerHTML = ic.text;
     card.appendChild(p);

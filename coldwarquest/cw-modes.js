@@ -225,6 +225,7 @@
       root.innerHTML = "";
       el(root, "div", "📠 <b>Fernschreiber an die Zentrale</b> – wähle die Bausteine, die durch deine Beweise <b>belegt</b> sind.", "qm-step");
       el(root, "div", "<b>" + g.satzanfang + "</b>", "qm-card");
+      beweisAkte(root);
       const answer = el(root, "div", null, "cw-answer");
       const opts = el(root, "div", null, "qm-opts");
       const fb = el(root, "div", "", "qm-fb");
@@ -329,11 +330,40 @@
     inp.addEventListener("keydown", e => { e.stopPropagation(); if (e.key === "Enter") tryOpen(); });
   }
 
+  // ---------- Infotafel zum Aufklappen (Nachlesen ohne Fenster- oder Tabwechsel) ----------
+  function infoAufklapp(parent, d, offen) {
+    const det = el(parent, "details", null, "cw-nachlesen");
+    if (offen) det.open = false;
+    el(det, "summary", "📖 Infotafel hier nachlesen (Karte 1–" + d.infoCards.length + ")");
+    d.infoCards.forEach((ic, i) => {
+      const c = el(det, "div", null, "infoCard");
+      el(c, "h4", "Karte " + (i + 1) + " · " + ic.heading);
+      el(c, "div", ic.text);
+    });
+    return det;
+  }
+  window.CWInfoAufklapp = infoAufklapp;
+
+  // Finale: alle Beweise, Merksätze und Infotafeln der vier Häuser zum Nachlesen
+  function beweisAkte(parent) {
+    const det = el(parent, "details", null, "cw-nachlesen");
+    el(det, "summary", "💼 Deine Beweise aus Haus 1–4 nachlesen");
+    CW.order.slice(0, 4).forEach((id, i) => {
+      const d = CW.content[id];
+      const box = el(det, "div", null, "infoCard");
+      el(box, "h4", d.beweis.icon + " Haus " + (i + 1) + ": " + d.title.replace(/^Haus \d: /, "") + " · Code: " + d.tresor.code);
+      el(box, "div", d.summary);
+      infoAufklapp(box, d, false);
+    });
+    return det;
+  }
+
   // ---------- Ablauf eines Hauses ----------
   window.CWHouse = function (root, d, done, onSolved) {
     root.innerHTML = "";
     if (d.mode === "finale") { M.finale(root, d, done, onSolved); return; }
     if (done) { success(root, d, false); return; }
+    infoAufklapp(root, d, false);
     const puzzle = el(root, "div");
     const after = el(root, "div");
     M[d.mode](puzzle, d, false, () => afterPuzzle());
@@ -348,6 +378,7 @@
         return;
       }
       el(after, "div", "🔦 UV-Notiz: <i>" + d.uv.text + "</i>", "qm-card");
+      infoAufklapp(after, d, true);
       tresor(after, d, () => { success(after, d, true); onSolved(); }); // erst Merksatz, dann markSolved (setzt Flaggen-Meldung/Leitfragen-Karte davor)
     }
   };
