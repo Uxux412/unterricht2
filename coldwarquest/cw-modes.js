@@ -275,7 +275,9 @@
     M[d.mode](puzzle, d, false, () => afterPuzzle());
     function afterPuzzle() {
       after.innerHTML = "";
+      root._uvRetry = null;
       if (!CWS.uv[d._id]) {
+        root._uvRetry = afterPuzzle;
         const lockMsg = el(after, "div", "🔦 <b>Der Tresor öffnet erst mit der UV-Notiz aus diesem Raum.</b> Schalte die UV-Lampe ein ([U] oder 🔦 UV oben) und such den Raum ab. Dann komm zurück an den Tisch.", "qm-card cw-uvhint");
         weiter(after, "Ich habe die Notiz – Tresor zeigen", () => afterPuzzle());
         void lockMsg;

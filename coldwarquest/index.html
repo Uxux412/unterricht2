@@ -517,10 +517,11 @@ function findVillagePath(startC, startR, goalC, goalR) {
 
 function houseAtTile(tc, tr) {
   for (const h of HOUSES) {
-    const w = h.id === "wahlrecht" ? 4 : 5;
+    // Kleine Gebäude (KS1-Büro auf der Brücke) ohne Rand, sonst schluckt der Rand Brücke und Ostufer
+    const w = h.w || 5, m = w < 5 ? 0 : 1;
     if (
       (tc === h.door.c && tr === h.door.r) ||
-      (tc >= h.c - 1 && tc <= h.c + w && tr >= h.r - 2 && tr <= h.door.r)
+      (tc >= h.c - m && tc <= h.c + w - 1 + m && tr >= h.r - 1 - m && tr <= h.door.r)
     ) {
       return h;
     }
@@ -898,6 +899,8 @@ function openStationModal(h, forceReset, startTab) {
       CWHouse(d._host, d, isAlreadySolved, () => markSolved(null));
     }
     quizView.appendChild(d._host);
+    // Notiz inzwischen gefunden: Tresor sofort zeigen statt des alten UV-Hinweises
+    if (d._host._uvRetry && CWS.uv[h.id]) d._host._uvRetry();
     const mb = add(quizView, "div");
     mb.className = "btns";
     add(mb, "button", "📖 Infotext nachschlagen").addEventListener("click", () => switchTab("info"));
@@ -1010,12 +1013,22 @@ function markSolved(fb) {
   }
 }
 
+const DIRS = {
+  ArrowUp: [0, -1], KeyW: [0, -1],
+  ArrowDown: [0, 1], KeyS: [0, 1],
+  ArrowLeft: [-1, 0], KeyA: [-1, 0],
+  ArrowRight: [1, 0], KeyD: [1, 0]
+};
 window.addEventListener("keydown", e => {
   if (modalOpen) {
     if (e.code === "Escape") {
       saveCurrentDrafts();
       closeStationModalToRoom();
     }
+    return;
+  }
+  if (victoryEl.style.display === "flex") {
+    if (e.code === "Escape") victoryEl.style.display = "none";
     return;
   }
   if (scene === "interior" && e.code === "Escape") {

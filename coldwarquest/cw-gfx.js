@@ -59,12 +59,14 @@ const KS001_PAL = {
   C: "#7a4e2a", c: "#4e3018", G: "#c9a640", K: "#121214", k: "#3c3c44"
 };
 // Optionale PNG-Sprites des Lehrers (Ordner bilder/). Fehlen sie, zeichnet das Spiel den Pixel-Agenten.
+// Sobald bilder/agent.png existiert, hier "bilder/agent.png" eintragen (leer = keine Anfrage, kein 404).
+const CW_SPRITE_SRC = "";
 const CW_SPRITE_IMG = { ready: false, img: null };
-(function () {
+if (CW_SPRITE_SRC) (function () {
   const img = new Image();
   img.onload = () => { CW_SPRITE_IMG.ready = true; CW_SPRITE_IMG.img = img; if (typeof cachesBuilt !== "undefined") cachesBuilt = false; };
   img.onerror = () => {};
-  img.src = "bilder/agent.png";
+  img.src = CW_SPRITE_SRC;
 })();
 function drawAgent(x, y, scale, flip) {
   if (CW_SPRITE_IMG.ready) {
