@@ -242,7 +242,7 @@
           if (chosen.length === need) {
             [].forEach.call(opts.children, x => { x.disabled = true; });
             const eigen = el(root, "div", null, "qm-card");
-            el(eigen, "div", "✍️ <b>Jetzt du:</b> Erkläre in 2–3 eigenen Sätzen, warum der Kalte Krieg zwischen den Supermächten nie heiß wurde (mindestens zwei Gründe). Sie kommt in dein Dossier. <small>Auf geteilten Geräten am Ende oben auf ↺ Neu tippen.</small>", "qm-step");
+            el(eigen, "div", "✍️ <b>Jetzt du:</b> Erkläre in eigenen Worten, warum der Kalte Krieg zwischen den Supermächten nie heiß wurde – mit zwei Gründen (Stichworte reichen). Sie kommt in dein Dossier. <small>Auf geteilten Geräten am Ende oben auf ↺ Neu tippen.</small>", "qm-step");
             const ta = el(eigen, "textarea"); ta.rows = 4; ta.className = "cw-eigen"; ta.value = CWS.antwort || "";
             ta.setAttribute("aria-label", "Eigene Antwort auf die Leitfrage");
             ta.addEventListener("keydown", e => e.stopPropagation());
@@ -250,7 +250,7 @@
             const counter = el(eigen, "div", "", "cw-lock-tick");
             const countWords = () => ta.value.trim().split(/\s+/).filter(w => /[a-zäöüß]{2,}/i.test(w)).length;
             const FACH = [
-              { name: "Abschreckung", re: /abschreck/i }, { name: "Vergeltung", re: /vergelt/i }, { name: "Sicherheit", re: /sicherheit/i },
+              { name: "Abschreckung", re: /abschreck/i }, { name: "Vergeltung", re: /vergelt|gegenschl|gegenangriff|zurückschlag/i }, { name: "Sicherheit", re: /sicherheit/i },
               { name: "Verhandlung", re: /verhandl|kompromiss|einig/i }, { name: "indirekt", re: /indirekt/i }, { name: "Stellvertreterkrieg", re: /stellvertret/i },
               { name: "Atomkrieg", re: /atom|nuklear/i }, { name: "Vernichtung", re: /vernicht|untergang/i }, { name: "Kubakrise", re: /kuba|türkei|raketen/i }
             ];
@@ -260,7 +260,7 @@
             const send = btn(w, "📠 Antwort senden");
             send.addEventListener("click", () => {
               const words = countWords();
-              if (words < 12) { hint.className = "qm-fb bad"; hint.textContent = "Die Zentrale braucht mehr: mindestens 12 Wörter, zwei Gründe. (" + words + " Wörter bisher)"; return; }
+              if (words < 6) { hint.className = "qm-fb bad"; hint.textContent = "Die Zentrale braucht etwas mehr: mindestens 6 Wörter. (" + words + " Wörter bisher)"; return; }
               const found = FACH.filter(f => f.re.test(ta.value)).map(f => f.name);
               if (found.length < 2) { hint.className = "qm-fb bad"; hint.innerHTML = "Die Zentrale braucht Belege: Nutze mindestens zwei Fachbegriffe aus deinen Beweisen, z. B. <i>Abschreckung, Vergeltung, Sicherheit, verhandeln, indirekt, Stellvertreterkrieg, Atomkrieg</i>." + (found.length ? " (Gefunden: " + found.join(", ") + ")" : ""); return; }
               if (send.disabled) return; send.disabled = true;
