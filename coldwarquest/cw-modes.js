@@ -2,15 +2,15 @@
 // Erweitert window.QuestModes aus ../assets/quest-modes.js, ohne die gemeinsame Datei zu verändern.
 (function () {
   // ---------- Spielstand (localStorage, abgesichert) ----------
-  const S = { solved: {}, uv: {}, bonus: {}, vermutung: null, twist1: false };
+  const S = { solved: {}, uv: {}, bonus: {}, puzzle: {}, vermutung: null, twist1: false };
   try {
     const raw = localStorage.getItem(CW.key);
-    if (raw) { const d = JSON.parse(raw); ["solved", "uv", "bonus"].forEach(k => { if (d[k]) S[k] = d[k]; }); S.vermutung = d.vermutung || null; S.antwort = d.antwort || ""; S.twist1 = !!d.twist1; }
+    if (raw) { const d = JSON.parse(raw); ["solved", "uv", "bonus", "puzzle"].forEach(k => { if (d[k]) S[k] = d[k]; }); S.vermutung = d.vermutung || null; S.antwort = d.antwort || ""; S.twist1 = !!d.twist1; }
   } catch (e) {}
   S.save = function () {
-    try { localStorage.setItem(CW.key, JSON.stringify({ solved: S.solved, uv: S.uv, bonus: S.bonus, vermutung: S.vermutung, twist1: S.twist1, antwort: S.antwort || "" })); } catch (e) {}
+    try { localStorage.setItem(CW.key, JSON.stringify({ solved: S.solved, uv: S.uv, bonus: S.bonus, puzzle: S.puzzle, vermutung: S.vermutung, twist1: S.twist1, antwort: S.antwort || "" })); } catch (e) {}
   };
-  S.reset = function () { try { localStorage.removeItem(CW.key); } catch (e) {} };
+  S.reset = function () { try { localStorage.removeItem(CW.key); localStorage.removeItem(CW.key + "-entwurf"); } catch (e) {} };
   S.solvedCount = function () { return CW.order.filter(id => S.solved[id]).length; };
   S.flags = function () { return [].concat.apply([], CW.flagStages.slice(0, S.solvedCount())); };
   window.CWS = S;
@@ -255,7 +255,8 @@
               { name: "Atomkrieg", re: /atom|nuklear/i }, { name: "Vernichtung", re: /vernicht|untergang/i }, { name: "Kubakrise", re: /kuba|türkei|raketen/i }
             ];
             const upd = () => { counter.textContent = countWords() + " Wörter"; };
-            ta.addEventListener("input", upd); upd();
+            ta.addEventListener("input", () => { upd(); CWS.entwurf = ta.value; try { localStorage.setItem(CW.key + "-entwurf", ta.value); } catch (e) {} }); upd();
+            if (!ta.value) { try { ta.value = localStorage.getItem(CW.key + "-entwurf") || ""; upd(); } catch (e) {} }
             const w = el(root, "div", null, "btns");
             const send = btn(w, "📠 Antwort senden");
             send.addEventListener("click", () => {
@@ -333,8 +334,9 @@
   // ---------- Infotafel zum Aufklappen (Nachlesen ohne Fenster- oder Tabwechsel) ----------
   function infoAufklapp(parent, d, offen) {
     const det = el(parent, "details", null, "cw-nachlesen");
-    if (offen) det.open = false;
+    det.open = !!offen;
     el(det, "summary", "📖 Infotafel hier nachlesen (Karte 1–" + d.infoCards.length + ")");
+    if (d.infoLead && /<b>/.test(d.infoLead)) el(det, "div", d.infoLead, "qm-card");
     d.infoCards.forEach((ic, i) => {
       const c = el(det, "div", null, "infoCard");
       el(c, "h4", "Karte " + (i + 1) + " · " + ic.heading);
@@ -366,7 +368,9 @@
     infoAufklapp(root, d, false);
     const puzzle = el(root, "div");
     const after = el(root, "div");
-    M[d.mode](puzzle, d, false, () => afterPuzzle());
+    // Rätsel schon gelöst (z. B. vor dem Neuladen)? Dann gleich zum Tresor.
+    if (CWS.puzzle && CWS.puzzle[d._id]) { el(puzzle, "div", "✔ Rätsel gelöst – jetzt fehlt nur noch der Tresor.", "qm-fb ok"); afterPuzzle(); }
+    else M[d.mode](puzzle, d, false, () => { CWS.puzzle = CWS.puzzle || {}; CWS.puzzle[d._id] = true; CWS.save(); afterPuzzle(); });
     function afterPuzzle() {
       after.innerHTML = "";
       root._uvRetry = null;
@@ -378,7 +382,7 @@
         return;
       }
       el(after, "div", "🔦 UV-Notiz: <i>" + d.uv.text + "</i>", "qm-card");
-      infoAufklapp(after, d, true);
+      infoAufklapp(after, d, false);
       tresor(after, d, () => { success(after, d, true); onSolved(); }); // erst Merksatz, dann markSolved (setzt Flaggen-Meldung/Leitfragen-Karte davor)
     }
   };

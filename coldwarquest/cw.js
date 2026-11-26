@@ -140,7 +140,7 @@ window.CW = {
       tresor: {
         frage: "Wie kämpften die USA und die UdSSR in allen drei Kriegen gegeneinander? (Ein Wort)",
         accept: ["INDIREKT", "INDIREKTE", "INDIREKTEN", "INDIREKTER"], code: "INDIREKT",
-        tipps: ["Schau dir in jeder Akte Frage 2 an: Standen sich Soldaten beider Supermächte offen gegenüber?",
+        tipps: ["Lies die drei Akten auf der Infotafel (unten aufklappen): Kämpften Soldaten der USA und der UdSSR irgendwo direkt gegeneinander?",
                 "Sie kämpften nicht direkt, sondern über andere."],
         erklaerung: "Die Supermächte kämpften indirekt: mit Waffen, Geld und Soldaten auf gegnerischen Seiten, aber nie offen gegeneinander."
       },
@@ -332,7 +332,7 @@ window.CW = {
         { heading: "🗂️ Deine vier Beweise", max: 35,
           text: "Haus 1: zwei Lager, beide „demokratisch“ · Haus 2: Stellvertreterkriege – indirekt · Haus 3: Vergeltung als Drohung · Haus 4: Sicherheit für beide und der „Knoten des Krieges“." },
         { heading: "⚖️ Was hielt den Krieg kalt?", max: 35,
-          text: "Prüfe jeden Baustein: Welches Haus liefert den Beleg? Nur belegte Bausteine öffnen das Schloss." }
+          text: "Prüfe jeden Baustein: Welches Haus liefert den Beleg? Nur belegte Bausteine kommen durch den Fernschreiber." }
       ],
       intro: "Am Fernschreiber wartet die Zentrale auf deine Antwort. Bau sie aus Bausteinen – nur belegte Bausteine zählen.",
       mode: "finale",
@@ -340,7 +340,7 @@ window.CW = {
         satzanfang: "Der Kalte Krieg wurde zwischen den Supermächten nie heiß, weil …",
         bausteine: [
           { t: "… ein Atomkrieg beide Seiten vernichtet hätte – wer angreift, wird selbst getroffen.", ok: true, beleg: "Haus 3 (Vergeltung) und Haus 4 (Knoten)" },
-          { t: "… beide Seiten in der Kubakrise am Ende verhandelten.", ok: true, beleg: "Haus 4 (Angebot, den Knoten zu lösen)" },
+          { t: "… beide Seiten in der Kubakrise nicht angriffen, sondern Verhandlungen anboten.", ok: true, beleg: "Haus 3 (Quarantäne statt Angriff) und Haus 4 (Angebot, den Knoten zu lösen)" },
           { t: "… sie ihre Gegnerschaft indirekt in Stellvertreterkriegen austrugen.", ok: true, beleg: "Haus 2 (indirekt)" },
           { t: "… die UNO den Krieg verhindert hat, weil sie beide Seiten zum Abrüsten zwang.", ok: false, fb: "Nicht ganz: Die UNO war Bühne – Kennedy ruft den Sicherheitsrat an – und sollte den Abzug der Raketen überwachen. Verhindert haben den Krieg aber Abschreckung und Verhandlungen der beiden Regierungen." },
           { t: "… sie sich eigentlich einig waren und nur zum Schein gegeneinander rüsteten.", ok: false, fb: "Haus 1 zeigt das Gegenteil: zwei Lager, zwei Weltbilder." },
