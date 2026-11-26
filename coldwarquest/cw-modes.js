@@ -99,7 +99,7 @@
         b.addEventListener("click", () => {
           if (b.disabled) return;
           if (side !== it.a) {
-            b.className = "bad"; fb.className = "qm-fb bad"; fb.innerHTML = "✘ " + it.bad;
+            b.className = "bad"; b.disabled = true; fb.className = "qm-fb bad"; fb.innerHTML = "✘ " + it.bad; // Doppeltipp zählt nicht doppelt
             errors++;
             if (errors >= 3) {
               fbAll.className = "qm-fb bad";
@@ -174,6 +174,7 @@
     }
     function openSpot(i) {
       const h = g.hotspots[i];
+      if (panel.querySelector(".cw-lock-tick")) return; // Funkstille nicht durch neues Antippen umgehen
       panel.innerHTML = "";
       if (solvedSpots[i]) { el(panel, "div", "✔ " + h.label + " ist schon gedeutet.", "qm-fb ok"); return; }
       el(panel, "div", "🔎 Stelle " + (i + 1) + ": <b>" + h.label + "</b>", "qm-step");
@@ -258,7 +259,7 @@
   function showResult(root, d, chosen, onSolved) {
     const g = d.game;
     root.innerHTML = "";
-    if (chosen) {
+    if (chosen || CWS.antwort) {
       el(root, "div", "<b>Deine Antwort:</b> " + esc(CWS.antwort || ""), "qm-card");
     }
     el(root, "div", "<b>Zum Vergleich – die Antwort der Zentrale:</b><br>" + g.musterantwort, "qm-sum");
@@ -329,7 +330,7 @@
         return;
       }
       el(after, "div", "🔦 UV-Notiz: <i>" + d.uv.text + "</i>", "qm-card");
-      tresor(after, d, () => { onSolved(); success(after, d, true); });
+      tresor(after, d, () => { success(after, d, true); onSolved(); }); // erst Merksatz, dann markSolved (setzt Flaggen-Meldung/Leitfragen-Karte davor)
     }
   };
   function success(root, d, fresh) {
