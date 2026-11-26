@@ -103,9 +103,13 @@
             errors++;
             if (errors >= 3) {
               fbAll.className = "qm-fb bad";
-              fbAll.innerHTML = "🚨 Alarm: Drei Rädchen falsch – das Schloss verriegelt sich und mischt neu. Lies die Karten auf der Infotafel genau!";
-              [].forEach.call(root.querySelectorAll("button"), x => { x.disabled = true; });
-              setTimeout(() => { delete d._order; M.schloss(root, d, done, onDone); }, 3500);
+              // Alarm: Schloss 10 s gesperrt, eingerastete Rädchen bleiben erhalten
+              errors = 0;
+              fbAll.innerHTML = "🚨 Alarm: Drei Rädchen falsch – das Schloss sperrt sich für 10 Sekunden. Lies die Karten 2 und 3 auf der Infotafel noch einmal genau!";
+              fb.innerHTML += "<br>🚨 <b>Alarm: Schloss 10 Sekunden gesperrt.</b> Lies Karte 2 und 3 noch einmal.";
+              const locked = [].filter.call(root.querySelectorAll(".cw-two button"), x => !x.disabled);
+              locked.forEach(x => { x.disabled = true; });
+              setTimeout(() => { locked.forEach(x => { x.disabled = false; }); if (solvedN < g.items.length) { fbAll.className = "qm-fb"; fbAll.textContent = "Das Schloss ist wieder offen. Stell die übrigen Rädchen ein."; } }, 10000);
             }
             return;
           }
@@ -237,16 +241,27 @@
           if (chosen.length === need) {
             [].forEach.call(opts.children, x => { x.disabled = true; });
             const eigen = el(root, "div", null, "qm-card");
-            el(eigen, "div", "✍️ <b>Jetzt du:</b> Schreib die Antwort auf die Leitfrage in 1–2 eigenen Sätzen. Nenne mindestens zwei Gründe. (Sie kommt in dein Dossier.)", "qm-step");
+            el(eigen, "div", "✍️ <b>Jetzt du:</b> Erkläre in 2–3 eigenen Sätzen, warum der Kalte Krieg zwischen den Supermächten nie heiß wurde (mindestens zwei Gründe). Sie kommt in dein Dossier. <small>Auf geteilten Geräten am Ende oben auf ↺ Neu tippen.</small>", "qm-step");
             const ta = el(eigen, "textarea"); ta.rows = 4; ta.className = "cw-eigen"; ta.value = CWS.antwort || "";
             ta.setAttribute("aria-label", "Eigene Antwort auf die Leitfrage");
             ta.addEventListener("keydown", e => e.stopPropagation());
             const hint = el(eigen, "div", "", "qm-fb");
+            const counter = el(eigen, "div", "", "cw-lock-tick");
+            const countWords = () => ta.value.trim().split(/\s+/).filter(w => /[a-zäöüß]{2,}/i.test(w)).length;
+            const FACH = [
+              { name: "Abschreckung", re: /abschreck/i }, { name: "Vergeltung", re: /vergelt/i }, { name: "Sicherheit", re: /sicherheit/i },
+              { name: "Verhandlung", re: /verhandl|kompromiss|einig/i }, { name: "indirekt", re: /indirekt/i }, { name: "Stellvertreterkrieg", re: /stellvertret/i },
+              { name: "Atomkrieg", re: /atom|nuklear/i }, { name: "Vernichtung", re: /vernicht|untergang/i }, { name: "Kubakrise", re: /kuba|türkei|raketen/i }
+            ];
+            const upd = () => { counter.textContent = countWords() + " Wörter"; };
+            ta.addEventListener("input", upd); upd();
             const w = el(root, "div", null, "btns");
             const send = btn(w, "📠 Antwort senden");
             send.addEventListener("click", () => {
-              const words = ta.value.trim().split(/\s+/).filter(Boolean).length;
+              const words = countWords();
               if (words < 12) { hint.className = "qm-fb bad"; hint.textContent = "Die Zentrale braucht mehr: mindestens 12 Wörter, zwei Gründe. (" + words + " Wörter bisher)"; return; }
+              const found = FACH.filter(f => f.re.test(ta.value)).map(f => f.name);
+              if (found.length < 2) { hint.className = "qm-fb bad"; hint.innerHTML = "Die Zentrale braucht Belege: Nutze mindestens zwei Fachbegriffe aus deinen Beweisen, z. B. <i>Abschreckung, Vergeltung, Sicherheit, verhandeln, indirekt, Stellvertreterkrieg, Atomkrieg</i>." + (found.length ? " (Gefunden: " + found.join(", ") + ")" : ""); return; }
               if (send.disabled) return; send.disabled = true;
               CWS.antwort = ta.value.trim(); CWS.save();
               showResult(root, d, chosen, onSolved);
@@ -281,7 +296,7 @@
     const ob = btn(row, "Öffnen");
     const fb = el(box, "div", "", "qm-fb");
     const tip = el(box, "div", "", "cw-tipp");
-    let wrong = 0, tipsShown = 0, revealed = 1;
+    let wrong = 0, tipsShown = 0, revealed = 0;
     function pattern() {
       const c = t.code; let s = "";
       for (let i = 0; i < c.length; i++) s += (i < revealed || i === c.length - 1) ? c[i] : "_";
@@ -290,7 +305,8 @@
     // Textuelle Tipps gibt es auf Knopfdruck; Buchstaben des Codes erst nach drei echten Fehlversuchen.
     function showTip() {
       if (tipsShown < t.tipps.length) { tip.innerHTML = "💡 Tipp: " + t.tipps[tipsShown]; tipsShown++; return; }
-      if (wrong >= 3) { tip.innerHTML = "💡 Teillösung: <b class='cw-mono'>" + pattern() + "</b>"; revealed = Math.min(t.code.length - 1, revealed + 1); }
+      // Pro echtem Fehlversuch ab dem vierten wird höchstens ein Buchstabe mehr verraten – Tipp-Spam bringt nichts.
+      if (wrong >= 4) { revealed = Math.min(t.code.length - 2, wrong - 3); tip.innerHTML = "💡 Teillösung: <b class='cw-mono'>" + pattern() + "</b>"; }
       else tip.innerHTML = "💡 Tipp: " + t.tipps[t.tipps.length - 1] + "<br><small>Mehr Hilfe gibt es, wenn du ein paar Codes ausprobiert hast.</small>";
     }
     const tb = el(box, "div", null, "btns");
@@ -303,11 +319,13 @@
         inp.disabled = true; ob.disabled = true;
         onOpen();
       } else {
-        wrong++; fb.className = "qm-fb bad"; fb.textContent = "✘ Der Tresor bleibt zu. Lies die Quelle noch einmal.";
-        if (wrong >= 3 || tipsShown < wrong) showTip();
+        wrong++; fb.className = "qm-fb bad"; fb.textContent = "✘ Der Tresor bleibt zu. Gesucht ist genau ein Wort – lies die Quelle noch einmal.";
+        if (wrong >= 4 || tipsShown < wrong) showTip();
+        inp.disabled = true; ob.disabled = true;
+        setTimeout(() => { inp.disabled = false; ob.disabled = false; inp.value = ""; inp.focus(); }, LOCK_S * 1000);
       }
     }
-    ob.addEventListener("click", tryOpen);
+    ob.addEventListener("click", () => { if (!ob.disabled) tryOpen(); });
     inp.addEventListener("keydown", e => { e.stopPropagation(); if (e.key === "Enter") tryOpen(); });
   }
 
