@@ -51,7 +51,15 @@
   function weiter(parent, label, fn) {
     const w = el(parent, "div", null, "btns");
     const b = btn(w, label);
-    b.addEventListener("click", () => { if (b.disabled) return; b.disabled = true; fn(); });
+    b.addEventListener("click", () => {
+      if (b.disabled) return;
+      b.disabled = true;
+      // Doppeltipp: der zweite Tipp darf nicht auf dem neu aufgebauten Inhalt landen
+      const stop = ev => { ev.stopImmediatePropagation(); ev.preventDefault(); };
+      document.addEventListener("click", stop, true);
+      setTimeout(() => document.removeEventListener("click", stop, true), 450);
+      fn();
+    });
     return w;
   }
 

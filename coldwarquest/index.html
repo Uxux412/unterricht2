@@ -435,8 +435,8 @@ function showBoard(build) {
   modalOpen = true;
   board.innerHTML = "";
   build(board);
-  board.scrollTop = 0;
   modal.style.display = "flex";
+  board.scrollTop = 0; // erst nach dem Einblenden wirksam
   promptEl.style.display = "none";
 }
 function closeBoard() { closeStationModalToRoom(); }
@@ -760,8 +760,19 @@ canvas.addEventListener("pointermove", e => {
   canvas.style.cursor = st ? "pointer" : "default";
 });
 
+// Touch: Öffnet ein Fingertipp (pointerdown) ein Fenster, landet der folgende click sonst auf einem Knopf darin
+function swallowGhostClick() {
+  const stop = ev => { ev.stopImmediatePropagation(); ev.preventDefault(); done(); };
+  const done = () => { document.removeEventListener("click", stop, true); clearTimeout(tm); };
+  const tm = setTimeout(done, 700);
+  document.addEventListener("click", stop, true);
+}
 canvas.addEventListener("pointerdown", e => {
   if (modalOpen) return;
+  handleCanvasDown(e);
+  if (modalOpen) swallowGhostClick();
+});
+function handleCanvasDown(e) {
   const rect = canvas.getBoundingClientRect();
   const cx = ((e.clientX - rect.left) / rect.width) * 1280;
   const cy = ((e.clientY - rect.top) / rect.height) * 760;
@@ -806,7 +817,7 @@ canvas.addEventListener("pointerdown", e => {
       walkToTileAndAct(tc, tr, null);
     }
   }
-});
+}
 
 document.getElementById("btnLeaveRoomHud").addEventListener("click", leaveHouseToVillage);
 
@@ -964,6 +975,7 @@ function openStationModal(h, forceReset, startTab) {
     quizView.style.display = showInfo ? "none" : "block";
     tabInfoBtn.classList.toggle("active", showInfo);
     tabQuizBtn.classList.toggle("active", !showInfo);
+    board.scrollTop = 0;
   }
 
   tabInfoBtn.addEventListener("click", () => switchTab("info"));
@@ -975,9 +987,8 @@ function openStationModal(h, forceReset, startTab) {
   });
 
   const initialTab = startTab || "quiz";
-  switchTab(initialTab);
-
   modal.style.display = "flex";
+  switchTab(initialTab);
   promptEl.style.display = "none";
 }
 
@@ -1069,7 +1080,7 @@ document.querySelectorAll(".pb[data-dx]").forEach(b => {
 });
 document.getElementById("bE").addEventListener("pointerdown", e => {
   e.preventDefault();
-  if (!modalOpen) interact();
+  if (!modalOpen) { interact(); if (modalOpen) swallowGhostClick(); }
 });
 
 function selfTest() {
