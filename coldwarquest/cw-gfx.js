@@ -93,7 +93,30 @@ function ksFrame(name) {
   return (KS_CACHE[name] = c);
 }
 // x, y: linke obere Ecke der alten 38 × 48-Box (mal scale). Füße bleiben an derselben Stelle.
+// Spritesheet nach den Vorlagen des Lehrers (Gemini, 2026): 4 × 4 Bilder.
+// Zeile 1 nach unten · Zeile 2 nach oben · Zeile 3 nach rechts (links = gespiegelt) · Zeile 4 Posen: stehen, Uhr, Dossier, Jubel.
+const KS_SHEET = new Image();
+KS_SHEET.src = "bilder/agent-ks001.png";
+let ksPose = null; // z. B. "read" oder "win"
+function drawAgentSheet(x, y, scale, dir, moving, t) {
+  const fw = KS_SHEET.naturalWidth / 4, fh = KS_SHEET.naturalHeight / 4;
+  let row = 3, col = 0, flip = false;
+  const step = Math.floor(t / 120) % 4;
+  if (ksPose === "watch") col = 1; else if (ksPose === "read") col = 2; else if (ksPose === "win") col = 3;
+  else if (dir === "up") { row = 1; col = moving ? step : 0; }
+  else if (dir === "left" || dir === "right") { row = 2; col = moving ? step : 0; flip = dir === "left"; }
+  else if (moving) { row = 0; col = step; }
+  const h = 52 * scale, w = h * fw / fh;
+  const dx = x + (38 * scale - w) / 2, dy = y + 48 * scale - h + 2 * scale;
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  if (flip) { ctx.translate(dx + w, dy); ctx.scale(-1, 1); ctx.drawImage(KS_SHEET, col * fw, row * fh, fw, fh, 0, 0, w, h); }
+  else ctx.drawImage(KS_SHEET, col * fw, row * fh, fw, fh, dx, dy, w, h);
+  ctx.restore();
+}
 function drawAgentKS(x, y, scale, dir, moving, t) {
+  if (KS_SHEET.complete && KS_SHEET.naturalWidth) { drawAgentSheet(x, y, scale, dir, moving, t); return; }
   let name = "front", flip = false;
   if (dir === "up") name = "back";
   else if (dir === "left" || dir === "right") { name = moving ? "r" + (1 + Math.floor(t / 110) % 4) : "r1"; flip = dir === "left"; }

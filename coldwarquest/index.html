@@ -676,7 +676,7 @@ function enterHouse(h) {
   modalOpen = false;
   intPlayer.x = 856;
   intPlayer.y = 560;
-  intPlayer.dir = "left";
+  intPlayer.dir = "down";
   roomTitleTxt.textContent = "🏛️ " + h.name + (solved[h.id] ? " 🛡️" : "");
   roomHudEl.style.display = "flex";
   updatePrompt();
@@ -2027,7 +2027,9 @@ function drawInteriorPlayer1280(t) {
   const flipLeft = intPlayer.dir === "left";
 
   discP(intPlayer.x, intPlayer.y + 4, 28, 9, "rgba(0,0,0,.42)");
+  ksPose = modalOpen ? "read" : (victoryShown && current && current.id === "buero" ? "win" : null);
   drawAgentKS(px, py, 2, intPlayer.dir, moving, t);
+  ksPose = null;
 }
 
 function drawInteriorStations1280(t) {
