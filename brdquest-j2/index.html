@@ -554,6 +554,55 @@ const ROOM_STATIONS = [
   }
 ];
 
+// ---------- Eigene Raumbilder je Haus (Gemini-Bilder, 1280 × 760) ----------
+// hit = Klickfläche [x1, y1, x2, y2], stand = Standpunkt der Figur, label = Lage des Schilds.
+// floor = begehbarer Boden (Vieleck), block = gesperrte Rechtecke (Tisch, Stühle),
+// scale = Größe der Figur je nach Tiefe: [y0, Größe bei y0, Zuwachs pro Pixel].
+// Häuser ohne Eintrag (oder wenn das Bild fehlt) zeigen den alten Holzraum.
+const RAEUME = {
+  bundestag: {
+    src: "bilder/raum-bundestag.webp",
+    info: { hit: [110, 270, 325, 530], stand: [335, 625], label: [218, 254] },
+    quiz: { hit: [480, 455, 860, 655], stand: [650, 705], label: [660, 432] },
+    exit: { hit: [1060, 300, 1210, 695], stand: [1010, 690], label: [1135, 280] },
+    spawn: [985, 712],
+    floor: [[0, 745], [75, 690], [320, 500], [950, 500], [1210, 690], [1280, 740], [1280, 760], [0, 760]],
+    block: [[370, 0, 965, 668]],
+    scale: [500, 2.2, 0.0065]
+  }
+};
+Object.values(RAEUME).forEach(r => {
+  r.img = new Image();
+  r.img.onload = () => { r.ready = true; };
+  r.img.src = r.src;
+});
+const STATIONEN_HOLZRAUM = JSON.parse(JSON.stringify(ROOM_STATIONS));
+let raum = null;                  // aktueller Raum mit eigenem Bild, sonst null (Holzraum)
+function raumAnwenden(id) {
+  const r = RAEUME[id];
+  raum = r && r.ready ? r : null;
+  ROOM_STATIONS.forEach((st, i) => {
+    Object.assign(st, JSON.parse(JSON.stringify(STATIONEN_HOLZRAUM[i])));
+    delete st.labelX; delete st.labelY;
+    const c = raum && raum[st.id];
+    if (!c) return;
+    st.hitbox = { x1: c.hit[0], y1: c.hit[1], x2: c.hit[2], y2: c.hit[3] };
+    st.standX = c.stand[0]; st.standY = c.stand[1];
+    st.centerX = (c.hit[0] + c.hit[2]) / 2; st.centerY = (c.hit[1] + c.hit[3]) / 2;
+    st.proxRadius = 110;
+    st.labelX = c.label[0]; st.labelY = c.label[1];
+  });
+}
+function figurGroesse(y) { return raum ? raum.scale[1] + (y - raum.scale[0]) * raum.scale[2] : 2; }
+function imVieleck(x, y, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i], [xj, yj] = poly[j];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
 let stars = 0, showGrid = false, modalOpen = false, victoryShown = false, current = null, lastMove = 0;
 const solved = {};
 const draftAnswers = {};
@@ -687,6 +736,11 @@ function walkToTileAndAct(goalC, goalR, openHouseOnArrival) {
 }
 
 function isInteriorWalkable(x, y) {
+  if (raum) {
+    if (x < 30 || x > 1250 || y > 735) return false;
+    if (!imVieleck(x, y, raum.floor)) return false;
+    return !raum.block.some(b => x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3]);
+  }
   if (x < 215 || x > 1045) return false;
   if (y > 724) return false;
   const wallBottomY = 295 + Math.abs(x - 640) * 0.52;
@@ -785,8 +839,9 @@ function enterHouse(h) {
   current = h;
   scene = "interior";
   modalOpen = false;
-  intPlayer.x = 890;
-  intPlayer.y = 455;
+  raumAnwenden(h.id);
+  intPlayer.x = raum ? raum.spawn[0] : 890;
+  intPlayer.y = raum ? raum.spawn[1] : 455;
   intPlayer.dir = "left";
   roomTitleTxt.textContent = "🏛️ " + h.name + (solved[h.id] ? " 🛡️" : "");
   roomHintEl.textContent = ROOM_HINT_DEFAULT;
@@ -1264,6 +1319,27 @@ function selfTest() {
       }
     }
   }
+  Object.keys(RAEUME).forEach(id => {
+    const r = RAEUME[id], merk = r.ready; r.ready = true;
+    raumAnwenden(id);
+    const start = r.spawn, seen2 = new Set([start + ""]), q2 = [start], hit = {};
+    if (!isInteriorWalkable(start[0], start[1])) errors.push(id + ": Startpunkt nicht begehbar");
+    ROOM_STATIONS.forEach(st => {
+      if (!isInteriorWalkable(st.standX, st.standY)) errors.push(id + ": Standpunkt " + st.id + " nicht begehbar");
+      if (stationAtPoint(st.centerX, st.centerY)?.id !== st.id) errors.push(id + ": Klickfläche " + st.id + " fehlerhaft");
+    });
+    while (q2.length) {
+      const [rx, ry] = q2.shift();
+      const n = nearInteriorStation(rx, ry); if (n) hit[n.id] = true;
+      for (const [dx, dy] of [[26, 0], [-26, 0], [0, 20], [0, -20]]) {
+        const nx = rx + dx, ny = ry + dy, k = nx + "," + ny;
+        if (!seen2.has(k) && isInteriorWalkable(nx, ny)) { seen2.add(k); q2.push([nx, ny]); }
+      }
+    }
+    ["info", "quiz", "exit"].forEach(sid => { if (!hit[sid]) errors.push(id + ": " + sid + " zu Fuß nicht erreichbar"); });
+    r.ready = merk;
+  });
+  raumAnwenden(null);
   if (!reachedInfo) errors.push("Innenraum-BFS: Infotafel vom Eingang aus nicht zu Fuß erreichbar");
   if (!reachedQuiz) errors.push("Innenraum-BFS: Aufgaben-Tisch vom Eingang aus nicht zu Fuß erreichbar");
   if (!reachedExit) errors.push("Innenraum-BFS: Ausgangstür im Raum nicht erreichbar");
@@ -2657,14 +2733,14 @@ function drawPlayer1280(t) {
 
 function drawInteriorPlayer1280(t) {
   const moving = (t - intPlayer.stepTick) < 180;
-  const bob = (moving && (Math.floor(t / 80) % 2 === 1)) ? -4 : 0;
-  const px = Math.round(intPlayer.x - 38);
-  const py = Math.round(intPlayer.y - 90 + bob);
   const flipLeft = intPlayer.dir === "left";
+  const sc = figurGroesse(intPlayer.y);
+  const px = Math.round(intPlayer.x - 19 * sc);
+  const py = Math.round(intPlayer.y - 50 * sc + 6);
 
-  discP(intPlayer.x, intPlayer.y + 4, 28, 9, "rgba(0,0,0,.42)");
+  discP(intPlayer.x, intPlayer.y + 4, Math.round(14 * sc), Math.round(4.5 * sc), "rgba(0,0,0,.42)");
   ksPose = modalOpen ? "read" : null;
-  drawAgentKS(px, py - bob, 2, intPlayer.dir, moving, t, flipLeft);
+  drawAgentKS(px, py, sc, intPlayer.dir, moving, t, flipLeft);
   ksPose = null;
 }
 
@@ -2685,6 +2761,7 @@ function drawInteriorStations1280(t) {
     if (st.id === "info") { bx = 415; by = 228; }
     if (st.id === "quiz") { bx = 624; by = 376; }
     if (st.id === "exit") { bx = 975; by = 188; }
+    if (st.labelX !== undefined) { bx = st.labelX; by = st.labelY; }
 
     const floatY = by + (pulse ? -2 : 0);
     ctx.save();
@@ -2731,6 +2808,16 @@ function ensureCaches() {
 
 function drawInterior(t) {
   ensureCaches();
+  if (raum) {
+    ctx.save();
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(raum.img, 0, 0, 1280, 760);
+    ctx.restore();
+    drawInteriorStations1280(t);
+    drawInteriorPlayer1280(t);
+    drawParticles1280();
+    return;
+  }
   ctx.drawImage(interiorCache, 0, 0);
   const f = Math.floor(t / 95) % 4;
   discP(308, 348, 38, 16, "#d93800");
