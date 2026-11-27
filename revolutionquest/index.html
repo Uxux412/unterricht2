@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Revolution Quest – Operation Brumaire</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { width: 100%; min-height: 100vh; min-height: 100dvh; background: #16181d; color: #f0f2f5;
+               font-family: 'Segoe UI', Tahoma, sans-serif; overflow-x: hidden; }
+  body { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 6px; }
+  #game { width: 100%; max-width: 960px; box-shadow: 0 12px 36px rgba(0,0,0,.75); border-radius: 8px;
+          overflow: hidden; background: #161e22; display: flex; flex-direction: column; position: relative; }
+  #hud { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; background: #263545;
+         padding: 7px 12px; border-bottom: 2px solid #18222c; font-size: 13px; font-weight: bold; z-index: 6; }
+  #hud small { font-size: 11.5px; color: #cbd5e1; font-weight: normal; }
+  .hudRight { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  #rankBadge { background: #142234; color: #fde047; border: 1px solid #eab308; border-radius: 12px;
+               padding: 2px 8px; font-size: 11.5px; font-weight: bold; }
+  .hudBtn { background: #34495e; color: #f8fafc; border: 1px solid #64748b; border-radius: 10px;
+            padding: 3px 8px; font-size: 11.5px; font-weight: bold; cursor: pointer; user-select: none; min-height: 40px; min-width: 44px; }
+  .hudBtn:hover, .hudBtn:active { background: #476482; }
+  #wrap { position: relative; background: #161e22; width: 100%; display: flex; justify-content: center; align-items: center; }
+  canvas { display: block; width: 100%; height: auto; aspect-ratio: 640 / 380;
+           image-rendering: pixelated; image-rendering: crisp-edges; touch-action: none; background: #3b5c3b; }
+  #prompt { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); background: #e67e22; color: #fff;
+            padding: 6px 14px; border-radius: 18px; font-weight: bold; font-size: 13px; display: none;
+            max-width: 94%; text-align: center; line-height: 1.25;
+            border: 2px solid #fff3d1; box-shadow: 0 4px 12px rgba(0,0,0,.55); pointer-events: none; z-index: 4; }
+  #roomHud { position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+             background: rgba(20, 28, 38, 0.92); color: #ffe066; border: 2px solid #d4b87a; border-radius: 16px;
+             padding: 5px 12px; font-size: 12.5px; font-weight: bold; display: none; align-items: center;
+             justify-content: center; flex-wrap: wrap; gap: 8px; max-width: 96%; text-align: center;
+             box-shadow: 0 4px 14px rgba(0,0,0,.6); z-index: 5; }
+  #roomHud button { background: #7a4a24; color: #fff8e7; border: 1px solid #f1c40f; border-radius: 12px;
+                    padding: 4px 10px; font-size: 12px; font-weight: bold; cursor: pointer; }
+  #roomHud button:hover { background: #965d30; }
+  /* Lernmodul-Tafel im Pergament-Look */
+  #modal { position: absolute; inset: 0; background: rgba(0,0,0,.22); display: none;
+           justify-content: center; align-items: flex-start; padding: 8px 10px; pointer-events: none; z-index: 30; }
+  #board { pointer-events: auto; background: #efe2be; color: #2b1d12; border: 3px solid #3a2312; outline: 2px solid #d4b87a;
+           border-radius: 6px; padding: 10px 14px; width: 100%; max-width: 520px; max-height: 95%;
+           overflow-y: auto; -webkit-overflow-scrolling: touch; font-family: Georgia, serif; margin-top: 4px;
+           box-shadow: 0 0 28px rgba(255,220,130,.95), 0 6px 20px rgba(0,0,0,.65); transition: opacity .2s; }
+  #board.peek { opacity: 0.12; }
+  #board h2 { font-size: 15px; text-align: center; background: #d8c394; border: 1px solid #8c6b3f;
+              padding: 5px 8px; margin-bottom: 6px; color: #24160b; letter-spacing: .2px; }
+  #board p { font-size: 12px; margin-bottom: 7px; line-height: 1.38; }
+  .sheetNote { background: #e6d3a7; border-left: 3px solid #7a4a24; padding: 4px 8px; font-size: 11.5px;
+               margin-bottom: 8px; color: #3a200e; line-height: 1.35; }
+  .modeTabs { display: flex; gap: 6px; margin-bottom: 8px; position: sticky; top: -12px; z-index: 3; background: inherit; padding: 4px 0; }
+  .modeTab { flex: 1; background: #dec99a; color: #3a200e; border: 2px solid #8a6236; border-radius: 4px;
+             padding: 6px 8px; font-family: Georgia, serif; font-size: 12.5px; font-weight: bold; cursor: pointer; text-align: center; }
+  .modeTab.active { background: #7a4a24; color: #fff8e7; border-color: #3a200e; box-shadow: inset 0 1px 3px rgba(0,0,0,.3); }
+  .infoSourceBadge { display: inline-block; background: #d8c394; color: #3a200e; border: 1px solid #8c6b3f;
+                     border-radius: 3px; padding: 2px 6px; font-size: 11px; margin-bottom: 6px; font-weight: bold; }
+  .infoCard { background: #fbf2d8; border: 1.5px solid #8a6236; border-left: 4px solid #7a4a24; border-radius: 4px;
+              padding: 7px 10px; margin-bottom: 6px; font-size: 12.2px; line-height: 1.42; color: #24160b; }
+  .infoCard h4 { font-size: 12.8px; color: #5c3312; margin-bottom: 3px; }
+  .infoCard strong { color: #1e3a7a; background: rgba(255,230,128,.45); padding: 0 2px; border-radius: 2px; }
+  .row { margin-bottom: 8px; font-size: 12px; }
+  .row label { display: block; font-weight: bold; color: #332012; line-height: 1.3; margin-bottom: 2px; }
+  .row select { display: block; width: 100%; margin-top: 2px; padding: 6px 8px; font-size: 12.5px; background: #fbf2d8;
+                border: 2px solid #8a6236; border-radius: 4px; color: #24160b; font-family: Georgia, serif; }
+  .row select.ok { border-color: #1e8449; background: #d4efdf; font-weight: bold; }
+  .row select.bad { border-color: #c0392b; background: #f9d6d0; }
+  #feedback { font-size: 12px; font-weight: bold; margin: 7px 0; min-height: 16px; line-height: 1.35; }
+  .btns { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 6px; }
+  .btns button { background: #7a4a24; color: #fff8e7; border: 2px solid #3a200e; padding: 6px 12px; border-radius: 5px;
+                 font-weight: bold; cursor: pointer; font-family: Georgia, serif; font-size: 12.5px; }
+  .btns button:hover { background: #965d30; }
+  /* Abschluss-Banner bei 12 Sternen */
+  #victory { position: absolute; inset: 0; background: rgba(15,23,42,.85); display: none;
+             justify-content: center; align-items: center; padding: 16px; z-index: 40; }
+  #victoryBox { background: #f4e8c1; color: #2c221e; border: 5px ridge #d4ac0d; border-radius: 8px;
+                padding: 20px; max-width: 480px; text-align: center; font-family: Georgia, serif;
+                box-shadow: 0 0 40px rgba(241,196,15,.85); }
+  #victoryBox h2 { font-size: 20px; color: #1e3a7a; margin-bottom: 10px; }
+  #victoryBox p { font-size: 14px; line-height: 1.45; margin-bottom: 14px; }
+  #victoryBox button { background: #1e3a7a; color: #fff; border: 2px solid #f1c40f; padding: 8px 18px;
+                       border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
+  /* Touch-Steuerkreuz */
+  #pad { display: flex; justify-content: space-between; align-items: center; background: #263545;
+         padding: 8px 14px; border-top: 2px solid #18222c; gap: 10px; z-index: 8; }
+  #pad.hiddenPad { display: none !important; }
+  .dpad { display: grid; grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(2, 46px); gap: 5px; }
+  .pb { background: #34495e; color: #fff; border: 2px solid #5279a8; border-radius: 8px; font-size: 20px;
+        display: flex; align-items: center; justify-content: center; user-select: none; cursor: pointer; touch-action: none; }
+  .pb:active { background: #2980b9; transform: scale(0.95); }
+  #bE { width: 96px; height: 64px; background: #e67e22; border-color: #b85d12; font-weight: bold; font-size: 16px; }
+  .err { color: #ff6b6b !important; font-weight: bold !important; }
+  /* Dezente Fußzeile für das Impressum UNTER dem Spiel statt daneben */
+  #footerBar { width: 100%; max-width: 960px; text-align: center; font-size: 11px; color: #94a3b8;
+               padding: 6px 8px 2px; line-height: 1.2; }
+  #footerBar a { color: #cbd5e1; text-decoration: none; display: inline-block; padding: 12px 8px; }
+  #footerBar a:hover { text-decoration: underline; }
+
+  /* 1. SMARTPHONE HOCHFORMAT (Portrait) */
+  @media (max-width: 780px) {
+    body { padding: 0; justify-content: flex-start; }
+    #game { border-radius: 0; max-width: 100%; width: 100%; }
+    #hud { padding: 6px 8px; font-size: 12px; gap: 4px; }
+    #hud small { width: 100%; font-size: 10.5px; text-align: center; order: 4; }
+    #roomHud { position: static; transform: none; width: 100%; max-width: 100%; border-radius: 0;
+               border-left: none; border-right: none; border-top: none; padding: 5px 8px; font-size: 11.5px; }
+    #prompt { font-size: 11.5px; padding: 4px 10px; bottom: 6px; }
+    #modal, #victory { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.88);
+                       padding: 8px; align-items: center; justify-content: center; }
+    #board { max-width: 100%; max-height: 92vh; max-height: 92dvh; padding: 12px 14px; margin-top: 0; border-radius: 8px; }
+    #board h2 { font-size: 15.5px; padding: 6px 10px; }
+    #board p { font-size: 13.5px; }
+    .modeTab { font-size: 13px; padding: 8px 8px; }
+    .infoCard { font-size: 13.5px; padding: 8px 10px; line-height: 1.45; }
+    .infoCard h4 { font-size: 14px; }
+    .row { font-size: 13.5px; margin-bottom: 10px; }
+    .row label { font-size: 13.5px; margin-bottom: 4px; }
+    .row select { font-size: 14.5px; padding: 8px 10px; min-height: 40px; }
+    #feedback { font-size: 13px; }
+    .btns button { font-size: 13.5px; padding: 8px 12px; min-height: 40px; flex: 1 1 auto; }
+    #pad { padding: 10px 12px; }
+    .dpad { grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 48px); gap: 6px; }
+    #bE { width: 100px; height: 70px; font-size: 16px; }
+    #footerBar { padding: 4px 6px; font-size: 10.5px; }
+  }
+
+  /* 2. SMARTPHONE QUERFORMAT (Landscape-Vollbildmodus wie bei echten Mobile Games) */
+  @media (max-height: 540px) and (orientation: landscape) {
+    html, body { height: 100vh; height: 100dvh; overflow: hidden; padding: 0; }
+    #game { width: 100vw; max-width: 100vw; height: 100vh; height: 100dvh; border-radius: 0; }
+    #hud { padding: 3px 10px; font-size: 11.5px; gap: 6px; flex-shrink: 0; border-bottom: 1px solid #18222c; }
+    #hud small { display: none; }
+    #rankBadge { font-size: 10.5px; padding: 1px 7px; }
+    .hudBtn { font-size: 10.5px; padding: 2px 7px; }
+    #wrap { flex: 1; min-height: 0; width: 100%; height: 100%; overflow: hidden; }
+    canvas { width: auto; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; }
+    #roomHud { position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+               width: auto; max-width: 92%; border-radius: 12px; padding: 3px 10px; font-size: 11px;
+               border: 1.5px solid #d4b87a; }
+    #roomHud span:nth-child(2) { display: none; }
+    #prompt { bottom: 6px; font-size: 11px; padding: 3px 10px; max-width: 62%; }
+    /* Steuerkreuz schwebt halbtransparent links & rechts unten über dem Spiel */
+    #pad { position: absolute; left: 0; right: 0; bottom: 6px; background: transparent;
+           border-top: none; padding: 0 10px; pointer-events: none; }
+    .dpad { pointer-events: auto; grid-template-columns: repeat(3, 50px); grid-template-rows: repeat(2, 46px);
+            gap: 4px; opacity: 0.78; }
+    .pb { font-size: 17px; background: rgba(38, 53, 69, 0.85); }
+    #bE { pointer-events: auto; width: 84px; height: 70px; font-size: 16px; border-radius: 14px; opacity: 0.82; }
+    #modal, #victory { position: fixed; inset: 0; padding: 6px; background: rgba(15, 23, 42, 0.9);
+                       align-items: center; justify-content: center; }
+    #board { max-width: 680px; max-height: 94vh; max-height: 94dvh; padding: 8px 12px; }
+    #footerBar { position: fixed; top: 44px; right: 4px; width: auto; padding: 0;
+                 font-size: 9.5px; background: rgba(15, 23, 42, 0.65); border-radius: 6px; z-index: 7; }
+    #footerBar a { padding: 14px 8px; }
+  }
+  /* ---------- Cold War Quest ---------- */
+  #leitfrage { width: 100%; font-size: 12.5px; font-weight: bold; color: #ffe066; background: #1b2633; border: 1px solid #3b4b5e;
+               border-radius: 6px; padding: 4px 8px; order: 5; line-height: 1.35; }
+  .rot { color: #ff6b6b; text-decoration: underline wavy #ff6b6b; }
+  /* Kleine Handys im Hochformat (z. B. iPhone SE): Steuerung muss ganz sichtbar bleiben */
+  @media (max-width: 780px) and (max-height: 620px) and (orientation: portrait) {
+    #hud small { display: none; }
+    #leitfrage { font-size: 11px; padding: 2px 6px; }
+    #pad { padding: 6px 10px; }
+    .dpad { grid-template-rows: repeat(2, 44px); gap: 4px; }
+    #bE { height: 60px; }
+    #footerBar { padding: 2px 6px; }
+  }
+  .hudBtn.on { background: #6d28d9; border-color: #c4b5fd; }
+  .cw-lock { display: flex; gap: 6px; justify-content: center; margin: 4px 0 8px; }
+  .cw-dial { width: 30px; height: 30px; border-radius: 50%; background: #3a2312; color: #f2d64b; display: flex; align-items: center;
+             justify-content: center; font: bold 13px Georgia, serif; border: 2px solid #8a6236; transition: background .3s; }
+  .cw-dial.on { background: #1e8449; color: #fff; border-color: #145a32; }
+  .cw-two { flex-direction: row !important; }
+  .cw-two button { flex: 1; text-align: center !important; }
+  .cw-pic canvas, .cw-pics2 canvas { width: 100%; height: auto; border: 2px solid #8a6236; border-radius: 6px; display: block; cursor: pointer; }
+  .cw-pics2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 6px 0; }
+  .cw-spotlist { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+  .cw-spotlist button { font: bold 12.5px Georgia, serif; background: #dec99a; border: 2px solid #8a6236; border-radius: 6px;
+                        padding: 8px 10px; min-height: 44px; cursor: pointer; color: #2b1d12; }
+  .cw-spotlist button.ok { background: #d4efdf; border-color: #1e8449; }
+  .cw-tresor { background: #2b2f36; color: #f1f5f9; border: 3px solid #8a6236; border-radius: 8px; padding: 10px; margin-top: 10px; }
+  .cw-tresor .qm-step { color: #f2d64b; font-size: 12.5px; }
+  .cw-tresor .qm-fb.ok { color: #86efac; }
+  .cw-tresor .qm-fb.bad { color: #fca5a5; }
+  .cw-tresor-row { display: flex; gap: 6px; }
+  .cw-tresor-row input { flex: 1; min-width: 0; font: bold 18px 'Courier New', monospace; letter-spacing: 3px; text-transform: uppercase;
+                         padding: 8px 10px; border-radius: 6px; border: 2px solid #f2d64b; background: #111827; color: #f2d64b; min-height: 44px; }
+  .cw-tresor-row button { font: bold 14px Georgia, serif; background: #f2d64b; color: #111; border: 2px solid #8a6236; border-radius: 6px;
+                          padding: 8px 14px; min-height: 44px; cursor: pointer; }
+  .cw-eigen { width: 100%; font: 15px Georgia, serif; padding: 8px; border: 2px solid #8a6a3a; border-radius: 6px; background: #fffaf0; margin-top: 6px; box-sizing: border-box; }
+  .cw-twist { border-left: 5px solid #c0392b; }
+  #board .qm-card, #printArea { overflow-wrap: anywhere; } /* sehr lange Wörter in der eigenen Antwort */
+  .cw-lock-tick { font-size: 12.5px; margin-top: 4px; color: #7a4b00; }
+  .cw-nachlesen { margin: 8px 0; }
+  .cw-nachlesen > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; padding: 6px 12px; border: 2px dashed #8a6a3a; border-radius: 8px; font-weight: bold; color: #5e3a1e; background: #fff6df; list-style: none; }
+  .cw-nachlesen > summary::-webkit-details-marker { display: none; }
+  .cw-nachlesen[open] > summary { background: #f3e2b8; }
+  .cw-nachlesen .infoCard { margin-top: 6px; }
+  .cw-tipp { font-size: 12.5px; color: #fde68a; margin-top: 6px; min-height: 16px; }
+  .cw-mono { font-family: 'Courier New', monospace; letter-spacing: 2px; }
+  .cw-funk { background: #0b1a5c; color: #e8f0ff; font: 13px/1.45 'Courier New', monospace; border: 3px solid #fff;
+             box-shadow: 0 0 0 3px #0b1a5c; padding: 10px 12px; margin: 10px 3px; }
+  .cw-answer { background: #fff8d6; border: 2px dashed #d4ac0d; border-radius: 6px; padding: 8px; margin: 6px 0; font-size: 13px; min-height: 30px; }
+  .cw-answer small { color: #6b4e16; }
+  .cw-h3 { font-size: 13.5px; color: #5c3312; margin: 10px 0 4px; }
+  .cw-dim { opacity: .55; }
+  .cw-flaggrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cw-flagrow { display: flex; align-items: center; gap: 6px; font-size: 12px; margin: 3px 0; }
+  .cw-flagrow canvas { width: 30px; height: 20px; }
+  .cw-lage { background: #1f2937; color: #f8fafc; border-left: 4px solid #f2d64b; padding: 8px 10px; margin-bottom: 8px;
+             font-size: 12.5px; line-height: 1.45; border-radius: 4px; }
+  .cw-lage .ort { color: #f2d64b; font-family: 'Courier New', monospace; letter-spacing: 1px; font-weight: bold; }
+  .cw-orig { margin-top: 6px; font-size: 11.5px; }
+  .cw-orig summary { cursor: pointer; color: #5c3312; font-weight: bold; min-height: 28px; }
+  .cw-quelle { font-size: 10.5px; color: #6b5a44; margin-top: 4px; font-style: italic; }
+  .cw-uvhint { border-color: #6d28d9; background: #ede9fe; }
+  #printArea { display: none; }
+  @media print {
+    html, body { background: #fff !important; color: #000 !important; display: block !important; padding: 0 !important; min-height: 0; }
+    body > *:not(#printArea) { display: none !important; }
+    #printArea { display: block !important; font-family: Georgia, serif; font-size: 12pt; color: #000; padding: 10mm; }
+    #printArea h1 { font-size: 18pt; margin-bottom: 8px; }
+    #printArea h2 { font-size: 13pt; margin: 12px 0 4px; }
+    #printArea p { margin-bottom: 6px; line-height: 1.4; }
+    #printArea .pl { border-bottom: 1px solid #888; height: 26px; }
+    #printArea .urk { border: 6px double #000; padding: 30px; text-align: center; margin-top: 40px; }
+    #printArea .rot { color: #c00; }
+  }
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="hud">
+    <span id="titleHud">🇫🇷 Revolution Quest</span>
+    <span id="stars">🚩 Fahnen: 0 / 11 (0/4 Häuser)</span>
+    <div class="hudRight">
+      <span id="rankBadge">🏅 Rang: Rekrut/in</span>
+      <button id="btnKoffer" class="hudBtn" type="button" title="Tasche öffnen [I]">💼 Tasche</button>
+      <button id="btnUV" class="hudBtn" type="button" title="Kerze an/aus [U]">🕯️ Kerze</button>
+      <button id="btnTogglePad" class="hudBtn" type="button" title="Steuerkreuz ein-/ausblenden">🎮 Pad</button>
+      <button id="btnFullscreen" class="hudBtn" type="button" title="Vollbild umschalten">⛶ Vollbild</button>
+      <button id="btnReset" class="hudBtn" type="button" title="Spielstand löschen und neu beginnen">↺ Neu</button>
+    </div>
+    <div id="leitfrage">❓ Leitfrage: <span id="leitfrageTxt"></span></div>
+    <small id="help">Tippe auf ein Haus oder nutze Steuerkreuz &amp; [E] · [I] Tasche · [U] Kerze</small>
+  </div>
+  <div id="wrap">
+    <div id="roomHud">
+      <span id="roomTitleTxt">🏛️ Im Haus</span>
+      <span style="color:#cbd5e1;font-weight:normal;font-size:11.5px;">📖 Infotafel · 🧩 Tisch · 🕯️ Geheimtinte suchen</span>
+      <button id="btnLeaveRoomHud" type="button">🚪 Raus</button>
+    </div>
+    <canvas id="c" width="1280" height="760"></canvas>
+    <div id="prompt"></div>
+    <div id="modal"><div id="board"></div></div>
+    <div id="victory">
+      <div id="victoryBox">
+        <h2>🖨️ Operation BRUMAIRE abgeschlossen!</h2>
+        <p id="victoryText"></p>
+        <div class="btns">
+          <button id="btnUrkunde" type="button">🖨️ Urkunde</button>
+          <button id="btnDossierV" type="button">🖨️ Dossier</button>
+          <button id="closeVictory" type="button">Weiter umsehen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="pad">
+    <div class="dpad">
+      <div></div><div class="pb" data-dx="0" data-dy="-1">↑</div><div></div>
+      <div class="pb" data-dx="-1" data-dy="0">←</div><div class="pb" data-dx="0" data-dy="1">↓</div><div class="pb" data-dx="1" data-dy="0">→</div>
+    </div>
+    <div class="pb" id="bE">[E]</div>
+  </div>
+</div>
+<footer id="footerBar">
+  <a href="../index.html">🏠 Übersicht</a> · <a href="../impressum/index.html">Impressum &amp; Datenschutz</a>
+</footer>
+<div id="printArea"></div>
+
+<script src="../assets/quest-intro.js"></script>
+<script src="../assets/quest-modes.js"></script>
+<script src="cw-gfx.js"></script>
+<script src="cw.js"></script>
+<script src="cw-modes.js"></script>
+<script>QuestIntro({ key: "revolutionquest", title: "REVOLUTION QUEST", pages: CW.introPages });</script>
+<script>
+// =====================================================================
+// COLD WAR QUEST – Engine (Grundlage: BRD Quest J2, umgebaut)
+// =====================================================================
+const CONTENT = CW.content;
+// =====================================================================
+// TEIL C – SPIELLOGIK (Steuerung, Infotafel + Aufgaben-Tabs, Selbsttest)
+// =====================================================================
+const T = 20, COLS = 32, ROWS = 19;
+// Geteilte Stadt: Westen links, Fluss mit Agentenbrücke in der Mitte, Osten rechts.
+// ~ Fluss · B Brücke · K KS1-Büro · R Litfaßsäule/Plakatwand · A Auto
+const MAP = [
+  "TTTTTTTTTTTTTT~~~~TTTTTTTTTTTTTT",
+  "TT############~~~~############TT",
+  "TT#==HHHHH===#~~~~#===HHHHH==#TT",
+  "TT#==HHHHH===#~~~~#===HHHHH==#TT",
+  "TT#==HHHHH===#~~~~#===HHHHH==#TT",
+  "TT####=D=====#~~~~#=====D=####TT",
+  "TT#######====#~~~~#====#######TT",
+  "TT========A===BBBB============TT",
+  "TT============BKKB============TT",
+  "TT==R=========BKKB=========R==TT",
+  "TT============BDBB============TT",
+  "TT============BBBB===A========TT",
+  "TT#######====#~~~~#====#######TT",
+  "TT#==HHHHH===#~~~~#===HHHHH==#TT",
+  "TT#==HHHHH===#~~~~#===HHHHH==#TT",
+  "TT#==HHHHH===#~~~~#===HHHHH==#TT",
+  "TT####=D=====#~~~~#=====D=####TT",
+  "TT############~~~~############TT",
+  "TTTTTTTTTTTTTT~~~~TTTTTTTTTTTTTT"
+];
+const SOLID = "T#HK~RA";
+
+const HOUSES = [
+  { id: "truman",         name: "Haus 1: Versailles",  c: 5,  r: 2,  w: 5, door: { c: 7,  r: 5 } },
+  { id: "stellvertreter", name: "Haus 2: Rathaus",     c: 22, r: 2,  w: 5, door: { c: 24, r: 5 } },
+  { id: "washington",     name: "Haus 3: Revolutionsplatz", c: 5,  r: 13, w: 5, door: { c: 7,  r: 16 } },
+  { id: "moskau",         name: "Haus 4: Konsulat",    c: 22, r: 13, w: 5, door: { c: 24, r: 16 } },
+  { id: "buero",          name: "Druckerei (Finale)",   c: 15, r: 8,  w: 2, door: { c: 15, r: 10 } }
+];
+
+const RANKS = CW.ranks;
+// Häuser der Reihe nach: Haus n öffnet sich erst, wenn Haus n−1 gelöst ist.
+function isUnlocked(h) {
+  const i = CW.order.indexOf(h.id);
+  return i <= 0 || !!CWS.solved[CW.order[i - 1]];
+}
+let uvOn = false;
+const seenRoom = {};
+
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+const promptEl = document.getElementById("prompt");
+const roomHudEl = document.getElementById("roomHud");
+const roomTitleTxt = document.getElementById("roomTitleTxt");
+const modal = document.getElementById("modal");
+const board = document.getElementById("board");
+const victoryEl = document.getElementById("victory");
+const padEl = document.getElementById("pad");
+
+// Mobile-Buttons: Steuerkreuz ein-/ausblenden & Vollbild-Modus
+document.getElementById("btnTogglePad").addEventListener("click", () => {
+  padEl.classList.toggle("hiddenPad");
+});
+document.getElementById("btnFullscreen").addEventListener("click", () => {
+  const docEl = document.documentElement;
+  if (!document.fullscreenElement) {
+    if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
+  } else if (document.exitFullscreen) {
+    document.exitFullscreen().catch(() => {});
+  }
+});
+
+let scene = "village";
+const player = { c: 16, r: 11, dir: "up" };
+const intPlayer = { x: 890, y: 455, dir: "left", stepTick: 0 };
+let hoverStationId = null;
+
+const ROOM_STATIONS = [
+  {
+    id: "info",
+    label: "📖 INFOTAFEL",
+    prompt: "[E] oder Tippen: 📖 Infotafel lesen",
+    standX: 430,
+    standY: 418,
+    centerX: 415,
+    centerY: 345,
+    proxRadius: 95,
+    hitbox: { x1: 340, y1: 215, x2: 495, y2: 430 }
+  },
+  {
+    id: "quiz",
+    label: "🧩 TISCH: RÄTSEL & TRESOR",
+    prompt: "[E] oder Tippen: 🧩 Rätsel und Tresor am Tisch",
+    standX: 624,
+    standY: 558,
+    centerX: 624,
+    centerY: 465,
+    proxRadius: 122,
+    hitbox: { x1: 455, y1: 365, x2: 795, y2: 565 }
+  },
+  {
+    id: "exit",
+    label: "🚪 AUSGANG",
+    prompt: "[E] oder Tippen: 🚪 Haus verlassen (zurück in die Stadt)",
+    standX: 905,
+    standY: 450,
+    centerX: 965,
+    centerY: 340,
+    proxRadius: 95,
+    hitbox: { x1: 895, y1: 165, x2: 1055, y2: 465 }
+  }
+];
+
+let stars = 0, showGrid = false, modalOpen = false, victoryShown = !!CWS.solved.buero, current = null, lastMove = 0;
+const solved = CWS.solved;
+const draftAnswers = {};
+const houseOptions = {};
+const particles = [];
+
+function spawnParticles(cx, cy, count) {
+  for (let i = 0; i < count; i++) {
+    const ang = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4;
+    const spd = 1.5 + Math.random() * 3.5;
+    particles.push({
+      x: cx,
+      y: cy,
+      vx: Math.cos(ang) * spd,
+      vy: Math.sin(ang) * spd - 1.2,
+      life: 45 + Math.floor(Math.random() * 25),
+      col: ["#fff799", "#ffe042", "#f5c418", "#ffffff"][i % 4]
+    });
+  }
+}
+
+function updateStarsHud() {
+  const n = CWS.solvedCount();
+  stars = CWS.flags().length;
+  const houses = CW.order.slice(0, 4).filter(id => CWS.solved[id]).length;
+  document.getElementById("stars").textContent =
+    "🚩 Fahnen: " + stars + " / " + CW.flagStages.flat().length + " (" + houses + "/4 Häuser)" + (CWS.solved.buero ? " 🎉" : "");
+  document.getElementById("rankBadge").textContent = "🏅 Rang: " + RANKS[n];
+}
+function updateLeitfrage() {
+  document.getElementById("leitfrageTxt").innerHTML = CWS.twist1 ? CW.leitfrageKorrigiert : CW.leitfrage;
+}
+let flashTimer = null;
+function flashPrompt(txt, ms) {
+  promptEl.innerHTML = txt;
+  promptEl.style.display = "block";
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => { flashTimer = null; updatePrompt(); }, ms || 2600);
+}
+// Tafel-Modal für Koffer, Bonus-Akten und Vermutung
+function showBoard(build) {
+  saveCurrentDrafts();
+  modalOpen = true;
+  board.innerHTML = "";
+  build(board);
+  modal.style.display = "flex";
+  board.scrollTop = 0; // erst nach dem Einblenden wirksam
+  promptEl.style.display = "none";
+}
+function closeBoard() { closeStationModalToRoom(); }
+function toggleUV(force) {
+  uvOn = typeof force === "boolean" ? force : !uvOn;
+  if (scene !== "interior") uvOn = false;
+  if (uvOn && !uvSpot()) { uvOn = false; flashPrompt("🔦 Hier gibt es nichts Verstecktes."); }
+  document.getElementById("btnUV").classList.toggle("on", uvOn);
+  if (scene !== "interior" && force !== false) flashPrompt("🕯️ Die Kerze brauchst du nur in den Häusern.");
+  updatePrompt();
+}
+function uvSpot() { const th = current && ROOM_THEMES[current.id]; return th && th.uv ? th.uv : null; }
+function tryCollectUV() {
+  const sp = uvSpot();
+  if (!sp || !uvOn || CWS.uv[current.id]) return false;
+  if (Math.hypot(intPlayer.x - sp.x, intPlayer.y - sp.y) > 75) return false;
+  CWS.uv[current.id] = true;
+  CWS.save();
+  spawnParticles(sp.x, sp.y - 50, 24);
+  const d = CONTENT[current.id];
+  showBoard(b => {
+    const h = document.createElement("h2"); h.textContent = "🕯️ Geheimtinte gefunden!"; b.appendChild(h);
+    const c = document.createElement("div"); c.className = "qm-card"; c.innerHTML = "<i>" + d.uv.text + "</i>"; b.appendChild(c);
+    const p = document.createElement("p"); p.textContent = "Die Notiz liegt jetzt in deiner Tasche. Mit ihr öffnet sich der Tresor am Tisch."; b.appendChild(p);
+    const w = document.createElement("div"); w.className = "btns"; b.appendChild(w);
+    const bt = document.createElement("button"); bt.type = "button"; bt.textContent = "🧩 Zum Tisch"; w.appendChild(bt);
+    bt.addEventListener("click", () => { openStationModal(current, false, "quiz"); });
+    const bt2 = document.createElement("button"); bt2.type = "button"; bt2.textContent = "Weiter im Raum"; w.appendChild(bt2);
+    bt2.addEventListener("click", () => closeBoard());
+  });
+  return true;
+}
+function showVictory() {
+  const n = CWS.solvedCount();
+  document.getElementById("victoryText").innerHTML = "Du hast alle vier Schauplätze untersucht und die Leitfrage beantwortet.<br><b>Rang: " + RANKS[n] + "</b> · 🚩 " + CWS.flags().length + " von " + CW.flagStages.flat().length + " Faggen.<br><br>" + CW.content.buero.funkspruch;
+  victoryEl.style.display = "flex";
+}
+
+function tile(c, r) { return (c < 0 || r < 0 || c >= COLS || r >= ROWS) ? "#" : MAP[r][c]; }
+function walkable(c, r) { return !SOLID.includes(tile(c, r)); }
+function doorHere() { return HOUSES.find(h => h.door.c === player.c && h.door.r === player.r) || null; }
+
+let autoWalkTimer = null;
+function stopAutoWalk() {
+  if (autoWalkTimer) {
+    clearInterval(autoWalkTimer);
+    autoWalkTimer = null;
+  }
+}
+
+function findVillagePath(startC, startR, goalC, goalR) {
+  if (startC === goalC && startR === goalR) return [];
+  const q = [[startC, startR]];
+  const prev = new Map();
+  prev.set(startC + "," + startR, null);
+  while (q.length) {
+    const [c, r] = q.shift();
+    if (c === goalC && r === goalR) {
+      const path = [];
+      let cur = c + "," + r;
+      while (prev.get(cur) !== null) {
+        const [pc, pr] = cur.split(",").map(Number);
+        path.push([pc, pr]);
+        cur = prev.get(cur);
+      }
+      return path.reverse();
+    }
+    for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
+      const nc = c + dx, nr = r + dy;
+      const key = nc + "," + nr;
+      if (!prev.has(key) && walkable(nc, nr)) {
+        prev.set(key, c + "," + r);
+        q.push([nc, nr]);
+      }
+    }
+  }
+  return null;
+}
+
+function houseAtTile(tc, tr) {
+  for (const h of HOUSES) {
+    // Kleine Gebäude (KS1-Büro auf der Brücke) ohne Rand, sonst schluckt der Rand Brücke und Ostufer
+    const w = h.w || 5, m = w < 5 ? 0 : 1;
+    if (
+      (tc === h.door.c && tr === h.door.r) ||
+      (tc >= h.c - m && tc <= h.c + w - 1 + m && tr >= h.r - 1 - m && tr <= h.door.r)
+    ) {
+      return h;
+    }
+  }
+  return null;
+}
+
+function walkToTileAndAct(goalC, goalR, openHouseOnArrival) {
+  stopAutoWalk();
+  const path = findVillagePath(player.c, player.r, goalC, goalR);
+  if (!path) return;
+  if (path.length === 0) {
+    if (openHouseOnArrival) enterHouse(openHouseOnArrival);
+    return;
+  }
+  autoWalkTimer = setInterval(() => {
+    if (modalOpen || scene !== "village" || !path.length) {
+      stopAutoWalk();
+      return;
+    }
+    const [nextC, nextR] = path.shift();
+    const dx = nextC - player.c, dy = nextR - player.r;
+    player.dir = dx > 0 ? "right" : dx < 0 ? "left" : dy > 0 ? "down" : "up";
+    player.c = nextC;
+    player.r = nextR;
+    updatePrompt();
+    if (path.length === 0) {
+      stopAutoWalk();
+      if (openHouseOnArrival && player.c === openHouseOnArrival.door.c && player.r === openHouseOnArrival.door.r) {
+        enterHouse(openHouseOnArrival);
+      }
+    }
+  }, 95);
+}
+
+function isInteriorWalkable(x, y) {
+  if (x < 215 || x > 1045) return false;
+  if (y > 724) return false;
+  const wallBottomY = 295 + Math.abs(x - 640) * 0.52;
+  if (y < wallBottomY) return false;
+  const tableDiamond = Math.abs(x - 624) / 172 + Math.abs(y - 468) / 74;
+  if (tableDiamond < 1.0) return false;
+  return true;
+}
+
+function nearInteriorStation(px = intPlayer.x, py = intPlayer.y) {
+  let best = null, bestDist = Infinity;
+  for (const st of ROOM_STATIONS) {
+    const d1 = Math.hypot(px - st.standX, py - st.standY);
+    const d2 = Math.hypot(px - st.centerX, py - st.centerY);
+    const d = Math.min(d1, d2);
+    if (d <= st.proxRadius && d < bestDist) {
+      best = st;
+      bestDist = d;
+    }
+  }
+  return best;
+}
+
+function stationAtPoint(cx, cy) {
+  for (const st of ROOM_STATIONS) {
+    const b = st.hitbox;
+    if (cx >= b.x1 && cx <= b.x2 && cy >= b.y1 && cy <= b.y2) return st;
+  }
+  return null;
+}
+
+function tryMove(dx, dy) {
+  if (modalOpen) return;
+  stopAutoWalk();
+  if (scene === "interior") {
+    intPlayer.dir = dx > 0 ? "right" : dx < 0 ? "left" : dy > 0 ? "down" : "up";
+    const stepX = dx * 26, stepY = dy * 20;
+    const nx = intPlayer.x + stepX, ny = intPlayer.y + stepY;
+    if (isInteriorWalkable(nx, ny)) {
+      intPlayer.x = nx;
+      intPlayer.y = ny;
+      intPlayer.stepTick = performance.now();
+    } else if (dx !== 0 && isInteriorWalkable(intPlayer.x + stepX, intPlayer.y)) {
+      intPlayer.x += stepX;
+      intPlayer.stepTick = performance.now();
+    } else if (dy !== 0 && isInteriorWalkable(intPlayer.x, intPlayer.y + stepY)) {
+      intPlayer.y += stepY;
+      intPlayer.stepTick = performance.now();
+    } else {
+      for (const [altX, altY] of [[stepX, 14], [stepX, -14], [16, stepY], [-16, stepY]]) {
+        if (isInteriorWalkable(intPlayer.x + altX, intPlayer.y + altY)) {
+          intPlayer.x += altX;
+          intPlayer.y += altY;
+          intPlayer.stepTick = performance.now();
+          break;
+        }
+      }
+    }
+    updatePrompt();
+    return;
+  }
+  player.dir = dx > 0 ? "right" : dx < 0 ? "left" : dy > 0 ? "down" : "up";
+  if (walkable(player.c + dx, player.r + dy)) { player.c += dx; player.r += dy; }
+  updatePrompt();
+}
+
+function updatePrompt() {
+  if (modalOpen) {
+    promptEl.style.display = "none";
+    return;
+  }
+  if (flashTimer) return;
+  if (scene === "interior") {
+    const sp = uvSpot();
+    if (uvOn && sp && current && !CWS.uv[current.id] && Math.hypot(intPlayer.x - sp.x, intPlayer.y - sp.y) <= 75) {
+      promptEl.textContent = "[E] oder Tippen: 🕯️ Geheimtinte lesen";
+      promptEl.style.display = "block";
+      return;
+    }
+    const st = nearInteriorStation();
+    if (st) {
+      promptEl.textContent = st.prompt;
+      promptEl.style.display = "block";
+    } else {
+      promptEl.textContent = uvOn ? "🕯️ Kerze an: Lauf durch den Raum und such die Geheimtinte." : "Im Raum: 📖 Infotafel · 🧩 Tisch · 🕯️ [U] Kerze";
+      promptEl.style.display = "block";
+    }
+    return;
+  }
+  const h = doorHere();
+  if (h && !modalOpen) {
+    promptEl.textContent = isUnlocked(h) ? "[E] Haus betreten: " + h.name + (solved[h.id] ? " (gelöst 🛡️)" : "") : "🔒 " + h.name + " ist noch versiegelt.";
+    promptEl.style.display = "block";
+  } else promptEl.style.display = "none";
+}
+
+function enterHouse(h) {
+  stopAutoWalk();
+  if (!isUnlocked(h)) {
+    const prev = HOUSES.find(x => x.id === CW.order[CW.order.indexOf(h.id) - 1]);
+    flashPrompt("🔒 Versiegelt. Löse zuerst " + (prev ? prev.name : "das vorige Haus") + ".", 3000);
+    return;
+  }
+  current = h;
+  scene = "interior";
+  modalOpen = false;
+  intPlayer.x = 856;
+  intPlayer.y = 560;
+  intPlayer.dir = "down";
+  roomTitleTxt.textContent = "🏛️ " + h.name + (solved[h.id] ? " 🛡️" : "");
+  roomHudEl.style.display = "flex";
+  updatePrompt();
+  if (!seenRoom[h.id]) {
+    seenRoom[h.id] = true;
+    showArrival(h);
+  }
+}
+// Ankunft: Ort, Lage und Kontaktperson, danach direkt zur Infotafel
+function showArrival(h) {
+  const d = CONTENT[h.id];
+  showBoard(b => {
+    const o = add(b, "div", "📍 " + d.ort); o.className = "infoSourceBadge";
+    add(b, "h2", d.title);
+    add(b, "p", d.ankunft);
+    if (d.kontakt) {
+      const k = add(b, "div"); k.className = "qm-card";
+      k.innerHTML = "<b>🗣️ " + d.kontakt.name + ":</b> " + d.kontakt.text;
+    }
+    const w = add(b, "div"); w.className = "btns";
+    add(w, "button", "📖 Zur Infotafel").addEventListener("click", () => openStationModal(h, false, "info"));
+    add(w, "button", "🚶 Erst umsehen").addEventListener("click", () => closeBoard());
+  });
+}
+
+function leaveHouseToVillage() {
+  board.removeAttribute("style");
+  modal.style.display = "none";
+  modalOpen = false;
+  scene = "village";
+  current = null;
+  toggleUV(false);
+  roomHudEl.style.display = "none";
+  updatePrompt();
+}
+
+function closeStationModalToRoom() {
+  board.removeAttribute("style");
+  modal.style.display = "none";
+  modalOpen = false;
+  if (current) {
+    roomTitleTxt.textContent = "🏛️ " + current.name + (solved[current.id] ? " 🛡️" : "");
+  }
+  updatePrompt();
+}
+
+function triggerInteriorStation(st) {
+  if (!st || !current) return;
+  intPlayer.dir = st.standX < intPlayer.x ? "left" : "right";
+  intPlayer.x = st.standX;
+  intPlayer.y = st.standY;
+  intPlayer.stepTick = performance.now();
+  if (st.id === "exit") {
+    leaveHouseToVillage();
+  } else if (st.id === "info") {
+    openStationModal(current, false, "info");
+  } else if (st.id === "quiz") {
+    openStationModal(current, false, "quiz");
+  }
+}
+
+function interact() {
+  if (modalOpen) return;
+  if (scene === "village") {
+    const h = doorHere();
+    if (h) enterHouse(h);
+  } else if (scene === "interior") {
+    if (tryCollectUV()) return;
+    const st = nearInteriorStation();
+    if (st) {
+      triggerInteriorStation(st);
+    } else {
+      const dInfo = Math.hypot(intPlayer.x - ROOM_STATIONS[0].standX, intPlayer.y - ROOM_STATIONS[0].standY);
+      const dQuiz = Math.hypot(intPlayer.x - ROOM_STATIONS[1].standX, intPlayer.y - ROOM_STATIONS[1].standY);
+      triggerInteriorStation(dInfo <= dQuiz ? ROOM_STATIONS[0] : ROOM_STATIONS[1]);
+    }
+  }
+}
+
+canvas.addEventListener("pointermove", e => {
+  if (scene !== "interior" || modalOpen) {
+    canvas.style.cursor = "default";
+    hoverStationId = null;
+    return;
+  }
+  const rect = canvas.getBoundingClientRect();
+  const cx = ((e.clientX - rect.left) / rect.width) * 1280;
+  const cy = ((e.clientY - rect.top) / rect.height) * 760;
+  const st = stationAtPoint(cx, cy);
+  hoverStationId = st ? st.id : null;
+  canvas.style.cursor = st ? "pointer" : "default";
+});
+
+// Touch: Öffnet ein Fingertipp (pointerdown) ein Fenster, landet der folgende click (oder ein Doppeltipp) sonst auf einem Knopf darin
+function swallowGhostClick() {
+  const stop = ev => { ev.stopImmediatePropagation(); ev.preventDefault(); };
+  document.addEventListener("click", stop, true);
+  setTimeout(() => document.removeEventListener("click", stop, true), 450);
+}
+canvas.addEventListener("pointerdown", e => {
+  if (modalOpen) return;
+  handleCanvasDown(e);
+  if (modalOpen) swallowGhostClick();
+});
+function handleCanvasDown(e) {
+  const rect = canvas.getBoundingClientRect();
+  const cx = ((e.clientX - rect.left) / rect.width) * 1280;
+  const cy = ((e.clientY - rect.top) / rect.height) * 760;
+
+  if (scene === "interior") {
+    const sp = uvSpot();
+    if (uvOn && sp && Math.hypot(cx - sp.x, cy - (sp.y - 40)) < 90) {
+      e.preventDefault();
+      intPlayer.dir = sp.x < intPlayer.x ? "left" : "right";
+      intPlayer.x = sp.x; intPlayer.y = sp.y;
+      intPlayer.stepTick = performance.now();
+      if (!tryCollectUV()) updatePrompt();
+      return;
+    }
+    const st = stationAtPoint(cx, cy);
+    if (st) {
+      e.preventDefault();
+      triggerInteriorStation(st);
+      return;
+    }
+    if (isInteriorWalkable(cx, cy)) {
+      intPlayer.dir = cx < intPlayer.x ? "left" : "right";
+      intPlayer.x = Math.round(cx);
+      intPlayer.y = Math.round(cy);
+      intPlayer.stepTick = performance.now();
+      updatePrompt();
+    }
+  } else if (scene === "village") {
+    const tc = Math.floor(cx / TW), tr = Math.floor(cy / TW);
+    const tappedHouse = houseAtTile(tc, tr);
+    if (tappedHouse) {
+      e.preventDefault();
+      if (!isUnlocked(tappedHouse)) { enterHouse(tappedHouse); return; }
+      if (player.c === tappedHouse.door.c && player.r === tappedHouse.door.r) {
+        enterHouse(tappedHouse);
+      } else {
+        walkToTileAndAct(tappedHouse.door.c, tappedHouse.door.r, tappedHouse);
+      }
+      return;
+    }
+    if (walkable(tc, tr)) {
+      e.preventDefault();
+      walkToTileAndAct(tc, tr, null);
+    }
+  }
+}
+
+document.getElementById("btnLeaveRoomHud").addEventListener("click", leaveHouseToVillage);
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function add(parent, tag, text) {
+  const e = document.createElement(tag);
+  if (text) e.textContent = text;
+  parent.appendChild(e);
+  return e;
+}
+
+function saveCurrentDrafts() {
+  if (!current || !modalOpen) return;
+  const sels = [...board.querySelectorAll("select")];
+  if (sels.length) {
+    draftAnswers[current.id] = sels.map(s => s.value);
+  }
+}
+
+function openStationModal(h, forceReset, startTab) {
+  modalOpen = true;
+  current = h;
+  const d = CONTENT[h.id];
+  const isAlreadySolved = !!solved[h.id] && !forceReset;
+
+  if (!d.mode && (forceReset || !houseOptions[h.id])) {
+    houseOptions[h.id] = shuffle([...d.items.map(i => i.a), ...d.distractors]);
+  }
+  if (forceReset) {
+    delete draftAnswers[h.id];
+  }
+  const options = houseOptions[h.id];
+  const savedDraft = draftAnswers[h.id] || [];
+
+  board.innerHTML = "";
+  add(board, "h2", d.title);
+
+  const tabsBar = add(board, "div");
+  tabsBar.className = "modeTabs";
+  const tabInfoBtn = add(tabsBar, "button", "📖 Infotafel (Nachschlagen)");
+  tabInfoBtn.type = "button";
+  tabInfoBtn.className = "modeTab";
+  const tabQuizBtn = add(tabsBar, "button", "🧩 Aufgaben-Tisch");
+  tabQuizBtn.type = "button";
+  tabQuizBtn.className = "modeTab";
+
+  const infoView = add(board, "div");
+  const badge = add(infoView, "div", d.infoSource);
+  badge.className = "infoSourceBadge";
+  add(infoView, "p", d.infoLead);
+  d.infoCards.forEach((ic, ci) => {
+    const card = add(infoView, "div");
+    card.className = "infoCard";
+    add(card, "h4", "Karte " + (ci + 1) + " · " + ic.heading);
+    const p = document.createElement("div");
+    p.innerHTML = ic.text;
+    card.appendChild(p);
+    if (ic.quelle) { const q = add(card, "div", "Quelle: " + ic.quelle); q.className = "cw-quelle"; }
+    if (ic.orig) {
+      const det = add(card, "details");
+      add(det, "summary", "🇬🇧 Original anzeigen");
+      add(det, "div", ic.orig).className = "cw-orig";
+    }
+  });
+  const infoBtns = add(infoView, "div");
+  infoBtns.className = "btns";
+  const walkBackFromInfoBtn = add(infoBtns, "button", "🚶 Zurück in den Raum");
+  walkBackFromInfoBtn.type = "button";
+  walkBackFromInfoBtn.addEventListener("click", () => {
+    saveCurrentDrafts();
+    closeStationModalToRoom();
+  });
+  const toQuizBtn = add(infoBtns, "button", "🧩 Direkt zur Aufgabe am Tisch");
+  toQuizBtn.type = "button";
+
+  const quizView = add(board, "div");
+  add(quizView, "p", d.intro);
+
+  if (d.mode) {
+    // Spielstand bleibt erhalten, wenn man das Haus verlässt und wiederkommt
+    if (forceReset || !d._host) {
+      d._host = document.createElement("div");
+      CWHouse(d._host, d, isAlreadySolved, () => markSolved(null));
+    }
+    quizView.appendChild(d._host);
+    // Notiz inzwischen gefunden: Tresor sofort zeigen statt des alten UV-Hinweises
+    if (d._host._uvRetry && CWS.uv[h.id]) d._host._uvRetry();
+    const mb = add(quizView, "div");
+    mb.className = "btns";
+    add(mb, "button", "📖 Infotext nachschlagen").addEventListener("click", () => switchTab("info"));
+    add(mb, "button", "🚶 Zurück in den Raum").addEventListener("click", () => closeStationModalToRoom());
+    add(mb, "button", "🚪 Haus verlassen").addEventListener("click", () => leaveHouseToVillage());
+  } else {
+  const note = add(quizView, "div", "✍️ Tipp: Du kannst hier direkt über „📖 Infotext nachschlagen“ nachlesen oder zurück in den Raum laufen – deine Auswahl bleibt gespeichert!");
+  note.className = "sheetNote";
+
+  d.items.forEach((it, idx) => {
+    const row = add(quizView, "div");
+    row.className = "row";
+    add(row, "label", it.q);
+    const s = document.createElement("select");
+    s.appendChild(new Option("– Baustein wählen (oder korrigieren) –", ""));
+    options.forEach(o => s.appendChild(new Option(o, o)));
+    if (isAlreadySolved) {
+      s.value = it.a;
+      s.className = "ok";
+    } else if (savedDraft[idx]) {
+      s.value = savedDraft[idx];
+    }
+    s.addEventListener("change", () => {
+      s.className = "";
+      saveCurrentDrafts();
+    });
+    row.appendChild(s);
+  });
+
+  const fb = add(quizView, "div");
+  fb.id = "feedback";
+  if (isAlreadySolved) {
+    fb.style.color = "#1e7a3a";
+    fb.textContent = "✔ Bereits gelöst 🛡️ – alle richtigen Antworten sind grün eingetragen.";
+  }
+
+  const btns = add(quizView, "div");
+  btns.className = "btns";
+  add(btns, "button", "✔ Antworten prüfen").addEventListener("click", checkAnswers);
+  add(btns, "button", "📖 Infotext nachschlagen").addEventListener("click", () => switchTab("info"));
+  add(btns, "button", "💡 Tipp").addEventListener("click", () => {
+    fb.style.color = "#5e3a1e";
+    fb.textContent = "Tipp: " + d.tip;
+  });
+  add(btns, "button", "🔄 Neu mischen").addEventListener("click", () => openStationModal(h, true, "quiz"));
+  add(btns, "button", "🚶 Zurück in den Raum").addEventListener("click", () => {
+    saveCurrentDrafts();
+    closeStationModalToRoom();
+  });
+  add(btns, "button", "🚪 Haus verlassen").addEventListener("click", () => {
+    saveCurrentDrafts();
+    leaveHouseToVillage();
+  });
+  if (isAlreadySolved && d.summary) showSummary(quizView, d);
+  }
+
+  function switchTab(mode) {
+    saveCurrentDrafts();
+    const showInfo = mode === "info";
+    infoView.style.display = showInfo ? "block" : "none";
+    quizView.style.display = showInfo ? "none" : "block";
+    tabInfoBtn.classList.toggle("active", showInfo);
+    tabQuizBtn.classList.toggle("active", !showInfo);
+    // Zurück am Tisch: dorthin springen, wo man war (offener Tresor), sonst nach oben
+    const tr = !showInfo && quizView.querySelector(".cw-tresor input:not(:disabled)");
+    if (tr) setTimeout(() => tr.closest(".cw-tresor").scrollIntoView({ block: "center" }), 0);
+    else board.scrollTop = 0;
+  }
+
+  tabInfoBtn.addEventListener("click", () => switchTab("info"));
+  tabQuizBtn.addEventListener("click", () => switchTab("quiz"));
+  toQuizBtn.addEventListener("click", () => {
+    intPlayer.x = ROOM_STATIONS[1].standX;
+    intPlayer.y = ROOM_STATIONS[1].standY;
+    switchTab("quiz");
+  });
+
+  const initialTab = startTab || "quiz";
+  modal.style.display = "flex";
+  switchTab(initialTab);
+  promptEl.style.display = "none";
+}
+
+const LAENDER = ["Baden-Württemberg", "Bayern", "Berlin", "Brandenburg", "Bremen", "Hamburg", "Hessen", "Mecklenburg-Vorpommern",
+  "Niedersachsen", "Nordrhein-Westfalen", "Rheinland-Pfalz", "Saarland", "Sachsen", "Sachsen-Anhalt", "Schleswig-Holstein", "Thüringen"];
+function showSummary(parent, d) {
+  if (parent.querySelector(".qm-sum")) return;
+  const s = add(parent, "div");
+  s.className = "qm-sum";
+  s.innerHTML = "<h4>✍️ Ergebnis fürs Arbeitsblatt</h4>" + d.summary;
+}
+function markSolved(fb) {
+  if (!current) return;
+  const firstTime = !solved[current.id];
+  const before = CWS.flags().length;
+  solved[current.id] = true;
+  if (current.id === "stellvertreter") CWS.twist1 = true;
+  CWS.save();
+  updateStarsHud();
+  updateLeitfrage();
+  roomTitleTxt.textContent = "🏛️ " + current.name + " 🛡️";
+  if (!firstTime) return;
+  spawnParticles(640, 392, 36);
+  const neu = CWS.flags().slice(before).map(k => CW_FLAGS[k] ? CW_FLAGS[k][0] : k);
+  const n = CWS.solvedCount();
+  const msg = "🚩 Neue Fahnen für die Kriegskarte: " + (neu.length ? neu.join(", ") : "–") + " (" + CWS.flags().length + " / " + CW.flagStages.flat().length + " · Rang: " + RANKS[n] + ")";
+  const host = board.querySelector(".qm-sum");
+  if (host) { const m = document.createElement("div"); m.className = "qm-fb ok"; m.textContent = msg; host.parentNode.insertBefore(m, host); }
+  if (current.id === "stellvertreter" && host) {
+    const tw = document.createElement("div"); tw.className = "qm-card cw-twist";
+    tw.innerHTML = "❗ <b>Der Meister korrigiert die Leitfrage:</b> " + CW.leitfrageKorrigiert + "<br>" + CW.twistGrund;
+    host.parentNode.insertBefore(tw, host);
+  }
+  if (current.id === "buero" && !victoryShown) {
+    victoryShown = true;
+    setTimeout(showVictory, 900);
+  }
+}
+
+const DIRS = {
+  ArrowUp: [0, -1], KeyW: [0, -1],
+  ArrowDown: [0, 1], KeyS: [0, 1],
+  ArrowLeft: [-1, 0], KeyA: [-1, 0],
+  ArrowRight: [1, 0], KeyD: [1, 0]
+};
+window.addEventListener("keydown", e => {
+  if (modalOpen) {
+    if (e.code === "Escape") {
+      saveCurrentDrafts();
+      closeStationModalToRoom();
+    }
+    return;
+  }
+  if (e.ctrlKey || e.metaKey || e.altKey) return; // Browser-Kürzel (Strg+S, Strg+D …) nicht abfangen
+  if (victoryEl.style.display === "flex") {
+    if (e.code === "Escape") victoryEl.style.display = "none";
+    return;
+  }
+  if (scene === "interior" && e.code === "Escape") {
+    e.preventDefault();
+    leaveHouseToVillage();
+    return;
+  }
+  if (DIRS[e.code]) {
+    e.preventDefault();
+    const now = performance.now();
+    if (e.repeat && now - lastMove < 75) return;
+    lastMove = now;
+    tryMove(DIRS[e.code][0], DIRS[e.code][1]);
+  } else if (e.code === "KeyE" || e.code === "Enter" || e.code === "Space") {
+    e.preventDefault();
+    interact();
+  } else if (e.code === "KeyU") {
+    toggleUV();
+  } else if (e.code === "KeyI") {
+    CWKoffer.open();
+  } else if (e.code === "KeyG") {
+    showGrid = !showGrid;
+  }
+});
+
+document.querySelectorAll(".pb[data-dx]").forEach(b => {
+  let iv = null;
+  const go = () => tryMove(+b.dataset.dx, +b.dataset.dy);
+  b.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    go();
+    clearInterval(iv);
+    iv = setInterval(go, 130);
+  });
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev =>
+    b.addEventListener(ev, () => { clearInterval(iv); iv = null; })
+  );
+});
+document.getElementById("bE").addEventListener("pointerdown", e => {
+  e.preventDefault();
+  if (!modalOpen) { interact(); if (modalOpen) swallowGhostClick(); }
+});
+
+function selfTest() {
+  const errors = [];
+  if (MAP.length !== ROWS) errors.push("MAP hat " + MAP.length + " statt " + ROWS + " Zeilen");
+  MAP.forEach((l, i) => {
+    if (l.length !== COLS) errors.push("Zeile " + i + " hat " + l.length + " statt " + COLS + " Zeichen");
+  });
+  if (!walkable(player.c, player.r)) errors.push("Startfeld im Dorf ist gesperrt");
+  if (RANKS.length !== HOUSES.length + 1) errors.push("RANKS passt nicht zur Häuseranzahl");
+
+  const seen = new Set([player.c + "," + player.r]), q = [[player.c, player.r]];
+  while (q.length) {
+    const [c, r] = q.shift();
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const k = (c + dx) + "," + (r + dy);
+      if (!seen.has(k) && walkable(c + dx, r + dy)) {
+        seen.add(k);
+        q.push([c + dx, r + dy]);
+      }
+    }
+  }
+  HOUSES.forEach(h => {
+    if (tile(h.door.c, h.door.r) !== "D") errors.push(h.name + ": Türfeld ist kein D");
+    if (!seen.has(h.door.c + "," + h.door.r)) errors.push(h.name + ": Tür nicht erreichbar");
+    const d = CONTENT[h.id];
+    if (!d) {
+      errors.push(h.name + ": keine Lerninhalte");
+    } else {
+      if (!d.infoCards || d.infoCards.length < 3) errors.push(h.name + ": Infotext unvollständig");
+      (d.infoCards || []).forEach((k, i) => {
+        const n = k.text.replace(/<[^>]+>/g, " ").split(/\s+/).filter(w => /[\wÄÖÜäöüß]/.test(w)).length;
+        if (n > (k.max || 35)) errors.push(h.name + ": Infokarte " + (i + 1) + " hat " + n + " statt max. " + (k.max || 35) + " Wörter");
+      });
+      if (!QuestModes[d.mode]) errors.push(h.name + ": Spielart " + d.mode + " fehlt");
+      if (!d.summary) errors.push(h.name + ": Merksatz fehlt");
+      if (h.id !== "buero") {
+        const tr = d.tresor;
+        if (!tr || !tr.code || !tr.accept || !tr.accept.includes(tr.code)) errors.push(h.name + ": Tresor-Code fehlt oder passt nicht");
+        if (!d.uv || !d.uv.text) errors.push(h.name + ": UV-Notiz fehlt");
+        if (!d.beweis) errors.push(h.name + ": Beweisstück fehlt");
+        const sp = ROOM_THEMES[h.id] && ROOM_THEMES[h.id].uv;
+        if (!sp || !isInteriorWalkable(sp.x, sp.y)) errors.push(h.name + ": UV-Versteck nicht erreichbar");
+      }
+      // Jede falsche Antwort braucht eine erklärende Rückmeldung, jede Auswahl genau eine richtige
+      (function walk(o, path) {
+        if (Array.isArray(o)) {
+          if (o.length && o.every(x => x && typeof x === "object" && "t" in x && typeof x.ok !== "string") && o.some(x => x.ok === true) && path.indexOf("bausteine") < 0) {
+            if (o.filter(x => x.ok).length !== 1) errors.push(h.name + ": " + path + " hat nicht genau eine richtige Antwort");
+          }
+          o.forEach((x, i) => walk(x, path + "[" + i + "]"));
+        } else if (o && typeof o === "object") {
+          if ("t" in o && !o.ok && !o.fb && !o.bad) errors.push(h.name + ": " + path + " ohne Rückmeldung");
+          Object.keys(o).forEach(k => walk(o[k], path + "." + k));
+        }
+      })(d.game, "game");
+    }
+  });
+
+  const spawnPt = [856, 560];
+  if (!isInteriorWalkable(spawnPt[0], spawnPt[1])) errors.push("Innenraum-Spawn nicht begehbar");
+  if (nearInteriorStation(spawnPt[0], spawnPt[1])?.id === "exit") errors.push("Innenraum-Spawn liegt an der Ausgangstür");
+  ROOM_STATIONS.forEach(st => {
+    if (!isInteriorWalkable(st.standX, st.standY)) {
+      errors.push("Station " + st.id + " Standpunkt nicht begehbar");
+    }
+    if (nearInteriorStation(st.standX, st.standY)?.id !== st.id) {
+      errors.push("Station " + st.id + " Näherungssensor schlägt am Standpunkt nicht an");
+    }
+    const midX = (st.hitbox.x1 + st.hitbox.x2) / 2;
+    const midY = (st.hitbox.y1 + st.hitbox.y2) / 2;
+    if (stationAtPoint(midX, midY)?.id !== st.id) {
+      errors.push("Station " + st.id + " Klick-Hitbox fehlerhaft");
+    }
+  });
+
+  const rSeen = new Set(["856,560"]), rq = [[856, 560]];
+  let reachedInfo = false, reachedQuiz = false, reachedExit = false;
+  while (rq.length) {
+    const [rx, ry] = rq.shift();
+    const near = nearInteriorStation(rx, ry);
+    if (near?.id === "info") reachedInfo = true;
+    if (near?.id === "quiz") reachedQuiz = true;
+    if (near?.id === "exit") reachedExit = true;
+    for (const [dx, dy] of [[26, 0], [-26, 0], [0, 20], [0, -20]]) {
+      const nx = rx + dx, ny = ry + dy;
+      const key = nx + "," + ny;
+      if (!rSeen.has(key) && isInteriorWalkable(nx, ny)) {
+        rSeen.add(key);
+        rq.push([nx, ny]);
+      }
+    }
+  }
+  if (!reachedInfo) errors.push("Innenraum-BFS: Infotafel vom Eingang aus nicht zu Fuß erreichbar");
+  if (!reachedQuiz) errors.push("Innenraum-BFS: Aufgaben-Tisch vom Eingang aus nicht zu Fuß erreichbar");
+  if (!reachedExit) errors.push("Innenraum-BFS: Ausgangstür im Raum nicht erreichbar");
+
+  if (errors.length) {
+    console.error("KI-PRÜFSCHLEIFE FEHLGESCHLAGEN:", errors);
+    const help = document.getElementById("help");
+    help.textContent = "Selbsttest: " + errors.join(" · ");
+    help.className = "err";
+  } else {
+    console.log("KI-Prüfschleife (Handyspiel-Agent) OK: Dorf, Innenraum, Portrait & Landscape fehlerfrei.");
+  }
+  return errors;
+}
+// =====================================================================
+// TEIL D – GRAFIK (1280×760 PER-PIXEL-ENGINE & OFFSCREEN-CACHE)
+// =====================================================================
+canvas.width = 1280;
+canvas.height = 760;
+ctx.imageSmoothingEnabled = false;
+
+let activeCtx = ctx;
+
+function P(x, y, w, h, col) {
+  activeCtx.fillStyle = col;
+  activeCtx.fillRect(x | 0, y | 0, Math.max(1, w | 0), Math.max(1, h | 0));
+}
+function hash(c, r, s) {
+  let h = (c * 374761393 + r * 668265263 + s * 982451653) >>> 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0;
+  return (h ^ (h >>> 16)) >>> 0;
+}
+function bitmapP(rows, x, y, s, pal, flip) {
+  const sw = Math.max(1, Math.round(s));
+  for (let r = 0; r < rows.length; r++) {
+    const row = rows[r];
+    for (let c = 0; c < row.length; c++) {
+      const ch = row[flip ? row.length - 1 - c : c];
+      if (ch !== "." && pal[ch]) P(Math.round(x + c * s), Math.round(y + r * s), sw, sw, pal[ch]);
+    }
+  }
+}
+function discP(cx, cy, rx, ry, col) {
+  const x0 = Math.round(cx), y0 = Math.round(cy);
+  for (let dy = -ry; dy <= ry; dy++) {
+    const f = 1 - (dy * dy) / (ry * ry + 0.5);
+    if (f <= 0) continue;
+    const hw = Math.round(rx * Math.sqrt(f));
+    P(x0 - hw, y0 + dy, hw * 2, 1, col);
+  }
+}
+function cobbleStone(x, y, w, h, baseCol, lightCol, darkCol, outlineCol) {
+  if (w < 4 || h < 4) return;
+  P(x + 1, y, w - 2, h, outlineCol);
+  P(x, y + 1, w, h - 2, outlineCol);
+  P(x + 1, y + 1, w - 2, h - 2, baseCol);
+  P(x + 2, y + 1, w - 4, 1, lightCol);
+  P(x + 1, y + 2, 1, h - 4, lightCol);
+  P(x + 2, y + h - 2, w - 3, 1, darkCol);
+  P(x + w - 2, y + 2, 1, h - 3, darkCol);
+}
+
+const TW = 40;
+function isWater(c, r) {
+  return (c + r < 4) || (c === 0 && r <= 5) || (c === 31 && r === 0);
+}
+
+function drawWater1280(X, Y, c, r, t) {
+  P(X, Y, TW, TW, "#3572bd");
+  for (let py = 0; py < TW; py += 2) {
+    const wave = Math.sin((X + py * 2) * 0.08) * 4;
+    P(X, Y + py, TW, 1, ((py + c * 3) % 6 === 0) ? "#4686d4" : "#3572bd");
+    if (wave > 2) P(X + 6 + (py % 18), Y + py, 8, 1, "#5c9ce6");
+  }
+  const o = Math.floor(t / 280 + c + r) % 6;
+  P(X + 5 + o * 2, Y + 8, 12, 2, "#7ab8ff");
+  P(X + 18 - o * 2, Y + 24, 14, 2, "#7ab8ff");
+  P(X + 8, Y + 32, 8, 1, "#c2e4ff");
+  if (!isWater(c + 1, r)) {
+    for (let py = 0; py < TW; py++) {
+      const curve = Math.round(Math.sin(py * 0.16 + r) * 2);
+      P(X + TW - 8 + curve, Y + py, 3, 1, "#b8e2ff");
+      P(X + TW - 5 + curve, Y + py, 3, 1, "#6b5538");
+      P(X + TW - 2 + curve, Y + py, 4, 1, "#2f5928");
+      P(X + TW - 6 + curve, Y + py, 1, 1, "#182b16");
+    }
+  }
+  if (!isWater(c, r + 1)) {
+    for (let px = 0; px < TW; px++) {
+      const curve = Math.round(Math.cos(px * 0.16 + c) * 2);
+      P(X + px, Y + TW - 8 + curve, 1, 3, "#b8e2ff");
+      P(X + px, Y + TW - 5 + curve, 1, 3, "#6b5538");
+      P(X + px, Y + TW - 2 + curve, 1, 4, "#2f5928");
+      P(X + px, Y + TW - 6 + curve, 1, 1, "#182b16");
+    }
+  }
+}
+
+function drawGrass1280(X, Y, c, r) {
+  P(X, Y, TW, TW, "#4c853b");
+  for (let i = 0; i < 20; i++) {
+    const h = hash(c, r, i);
+    const gx = X + (h % 36), gy = Y + ((h >> 6) % 36);
+    const col = ["#3d6e2f", "#5e9c49", "#6eb057", "#345e27"][i % 4];
+    P(gx, gy, 2, 1, col);
+    P(gx + 1, gy - 1, 1, 2, col);
+  }
+}
+
+function drawPath1280(X, Y, c, r) {
+  P(X, Y, TW, TW, "#574c3f");
+  const rowHeights = [13, 14, 13];
+  let py = Y;
+  for (let ri = 0; ri < 3; ri++) {
+    const rh = rowHeights[ri];
+    const globalRow = r * 3 + ri;
+    const offset = (globalRow % 2) * 9 + (hash(c, globalRow, 1) % 3);
+    let px = X - offset;
+    let si = 0;
+    while (px < X + TW) {
+      const sw = 18 + (hash(c * 7 + si, globalRow, 2) % 5);
+      const x0 = Math.max(X, px), x1 = Math.min(X + TW, px + sw);
+      const w = x1 - x0;
+      if (w >= 5) {
+        const v = hash(c * 11 + si, globalRow, 3) % 4;
+        const base = ["#b5a68e", "#ada088", "#bca890", "#a69880"][v];
+        const light = ["#cabda6", "#c4b69e", "#d1bfa8", "#bdb098"][v];
+        const dark = ["#8c7f6a", "#857864", "#91836e", "#7d715d"][v];
+        cobbleStone(x0, py, w, rh, base, light, dark, "#4a4034");
+      }
+      px += sw;
+      si++;
+    }
+    py += rh;
+  }
+}
+
+function drawPlaza1280(X, Y, c, r) {
+  P(X, Y, TW, TW, "#d4c39a");
+  for (let ry = 0; ry < 2; ry++) {
+    for (let rx = 0; rx < 2; rx++) {
+      const px = X + rx * 20, py = Y + ry * 20;
+      const v = hash(c * 2 + rx, r * 2 + ry, 17) % 3;
+      const col = ["#d6c59c", "#cfbe95", "#ddd0a8"][v];
+      P(px, py, 20, 20, col);
+      P(px, py, 20, 1, "#e6d9b5");
+      P(px, py, 1, 20, "#e6d9b5");
+      P(px, py + 19, 20, 1, "#bba980");
+      P(px + 19, py, 1, 20, "#bba980");
+    }
+  }
+  if (c === 13) { P(X, Y, 2, TW, "#756548"); P(X + 2, Y, 2, TW, "#ebe0be"); }
+  if (c === 18) { P(X + TW - 2, Y, 2, TW, "#756548"); P(X + TW - 4, Y, 2, TW, "#b3a078"); }
+  if (r === 7)  { P(X, Y, TW, 2, "#756548"); P(X, Y + 2, TW, 2, "#ebe0be"); }
+  if (r === 11) { P(X, Y + TW - 2, TW, 2, "#756548"); P(X, Y + TW - 4, TW, 2, "#b3a078"); }
+}
+
+function drawHedge1280(X, Y, c, r) {
+  drawPath1280(X, Y, c, r);
+  const up = tile(c, r - 1) !== "#", dn = tile(c, r + 1) !== "#";
+  const lf = tile(c - 1, r) !== "#", rt = tile(c + 1, r) !== "#";
+
+  const x0 = X + (lf ? 2 : 0), x1 = X + TW - (rt ? 2 : 0);
+  const y0 = Y + (up ? 2 : 0), y1 = Y + TW - (dn ? 2 : 0);
+  const w = x1 - x0, h = y1 - y0;
+
+  P(x0, y0, w, h, "#142615");
+  const frontH = dn ? 14 : 0;
+  const topH = h - frontH - (dn ? 2 : 0);
+  P(x0 + (lf ? 2 : 0), y0 + (up ? 2 : 0), w - (lf ? 2 : 0) - (rt ? 2 : 0), topH, "#46913d");
+
+  for (let i = 0; i < 14; i++) {
+    const hv = hash(c, r, i + 50);
+    const lx = x0 + 5 + (hv % Math.max(4, w - 10));
+    const ly = y0 + 4 + ((hv >> 5) % Math.max(4, topH - 7));
+    discP(lx, ly, 4, 3, (i % 3 === 0) ? "#367530" : "#58a84a");
+    if (i % 2 === 0) P(lx - 2, ly - 1, 3, 2, "#70bf5e");
+  }
+
+  if (!dn) {
+    P(x0 + 3, Y + TW - 2, w - 6, 1, "#2c6328");
+    P(x0 + 4, Y + TW - 1, w - 8, 1, "#5ca84e");
+  }
+  if (!rt) {
+    P(X + TW - 2, y0 + 3, 1, topH - 6, "#2c6328");
+  }
+
+  if (dn) {
+    const fy = y1 - frontH;
+    P(x0 + (lf ? 2 : 0), fy, w - (lf ? 2 : 0) - (rt ? 2 : 0), frontH - 2, "#245223");
+    P(x0 + (lf ? 2 : 0), fy, w - (lf ? 2 : 0) - (rt ? 2 : 0), 2, "#326e2e");
+    for (let px = x0 + 4; px < x1 - 4; px += 6) {
+      P(px, fy + 3, 3, frontH - 7, "#1a3d1a");
+    }
+    P(x0 + 1, y1 - 2, w - 2, 2, "#102011");
+  }
+
+  if (up) {
+    P(x0 + 1, y0, w - 2, 2, "#142615");
+    P(x0 + 2, y0 + 2, w - 4, 3, "#68bd59");
+    P(x0 + 5, y0 + 2, w - 10, 1, "#86d672");
+  }
+  if (lf) {
+    P(x0, y0 + 1, 2, h - 2, "#142615");
+    P(x0 + 2, y0 + 2, 3, topH - 2, "#5ca84e");
+  }
+  if (rt) {
+    P(x1 - 2, y0 + 1, 2, h - 2, "#142615");
+    P(x1 - 5, y0 + 2, 3, topH - 2, "#2c6328");
+  }
+}
+
+function foliageBall(cx, cy, r, seed) {
+  discP(cx, cy, r + 1.5, r + 1, "#112012");
+  discP(cx, cy + 0.5, r, r - 0.5, "#1f4722");
+  discP(cx - 0.5, cy - 0.5, r - 1.5, r - 2, "#2f6b2f");
+  discP(cx - 1.5, cy - 2, Math.max(2, r - 3.5), Math.max(2, r - 4), "#46913f");
+  discP(cx - 2.5, cy - 3, Math.max(1, r - 6), Math.max(1, r - 6.5), "#64b553");
+  for (let i = 0; i < 16; i++) {
+    const h = hash(seed, i, 77);
+    const ang = (h % 360) * (Math.PI / 180);
+    const dist = (h >> 8) % Math.max(2, r - 2);
+    const lx = Math.round(cx + Math.cos(ang) * dist);
+    const ly = Math.round(cy + Math.sin(ang) * dist * 0.85);
+    const col = (ly < cy - 1) ? ((i % 2) ? "#7ad164" : "#52a146") : ((i % 2) ? "#265426" : "#18381a");
+    P(lx, ly, 2, 2, col);
+  }
+}
+
+function drawTree1280(X, Y, c, r) {
+  const ox = ((hash(c, r, 3) % 7) - 3), oy = ((hash(c, r, 4) % 7) - 3);
+  const cx = X + 20 + ox, cy = Y + 17 + oy;
+  discP(cx, cy + 20, 18, 7, "rgba(0,0,0,.32)");
+  P(cx - 5, cy + 8, 10, 13, "#1a0f08");
+  P(cx - 4, cy + 8, 8, 12, "#4f311c");
+  P(cx - 3, cy + 8, 3, 11, "#6e4629");
+  P(cx - 6, cy + 18, 4, 3, "#3b2313");
+  P(cx + 3, cy + 18, 4, 3, "#3b2313");
+  const s = c * 31 + r * 17;
+  foliageBall(cx - 9, cy + 4, 11, s + 1);
+  foliageBall(cx + 9, cy + 4, 11, s + 2);
+  foliageBall(cx, cy + 6, 12, s + 3);
+  foliageBall(cx - 7, cy - 3, 11, s + 4);
+  foliageBall(cx + 7, cy - 3, 11, s + 5);
+  foliageBall(cx, cy - 6, 13, s + 6);
+}
+
+function barrel1280(x, y) {
+  discP(x + 9, y + 25, 10, 4, "rgba(0,0,0,.3)");
+  P(x + 1, y, 16, 25, "#1a0f08");
+  P(x, y + 3, 18, 19, "#1a0f08");
+  P(x + 2, y + 2, 14, 21, "#784724");
+  P(x + 4, y + 2, 4, 21, "#9c6236");
+  P(x + 12, y + 2, 3, 21, "#573218");
+  P(x + 7, y + 2, 1, 21, "#4a2a14");
+  P(x + 11, y + 2, 1, 21, "#4a2a14");
+  [4, 12, 19].forEach(ry => {
+    P(x + 1, y + ry, 16, 2, "#2b2d33");
+    P(x + 3, y + ry, 5, 1, "#5a5e6b");
+  });
+  P(x + 3, y + 1, 12, 2, "#b07648");
+}
+
+function vegCrate1280(x, y, col1, col2, col3) {
+  P(x - 1, y + 4, 30, 20, "#1c1008");
+  P(x + 1, y + 6, 26, 16, "#8c5a30");
+  P(x + 1, y + 6, 26, 3, "#b87e4a");
+  P(x + 1, y + 13, 26, 2, "#59361a");
+  P(x + 1, y + 6, 3, 16, "#a66e3e");
+  P(x + 24, y + 6, 3, 16, "#6e4422");
+  for (let i = 0; i < 7; i++) {
+    const fx = x + 3 + (i % 4) * 6 + (i > 3 ? 2 : 0);
+    const fy = y + 1 + (i > 3 ? 3 : 0);
+    const c = [col1, col2, col3][i % 3];
+    discP(fx + 2, fy + 2, 3.5, 3, "#1c1008");
+    discP(fx + 2, fy + 2, 2.5, 2, c);
+    P(fx + 1, fy + 1, 1, 1, "#ffffff");
+  }
+}
+
+function frontAwning1280(x, y, w) {
+  const h = 20;
+  P(x - 2, y - 1, w + 4, h + 2, "#1c0f08");
+  const stripeW = 9;
+  for (let sx = 0; sx < w; sx += stripeW) {
+    const sw = Math.min(stripeW, w - sx);
+    const isRed = ((sx / stripeW) | 0) % 2 === 0;
+    const topC = isRed ? "#cc3729" : "#f2ead8";
+    const midC = isRed ? "#b02b1e" : "#dfd5c0";
+    const botC = isRed ? "#821d13" : "#b8ae9a";
+    P(x + sx, y, sw, 11, topC);
+    P(x + sx, y + 11, sw, 5, midC);
+    P(x + sx, y + 16, sw, 4, botC);
+    P(x + sx + sw - 1, y, 1, 16, botC);
+    P(x + sx + 1, y + h, sw - 2, 3, "#1c0f08");
+    P(x + sx + 2, y + h, sw - 4, 2, midC);
+  }
+  P(x, y + 1, w, 2, "rgba(255,255,255,.32)");
+  P(x, y + 15, w, 1, "#1c0f08");
+}
+
+function sideAwningRight1280(x, y) {
+  for (let dy = 0; dy < 44; dy++) {
+    const w = 16 + ((dy * 0.45) | 0);
+    const stripe = ((dy / 7) | 0) % 2 === 0;
+    const col = stripe ? "#cc3729" : "#f2ead8";
+    const shd = stripe ? "#8c2016" : "#bfb5a2";
+    P(x + 172, y + 14 + dy, w, 1, col);
+    P(x + 172 + w - 4, y + 14 + dy, 4, 1, shd);
+    P(x + 170, y + 14 + dy, 2, 1, "#1c0f08");
+    P(x + 172 + w, y + 14 + dy, 2, 1, "#1c0f08");
+  }
+  P(x + 170, y + 58, 38, 3, "#1c0f08");
+}
+
+function roof3DParallelogram1280(cx, ridgeTopY, ridgeLen, halfW, dropH, opts) {
+  const cL = opts.cLight, cM = opts.cMid, cD = opts.cDark, cO = opts.cOutline || "#1a0d07";
+  const gridL = opts.gridLeft || cM, gridR = opts.gridRight || cD;
+  const wallCol = opts.wallCol, wallShade = opts.wallShade || wallCol;
+  const bargeCol = opts.bargeCol || "#3b1f0e", bargeHi = opts.bargeHi || "#593118";
+  const bargeThick = opts.bargeThick || 8;
+  const gablePeakY = ridgeTopY + ridgeLen;
+  const eaveY = gablePeakY + dropH;
+
+  if (wallCol) {
+    for (let dx = -halfW; dx <= halfW; dx++) {
+      const slopeY = Math.round((Math.abs(dx) / halfW) * dropH);
+      const yGableTop = gablePeakY + slopeY;
+      const gh = eaveY - yGableTop;
+      if (gh > 0) {
+        P(cx + dx, yGableTop, 1, gh, dx < 0 ? wallCol : wallShade);
+        P(cx + dx, yGableTop, 1, Math.min(gh, bargeThick + 3), "rgba(0,0,0,.22)");
+      }
+    }
+  }
+
+  for (let dx = -halfW; dx <= halfW; dx++) {
+    const absDx = Math.abs(dx);
+    const slopeY = Math.round((absDx / halfW) * dropH);
+    const yTop = ridgeTopY + slopeY;
+    const yBot = gablePeakY + slopeY;
+    const isLeft = dx < 0;
+
+    for (let py = yTop; py <= yBot; py++) {
+      const v = py - yTop;
+      const u = absDx;
+      let col = isLeft ? cL : cM;
+      if (v > ridgeLen - 5) col = isLeft ? cM : cD;
+      const d1 = (u + v * 2) % 12;
+      const d2 = (u * 2 + 1200 - v * 3) % 14;
+      if (d1 === 0 || d1 === 1 || d2 === 0) {
+        col = isLeft ? gridL : gridR;
+      } else if (isLeft && (d1 === 2 || d2 === 1) && v > 3 && v < ridgeLen - 4) {
+        col = opts.cHighlight || cL;
+      }
+      P(cx + dx, py, 1, 1, col);
+    }
+
+    P(cx + dx, yTop - 2, 1, 2, cO);
+    P(cx + dx, yTop, 1, 2, isLeft ? (opts.cHighlight || cL) : cL);
+
+    P(cx + dx, yBot - 1, 1, 2, cO);
+    P(cx + dx, yBot + 1, 1, bargeThick, isLeft ? bargeHi : bargeCol);
+    P(cx + dx, yBot + 1, 1, 2, opts.bargeTopHi || bargeHi);
+    P(cx + dx, yBot + 1 + bargeThick, 1, 2, cO);
+  }
+
+  const yOutTop = ridgeTopY + dropH;
+  P(cx - halfW - 2, yOutTop - 1, 3, ridgeLen + bargeThick + 4, cO);
+  P(cx + halfW, yOutTop - 1, 3, ridgeLen + bargeThick + 4, cO);
+
+  const rW = opts.ridgeWidth || 6;
+  const rHalf = (rW / 2) | 0;
+  P(cx - rHalf - 2, ridgeTopY - 2, rW + 4, ridgeLen + 4, cO);
+  P(cx - rHalf, ridgeTopY, rW, ridgeLen + 1, opts.ridgeCol || cD);
+  P(cx - rHalf, ridgeTopY, Math.max(2, rHalf), ridgeLen + 1, opts.ridgeHi || cL);
+}
+
+function drawParliamentStatic1280(X, Y, roofTheme) {
+  P(X - 4, Y + 114, 210, 10, "rgba(0,0,0,.32)");
+  P(X + 194, Y + 32, 12, 88, "rgba(0,0,0,.22)");
+
+  P(X + 8, Y + 36, 184, 78, "#171311");
+  P(X + 12, Y + 40, 176, 68, "#362d27");
+  for (let py = 8; py < 66; py += 8) P(X + 12, Y + 40 + py, 176, 1, "#261f1b");
+
+  cobbleStone(X + 78, Y + 48, 44, 56, "#9e9687", "#cfc7b8", "#696358", "#1c1714");
+  P(X + 84, Y + 54, 32, 48, "#1f0b08");
+  const doorBase = roofTheme === "black" ? "#2c303a" : "#6b2219";
+  const doorHi   = roofTheme === "black" ? "#434957" : "#872e22";
+  P(X + 86, Y + 56, 13, 44, doorBase);
+  P(X + 101, Y + 56, 13, 44, doorBase);
+  P(X + 88, Y + 60, 9, 15, doorHi);
+  P(X + 103, Y + 60, 9, 15, doorHi);
+  P(X + 88, Y + 79, 9, 17, doorHi);
+  P(X + 103, Y + 79, 9, 17, doorHi);
+  P(X + 95, Y + 76, 3, 3, "#f5c842");
+  P(X + 102, Y + 76, 3, 3, "#f5c842");
+
+  [16, 40, 64, 122, 146, 170].forEach(cx => {
+    const sx = X + cx;
+    P(sx - 2, Y + 40, 18, 62, "#1c1714");
+    P(sx, Y + 42, 14, 58, "#d9d2c4");
+    P(sx + 1, Y + 42, 4, 58, "#f5f0e6");
+    P(sx + 10, Y + 42, 4, 58, "#9e9788");
+    P(sx + 4, Y + 44, 1, 54, "#8f8879");
+    P(sx + 7, Y + 44, 1, 54, "#8f8879");
+    P(sx + 10, Y + 44, 1, 54, "#7a7467");
+    cobbleStone(sx - 4, Y + 38, 22, 6, "#e6dfd1", "#ffffff", "#aba495", "#1c1714");
+    cobbleStone(sx - 3, Y + 98, 20, 6, "#cfc8b8", "#f0eadc", "#968f80", "#1c1714");
+  });
+
+  cobbleStone(X + 4, Y + 100, 70, 20, "#b8b0a0", "#e3dcd0", "#7d7668", "#1c1714");
+  cobbleStone(X + 12, Y + 105, 54, 10, "#8f8879", "#b8b0a0", "#5e594e", "#1c1714");
+  cobbleStone(X + 126, Y + 100, 70, 20, "#b8b0a0", "#e3dcd0", "#7d7668", "#1c1714");
+  cobbleStone(X + 134, Y + 105, 54, 10, "#8f8879", "#b8b0a0", "#5e594e", "#1c1714");
+  for (let st = 0; st < 3; st++) {
+    cobbleStone(X + 72, Y + 100 + st * 6, 56, 7, "#ded7c8", "#ffffff", "#968f80", "#1c1714");
+  }
+
+  cobbleStone(X - 2, Y + 24, 204, 16, "#d6cfc0", "#f5f0e6", "#968f80", "#1c1714");
+  P(X + 2, Y + 36, 196, 3, "#2b2520");
+  for (let tx = 6; tx < 194; tx += 10) {
+    P(X + tx, Y + 29, 5, 6, "#6e685c");
+    P(X + tx + 1, Y + 30, 3, 4, "#e6dfd1");
+  }
+
+  const cx = X + 100, ridgeTopY = Y - 66, ridgeLen = 40, halfW = 96, dropH = 48;
+  if (roofTheme === "black") {
+    roof3DParallelogram1280(cx, ridgeTopY, ridgeLen, halfW, dropH, {
+      cHighlight: "#525866",
+      cLight: "#343942",
+      cMid: "#23272e",
+      cDark: "#15181d",
+      gridLeft: "#1a1d24",
+      gridRight: "#0f1115",
+      cOutline: "#090a0d",
+      wallCol: "#dfd8c8",
+      wallShade: "#cfc8b8",
+      bargeCol: "#2b2f38",
+      bargeHi: "#454b59",
+      bargeTopHi: "#7b8499",
+      bargeThick: 9,
+      ridgeWidth: 12,
+      ridgeCol: "#2b2f38",
+      ridgeHi: "#6c7487"
+    });
+  } else {
+    roof3DParallelogram1280(cx, ridgeTopY, ridgeLen, halfW, dropH, {
+      cHighlight: "#e0483e",
+      cLight: "#ba2c23",
+      cMid: "#911f18",
+      cDark: "#63120d",
+      gridLeft: "#751712",
+      gridRight: "#4a0c09",
+      cOutline: "#1f0705",
+      wallCol: "#dfd8c8",
+      wallShade: "#cfc8b8",
+      bargeCol: "#7a1b14",
+      bargeHi: "#b0281e",
+      bargeTopHi: "#eb5e55",
+      bargeThick: 9,
+      ridgeWidth: 12,
+      ridgeCol: "#7a1b14",
+      ridgeHi: "#e0483e"
+    });
+  }
+
+  [-74, -54, -34, -18, 18, 34, 54, 74].forEach(dx => {
+    const slopeY = Math.round((Math.abs(dx) / halfW) * dropH);
+    const yTop = ridgeTopY + slopeY;
+    [11, 25].forEach(vOff => {
+      const sx = cx + dx + (vOff === 25 ? (dx < 0 ? -5 : 5) : 0);
+      const sy = yTop + vOff;
+      if (roofTheme === "black") {
+        P(sx - 1, sy - 2, 4, 6, "#0d0f14");
+        P(sx - 2, sy - 1, 6, 4, "#0d0f14");
+        P(sx, sy - 2, 2, 6, "#6c7587");
+        P(sx - 2, sy, 6, 2, "#6c7587");
+        P(sx, sy, 2, 2, "#b8c2d4");
+      } else {
+        P(sx - 1, sy - 2, 4, 6, "#360705");
+        P(sx - 2, sy - 1, 6, 4, "#360705");
+        P(sx, sy - 2, 2, 6, "#e3463b");
+        P(sx - 2, sy, 6, 2, "#e3463b");
+        P(sx, sy, 2, 2, "#ff9e96");
+      }
+    });
+  });
+
+  cobbleStone(X + 88, Y - 2, 24, 18, "#cfc8b8", "#f5f0e6", "#878072", "#3b362f");
+  cobbleStone(X + 66, Y + 5, 22, 12, "#c2bba9", "#ebe5d8", "#878072", "#3b362f");
+  cobbleStone(X + 112, Y + 5, 22, 12, "#c2bba9", "#ebe5d8", "#878072", "#3b362f");
+  if (roofTheme === "black") {
+    cobbleStone(X - 4, Y + 20, 208, 6, "#383d47", "#6e778a", "#1c1f26", "#0b0d12");
+  } else {
+    cobbleStone(X - 4, Y + 20, 208, 6, "#a6241b", "#e8564a", "#5e110c", "#1f0705");
+  }
+}
+
+function drawParliamentAnim1280(X, Y, t, roofTheme) {
+  const cx = X + 100, ridgeTopY = Y - 66, halfW = 96, dropH = 48;
+  let idx = 0;
+  [-74, -54, -34, -18, 18, 34, 54, 74].forEach(dx => {
+    const slopeY = Math.round((Math.abs(dx) / halfW) * dropH);
+    const yTop = ridgeTopY + slopeY;
+    [11, 25].forEach(vOff => {
+      const sx = cx + dx + (vOff === 25 ? (dx < 0 ? -5 : 5) : 0);
+      const sy = yTop + vOff;
+      const pulse = (Math.floor(t / 320) + idx * 2) % 5 === 0;
+      if (pulse) {
+        if (roofTheme === "black") {
+          P(sx, sy - 2, 2, 6, "#9aa4b8");
+          P(sx - 2, sy, 6, 2, "#9aa4b8");
+          P(sx, sy, 2, 2, "#e2e8f0");
+        } else {
+          P(sx, sy - 2, 2, 6, "#ff6b61");
+          P(sx - 2, sy, 6, 2, "#ff6b61");
+          P(sx, sy, 2, 2, "#ffd1cc");
+        }
+      }
+      idx++;
+    });
+  });
+}
+
+function label1280(lines, cx, cy) {
+  activeCtx.save();
+  activeCtx.font = "bold 19px 'Segoe UI', monospace";
+  activeCtx.textAlign = "center";
+  activeCtx.textBaseline = "middle";
+  const arr = Array.isArray(lines) ? lines : [lines];
+  arr.forEach((txt, idx) => {
+    const ly = cy + idx * 21;
+    activeCtx.strokeStyle = "rgba(228,216,188,.92)";
+    activeCtx.lineWidth = 5;
+    activeCtx.strokeText(txt, cx, ly);
+    activeCtx.fillStyle = "#221911";
+    activeCtx.fillText(txt, cx, ly);
+  });
+  activeCtx.restore();
+}
+
+const interiorCache = document.createElement("canvas");
+interiorCache.width = 1280;
+interiorCache.height = 760;
+
+function buildInteriorCache() {
+  const prev = activeCtx;
+  activeCtx = interiorCache.getContext("2d");
+  activeCtx.imageSmoothingEnabled = false;
+
+  P(0, 0, 1280, 760, "#151f24");
+
+  for (let y = 268; y < 760; y++) {
+    const dy = y - 268;
+    const xL = Math.max(24, 640 - dy * 2);
+    const xR = Math.min(1256, 640 + dy * 2);
+    if (xR > xL) {
+      const plank = (y % 14 === 0) ? "#4f2e16" : ((y % 7 === 0) ? "#6e4222" : "#804e2a");
+      P(xL, y, xR - xL, 1, plank);
+    }
+  }
+  for (let k = -520; k <= 520; k += 40) {
+    for (let d = 0; d < 360; d++) {
+      const fx = 640 + k + d * 2, fy = 268 + Math.abs(k) * 0.5 + d;
+      if (fx > 44 && fx < 1236 && fy > 274 && fy < 752) {
+        P(fx, fy, 3, 1, "#4a2b14");
+        if (d % 48 === 0) P(fx - 6, fy + 3, 14, 1, "#3d2210");
+      }
+    }
+  }
+
+  for (let x = 40; x < 640; x++) {
+    const yTop = Math.round(324 - (x - 40) * 0.5 - 248);
+    const isPost = (x < 60) || (Math.abs(x - 204) < 10) || (Math.abs(x - 432) < 10) || (x > 624);
+    if (isPost) {
+      const pCol = (x % 9 === 0) ? "#2b170a" : "#59341a";
+      P(x, yTop, 1, 248, pCol);
+    } else {
+      P(x, yTop, 1, 248, "#87532d");
+      for (let py = 0; py < 248; py += 24) {
+        P(x, yTop + py, 1, 2, "#3d2210");
+        P(x, yTop + py + 2, 1, 3, "#a1663b");
+        P(x, yTop + py + 20, 1, 4, "#6b3f20");
+      }
+    }
+    P(x, yTop - 14, 1, 3, "#170d06");
+    P(x, yTop - 11, 1, 11, "#9c6238");
+    P(x, yTop, 1, 3, "#241309");
+    P(x, yTop + 236, 1, 12, "#4a2a14");
+    P(x, yTop + 246, 1, 3, "#170d06");
+  }
+
+  for (let x = 640; x < 1240; x++) {
+    const yTop = Math.round(24 + (x - 640) * 0.5);
+    const isPost = (x < 656) || (Math.abs(x - 868) < 10) || (Math.abs(x - 1072) < 10) || (x > 1220);
+    if (isPost) {
+      const pCol = (x % 9 === 0) ? "#241308" : "#4a2b15";
+      P(x, yTop, 1, 248, pCol);
+    } else {
+      P(x, yTop, 1, 248, "#734524");
+      for (let py = 0; py < 248; py += 24) {
+        P(x, yTop + py, 1, 2, "#331c0d");
+        P(x, yTop + py + 2, 1, 3, "#8c5730");
+        P(x, yTop + py + 20, 1, 4, "#59341a");
+      }
+    }
+    P(x, yTop - 14, 1, 3, "#170d06");
+    P(x, yTop - 11, 1, 11, "#87532f");
+    P(x, yTop, 1, 3, "#241309");
+    P(x, yTop + 236, 1, 12, "#3d2210");
+    P(x, yTop + 246, 1, 3, "#170d06");
+  }
+
+  [[42, 86], [456, 96]].forEach(([wx, ww]) => {
+    for (let dx = 0; dx < ww; dx++) {
+      const x = wx + dx;
+      const wy = Math.round(324 - (x - 40) * 0.5 - 184);
+      const isFrame = dx < 8 || dx > ww - 9;
+      P(x, wy, 1, 92, isFrame ? "#945b32" : "#263440");
+      P(x, wy, 1, 3, "#1c0f08");
+      P(x, wy + 89, 1, 4, "#1c0f08");
+      if (!isFrame) {
+        P(x, wy + 8, 1, 76, "#3b4f5e");
+        P(x, wy + 44, 1, 4, "#4a2b15");
+        if (Math.abs(dx - ww / 2) < 2) P(x, wy + 8, 1, 76, "#4a2b15");
+      }
+    }
+  });
+
+  for (let dx = 0; dx < 108; dx++) {
+    const x = 924 + dx;
+    const dy = Math.round(24 + (x - 640) * 0.5 + 64);
+    const isFrame = dx < 10 || dx > 97;
+    P(x, dy, 1, 184, isFrame ? "#87532f" : "#61391d");
+    P(x, dy, 1, 3, "#1c0f08");
+    if (!isFrame && dx > 18 && dx < 88 && (dx < 48 || dx > 56)) {
+      cobbleStone(x, dy + 20, 1, 64, "#4d2b15", "#704223", "#331b0c", "#261409");
+      cobbleStone(x, dy + 96, 1, 68, "#4d2b15", "#704223", "#331b0c", "#261409");
+    }
+  }
+  discP(1004, 300, 5, 5, "#1c0f08");
+  discP(1004, 300, 3.5, 3.5, "#e0ab38");
+
+  for (let dx = 0; dx < 208; dx++) {
+    const x = 188 + dx;
+    const yW = Math.round(324 - (x - 40) * 0.5);
+    P(x, yW - 8, 1, 52, "#575a63");
+    P(x, yW - 8, 1, 3, "#8c919e");
+    P(x, yW + 41, 1, 3, "#1c1a1f");
+  }
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 7; col++) {
+      const sx = 200 + col * 26 + (row % 2) * 10;
+      const sw = Math.min(26, 384 - sx);
+      if (sw >= 8) {
+        const sy = Math.round(324 - (sx - 40) * 0.5 + 16 - (row + 1) * 17);
+        const isSide = col === 0;
+        cobbleStone(sx, sy, sw, 17, isSide ? "#5e626e" : "#7c818f", "#a3a8b8", "#41444d", "#1c1a1f");
+      }
+    }
+  }
+  for (let dx = 52; dx < 152; dx++) {
+    const x = 200 + dx;
+    const yBase = Math.round(324 - (x - 40) * 0.5 + 12);
+    const arch = Math.round(Math.pow((dx - 102) / 50, 2) * 28);
+    P(x, yBase - 92 + arch, 1, 92 - arch, "#170e0b");
+  }
+  for (let dx = -12; dx < 196; dx++) {
+    const x = 200 + dx;
+    const yBase = Math.round(324 - (x - 40) * 0.5 - 116);
+    P(x, yBase - 24, 1, 24, dx < 24 ? "#5e361a" : "#8a532c");
+    P(x, yBase - 24, 1, 4, "#b37344");
+    P(x, yBase - 27, 1, 3, "#1c0f08");
+    P(x, yBase - 2, 1, 3, "#1c0f08");
+  }
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 5; col++) {
+      const sx = 224 + col * 26 + (row % 2) * 9;
+      const sw = Math.min(26, 360 - sx);
+      if (sw >= 8) {
+        const sy = Math.round(324 - (sx - 40) * 0.5 - 140 - (row + 1) * 17);
+        cobbleStone(sx, sy, sw, 17, col === 0 ? "#575b66" : "#757a87", "#9ca1b0", "#3d404a", "#1c1a1f");
+      }
+    }
+  }
+
+  for (let dx = 0; dx < 164; dx++) {
+    const x = 20 + dx;
+    const yTop = Math.round(432 - dx * 0.45);
+    P(x, yTop, 1, 96, dx < 124 ? "#8c5832" : "#61391d");
+    P(x, yTop - 12, 1, 12, "#ad7145");
+    P(x, yTop - 15, 1, 3, "#1c0f08");
+    P(x, yTop + 93, 1, 3, "#1c0f08");
+    if (dx > 12 && dx < 112 && Math.abs(dx - 62) > 4) {
+      P(x, yTop + 12, 1, 32, "#6e4222");
+      P(x, yTop + 52, 1, 32, "#6e4222");
+    }
+  }
+  [[48, 428], [96, 406], [48, 468], [96, 446]].forEach(([kx, ky]) => {
+    cobbleStone(kx, ky, 8, 6, "#d9a338", "#ffe680", "#8c6214", "#1c0f08");
+  });
+  cobbleStone(24, 388, 36, 28, "#a83226", "#d94e3f", "#6e1b12", "#1c0f08");
+  P(28, 406, 28, 6, "#efe2be");
+  cobbleStone(76, 372, 20, 24, "#a3aab5", "#e4eaf2", "#686e78", "#1c1a1f");
+
+  for (let dx = 0; dx < 156; dx++) {
+    const x = 1080 + dx;
+    const yTop = Math.round(320 + dx * 0.48);
+    P(x, yTop, 1, 136, dx < 28 ? "#8c5832" : "#693e20");
+    P(x, yTop - 10, 1, 10, "#ad7145");
+    P(x, yTop - 13, 1, 3, "#1c0f08");
+    P(x, yTop + 133, 1, 3, "#1c0f08");
+    if (dx >= 32 && dx <= 144) {
+      P(x, yTop + 16, 1, 44, "#26150a");
+      P(x, yTop + 72, 1, 44, "#26150a");
+      const bIdx = ((dx - 32) / 10) | 0;
+      const bCol1 = ["#c0392b", "#2980b9", "#27ae60", "#d4ac0d", "#8e44ad", "#d35400", "#c0392b"][bIdx % 7];
+      const bCol2 = ["#27ae60", "#c0392b", "#d4ac0d", "#2980b9", "#d35400", "#8e44ad", "#16a085"][bIdx % 7];
+      if ((dx - 32) % 10 > 1) {
+        P(x, yTop + 22, 1, 36, bCol1);
+        P(x, yTop + 78, 1, 36, bCol2);
+      }
+    }
+  }
+
+  const rCX = 650, rCY = 548, rW = 432, rH = 196;
+  for (let dy = -rH; dy <= rH; dy++) {
+    const f = 1 - Math.abs(dy) / rH;
+    const span = Math.round(f * rW);
+    P(rCX - span, rCY + dy, span * 2, 1, "#26120c");
+    if (span > 8)  P(rCX - span + 6,  rCY + dy, (span - 6) * 2,  1, "#d4b075");
+    if (span > 24) P(rCX - span + 20, rCY + dy, (span - 20) * 2, 1, "#8f3024");
+    if (span > 48) P(rCX - span + 40, rCY + dy, (span - 40) * 2, 1, "#c49a60");
+    if (span > 60) {
+      P(rCX - span + 52, rCY + dy, (span - 52) * 2, 1, "#7a251b");
+      for (let ox = -span + 68; ox < span - 68; ox += 36) {
+        if ((Math.abs(ox) + Math.abs(dy * 2)) % 36 < 6) {
+          P(rCX + ox, rCY + dy, 4, 1, "#d9b372");
+        }
+      }
+    }
+    if (dy > 0 && dy % 5 === 0) {
+      P(rCX - span - 6, rCY + dy, 6, 2, "#e8dec8");
+      P(rCX + span, rCY + dy, 6, 2, "#e8dec8");
+    }
+  }
+
+  [[436, 472, 84], [592, 536, 88], [796, 432, 80], [636, 380, 64]].forEach(([lx, ly, lh]) => {
+    discP(lx + 12, ly + lh, 18, 6, "rgba(0,0,0,.38)");
+    cobbleStone(lx, ly, 24, lh, "#6e4222", "#8f5932", "#472913", "#1c0f08");
+  });
+  const tCX = 624, tCY = 448, tW = 196, tH = 88;
+  for (let dy = -tH; dy <= tH; dy++) {
+    const span = Math.round((1 - Math.abs(dy) / tH) * tW);
+    if (dy >= 0) {
+      P(tCX - span, tCY + dy, span * 2, 18, "#1c0f08");
+      P(tCX - span + 3, tCY + dy, span - 3, 15, "#6e4222");
+      P(tCX, tCY + dy, span - 3, 15, "#4d2c15");
+    }
+    P(tCX - span, tCY + dy, span * 2, 1, (Math.abs(dy) % 12 === 0) ? "#5e361a" : "#8f5932");
+  }
+  cobbleStone(700, 396, 68, 36, "#9e2e22", "#c94032", "#661b13", "#1c0f08");
+  P(706, 422, 56, 6, "#efe2be");
+
+  cobbleStone(552, 408, 144, 64, "#29170b", "#54321b", "#1a0e06", "#140a04");
+  cobbleStone(558, 412, 64, 54, "#f2e5c2", "#ffffff", "#c9b88f", "#3b2312");
+  cobbleStone(624, 412, 66, 54, "#e3d4ad", "#f7ecd0", "#b5a47c", "#3b2312");
+  for (let l = 0; l < 7; l++) {
+    P(568, 420 + l * 6, 44, 2, "#6e5a3e");
+    P(634, 420 + l * 6, 44, 2, "#6e5a3e");
+  }
+
+  cobbleStone(464, 432, 40, 18, "#c99626", "#ffe066", "#876112", "#1c0f08");
+  cobbleStone(474, 392, 20, 42, "#fff6cc", "#ffffff", "#ebd894", "#4a3510");
+
+  cobbleStone(682, 540, 16, 46, "#4f2e16", "#6e4222", "#331c0c", "#140b06");
+  cobbleStone(728, 562, 16, 48, "#4f2e16", "#6e4222", "#331c0c", "#140b06");
+  cobbleStone(774, 538, 16, 44, "#4f2e16", "#6e4222", "#331c0c", "#140b06");
+  for (let dy = -26; dy <= 26; dy++) {
+    const span = Math.round((1 - Math.abs(dy) / 26) * 56);
+    if (dy >= 0) {
+      P(736 - span, 526 + dy, span * 2, 12, "#140b06");
+      P(736 - span + 2, 526 + dy, span - 2, 9, "#784926");
+      P(736, 526 + dy, span - 2, 9, "#523016");
+    }
+    P(736 - span, 526 + dy, span * 2, 1, (Math.abs(dy) % 7 === 0) ? "#633b1d" : "#9c6236");
+  }
+
+  discP(415, 396, 48, 13, "rgba(0,0,0,.38)");
+  cobbleStone(378, 336, 14, 62, "#4f2e16", "#784926", "#2b170b", "#140b06");
+  cobbleStone(438, 336, 14, 62, "#4f2e16", "#784926", "#2b170b", "#140b06");
+  cobbleStone(368, 386, 32, 12, "#5e361a", "#8a532c", "#331c0c", "#140b06");
+  cobbleStone(428, 386, 32, 12, "#5e361a", "#8a532c", "#331c0c", "#140b06");
+  cobbleStone(356, 250, 118, 98, "#6e4222", "#9c6236", "#3d2210", "#140b06");
+  cobbleStone(364, 258, 102, 82, "#f2e5c2", "#ffffff", "#c9b88f", "#3b2312");
+  P(370, 264, 90, 22, "#1e3a7a");
+  P(370, 264, 90, 2, "#5c9ce6");
+  discP(384, 275, 7, 7, "#ffe066");
+  P(383, 270, 3, 2, "#1e3a7a");
+  P(383, 274, 3, 6, "#1e3a7a");
+  P(396, 271, 56, 3, "#ffe066");
+  P(396, 277, 44, 2, "#e2e8f0");
+  for (let l = 0; l < 6; l++) {
+    P(372, 292 + l * 7, l % 2 === 0 ? 84 : 72, 3, l === 0 || l === 3 ? "#7a251b" : "#5c4932");
+  }
+
+  activeCtx = prev;
+}
+
+let lastStepC = player.c, lastStepR = player.r, lastStepTime = -1000;
+function drawPlayer1280(t) {
+  if (player.c !== lastStepC || player.r !== lastStepR) {
+    lastStepC = player.c;
+    lastStepR = player.r;
+    lastStepTime = t;
+  }
+  const stepBob = (t - lastStepTime < 180 && (Math.floor(t / 90) % 2 === 1)) ? -2 : 0;
+  const x = player.c * TW + 1;
+  const y = player.r * TW - 12 + stepBob;
+  const flipLeft = player.dir === "left";
+
+  discP(x + 18, player.r * TW + 34, 15, 5, "rgba(0,0,0,.38)");
+  drawAgentKS(x, y, 1, player.dir, t - lastStepTime < 240, t);
+}
+
+function drawInteriorPlayer1280(t) {
+  const moving = (t - intPlayer.stepTick) < 180;
+  const bob = (moving && (Math.floor(t / 80) % 2 === 1)) ? -4 : 0;
+  const px = Math.round(intPlayer.x - 38);
+  const py = Math.round(intPlayer.y - 90 + bob);
+  const flipLeft = intPlayer.dir === "left";
+
+  discP(intPlayer.x, intPlayer.y + 4, 28, 9, "rgba(0,0,0,.42)");
+  ksPose = modalOpen ? "read" : (victoryShown && current && current.id === "buero" ? "win" : null);
+  drawAgentKS(px, py, 2, intPlayer.dir, moving, t);
+  ksPose = null;
+}
+
+function drawInteriorStations1280(t) {
+  const nearSt = nearInteriorStation();
+  const pulse = (Math.floor(t / 260) % 2) === 0;
+
+  ROOM_STATIONS.forEach(st => {
+    const isActive = (nearSt && nearSt.id === st.id) || (hoverStationId === st.id);
+    const ringCol = isActive
+      ? "rgba(255, 230, 80, 0.55)"
+      : (pulse ? "rgba(255, 210, 90, 0.28)" : "rgba(255, 210, 90, 0.18)");
+
+    discP(st.standX, st.standY, isActive ? 34 : 28, isActive ? 13 : 10, ringCol);
+    discP(st.standX, st.standY, isActive ? 22 : 17, isActive ? 8 : 6, isActive ? "rgba(255,250,190,0.65)" : "rgba(255,240,150,0.32)");
+
+    let bx = st.centerX, by = st.centerY - 95;
+    if (st.id === "info") { bx = 415; by = 228; }
+    if (st.id === "quiz") { bx = 624; by = 376; }
+    if (st.id === "exit") { bx = 975; by = 188; }
+
+    const floatY = by + (pulse ? -2 : 0);
+    ctx.save();
+    ctx.font = "bold 15px 'Segoe UI', sans-serif";
+    const txt = st.label + (isActive ? " [E / Tippen]" : "");
+    const tw = Math.ceil(ctx.measureText(txt).width) + 18;
+    const bh = 26;
+    const rx = Math.round(bx - tw / 2), ry = Math.round(floatY - bh / 2);
+
+    ctx.fillStyle = isActive ? "#1e3a7a" : "rgba(26, 20, 14, 0.88)";
+    ctx.fillRect(rx, ry, tw, bh);
+    ctx.strokeStyle = isActive ? "#ffe066" : "#d4b87a";
+    ctx.lineWidth = isActive ? 2.5 : 1.5;
+    ctx.strokeRect(rx, ry, tw, bh);
+
+    ctx.fillStyle = isActive ? "#ffe066" : "#f8fafc";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(txt, bx, floatY + 1);
+    ctx.restore();
+  });
+}
+
+function drawParticles1280() {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const pt = particles[i];
+    pt.x += pt.vx;
+    pt.y += pt.vy;
+    pt.vy += 0.08;
+    pt.life--;
+    P(pt.x, pt.y, 4, 4, pt.col);
+    if (pt.life <= 0) particles.splice(i, 1);
+  }
+}
+
+let cachesBuilt = false;
+function ensureCaches() {
+  if (!cachesBuilt) {
+    buildVillageCache();
+    buildInteriorCache();
+    cachesBuilt = true;
+  }
+}
+
+function drawInterior(t) {
+  ensureCaches();
+  const id = current ? current.id : "truman";
+  ctx.drawImage(getThemedInterior(id), 0, 0);
+  drawThemeAnim(id, t);
+  if (ROOM_THEMES[id] && ROOM_THEMES[id].fire) {
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    [[308, 336, 290, 0.22], [484, 412, 190, 0.2], [415, 305, 140, 0.14]].forEach(([lx, ly, rr, a]) => {
+      const g = ctx.createRadialGradient(lx, ly, 8, lx, ly, rr);
+      g.addColorStop(0, "rgba(255,180,70," + (a + (Math.floor(t / 150) % 2) * 0.03) + ")");
+      g.addColorStop(1, "rgba(255,180,70,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 1280, 760);
+    });
+    ctx.restore();
+  }
+
+  drawInteriorStations1280(t);
+  drawInteriorPlayer1280(t);
+  drawUVLayer(t, uvOn, uvSpot() && CONTENT[id] && CONTENT[id].uv ? uvSpot() : null, !!CWS.uv[id]);
+
+  if (showGrid) {
+    ctx.save();
+    ctx.strokeStyle = "rgba(56, 189, 248, 0.7)";
+    ctx.lineWidth = 2;
+    ROOM_STATIONS.forEach(st => {
+      const b = st.hitbox;
+      ctx.strokeRect(b.x1, b.y1, b.x2 - b.x1, b.y2 - b.y1);
+    });
+    ctx.restore();
+  }
+
+  drawParticles1280();
+}
+
+function renderVillage(t) {
+  ensureCaches();
+  ctx.drawImage(villageCache, 0, 0);
+  renderCityAnim(t);
+
+  drawPlayer1280(t);
+  drawParticles1280();
+
+  if (showGrid) {
+    ctx.save();
+    ctx.strokeStyle = "rgba(255,255,255,.3)";
+    ctx.lineWidth = 1;
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        if (!walkable(c, r)) {
+          ctx.fillStyle = "rgba(231,76,60,.22)";
+          ctx.fillRect(c * TW, r * TW, TW, TW);
+        }
+        ctx.strokeRect(c * TW + 0.5, r * TW + 0.5, TW - 1, TW - 1);
+      }
+    }
+    ctx.restore();
+  }
+}
+
+function render(t) {
+  activeCtx = ctx;
+  if (scene === "interior") drawInterior(t);
+  else renderVillage(t);
+}
+
+function loop(t) { render(t); requestAnimationFrame(loop); }
+// HUD-Knöpfe
+document.getElementById("btnKoffer").addEventListener("click", () => { if (!modalOpen) CWKoffer.open(); });
+document.getElementById("btnUV").addEventListener("click", () => { if (!modalOpen) toggleUV(); });
+document.getElementById("btnReset").addEventListener("click", () => {
+  if (!confirm("Spielstand wirklich löschen und neu beginnen?")) return;
+  CWS.reset();
+  try { localStorage.removeItem("intro-revolutionquest"); } catch (e) {}
+  location.reload();
+});
+document.getElementById("closeVictory").addEventListener("click", () => { victoryEl.style.display = "none"; });
+document.getElementById("btnUrkunde").addEventListener("click", () => CWPrint.urkunde(RANKS[CWS.solvedCount()], CWS.flags().length));
+document.getElementById("btnDossierV").addEventListener("click", () => CWPrint.dossier());
+
+selfTest();
+updateStarsHud();
+updateLeitfrage();
+updatePrompt();
+// Nach dem Infotext: erste Vermutung zur Leitfrage (einmalig)
+if (!CWS.vermutung) {
+  const waitIntro = setInterval(() => {
+    const ov = document.getElementById("qiOverlay");
+    if (ov && ov.style.display !== "none") return;
+    clearInterval(waitIntro);
+    if (!modalOpen && !CWS.vermutung) CWVermutung.open();
+  }, 300);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
