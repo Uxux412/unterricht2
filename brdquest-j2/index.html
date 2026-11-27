@@ -69,7 +69,7 @@
   .btns button { background: #7a4a24; color: #fff8e7; border: 2px solid #3a200e; padding: 6px 12px; border-radius: 5px;
                  font-weight: bold; cursor: pointer; font-family: Georgia, serif; font-size: 12.5px; }
   .btns button:hover { background: #965d30; }
-  /* Abschluss-Banner bei 12 Sternen */
+  /* Abschluss-Banner: alle Häuser geschafft */
   #victory { position: absolute; inset: 0; background: rgba(15,23,42,.85); display: none;
              justify-content: center; align-items: center; padding: 16px; z-index: 40; }
   #victoryBox { background: #f4e8c1; color: #2c221e; border: 5px ridge #d4ac0d; border-radius: 8px;
@@ -78,7 +78,9 @@
   #victoryBox h2 { font-size: 20px; color: #1e3a7a; margin-bottom: 10px; }
   #victoryBox p { font-size: 14px; line-height: 1.45; margin-bottom: 14px; }
   #victoryBox button { background: #1e3a7a; color: #fff; border: 2px solid #f1c40f; padding: 8px 18px;
-                       border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
+                       border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; min-height: 44px; }
+  #victoryBox .vBtns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  #victoryBox #closeVictory { background: #7a4a24; }
   /* Touch-Steuerkreuz */
   #pad { display: flex; justify-content: space-between; align-items: center; background: #263545;
          padding: 8px 14px; border-top: 2px solid #18222c; gap: 10px; z-index: 8; }
@@ -101,6 +103,7 @@
     #game { border-radius: 0; max-width: 100%; width: 100%; }
     #hud { padding: 6px 8px; font-size: 12px; gap: 4px; }
     #hud small { width: 100%; font-size: 10.5px; text-align: center; order: 4; }
+    #wrap { flex-direction: column; }
     #roomHud { position: static; transform: none; width: 100%; max-width: 100%; border-radius: 0;
                border-left: none; border-right: none; border-top: none; padding: 5px 8px; font-size: 11.5px; }
     #prompt { font-size: 11.5px; padding: 4px 10px; bottom: 6px; }
@@ -161,6 +164,7 @@
     <span id="stars">🛡️ Wappen: 0 / 16 (0/5 Häuser)</span>
     <div class="hudRight">
       <span id="rankBadge">🏅 Rang: Dorf-Besucher/in</span>
+      <button id="btnPokal" class="hudBtn" type="button" title="Zum Pokalraum" style="display:none">🏆 Pokal</button>
       <button id="btnTogglePad" class="hudBtn" type="button" title="Steuerkreuz ein-/ausblenden">🎮 Pad</button>
       <button id="btnFullscreen" class="hudBtn" type="button" title="Vollbild umschalten">⛶ Vollbild</button>
     </div>
@@ -169,7 +173,7 @@
   <div id="wrap">
     <div id="roomHud">
       <span id="roomTitleTxt">🏛️ Im Haus</span>
-      <span style="color:#cbd5e1;font-weight:normal;font-size:11.5px;">Tippe auf 📖 Infotafel oder 🧩 Aufgaben-Tisch (oder laufe hin)</span>
+      <span id="roomHint" style="color:#cbd5e1;font-weight:normal;font-size:11.5px;">Tippe auf 📖 Infotafel oder 🧩 Aufgaben-Tisch (oder laufe hin)</span>
       <button id="btnLeaveRoomHud" type="button">🚪 Raus ins Dorf</button>
     </div>
     <canvas id="c" width="1280" height="760"></canvas>
@@ -178,8 +182,11 @@
     <div id="victory">
       <div id="victoryBox">
         <h2>🎉 Alle 16 Länderwappen gesammelt! 🎉</h2>
-        <p><strong>Herzlichen Glückwunsch – du bist super!</strong><br>Du hast alle 5 Häuser gemeistert und den höchsten Rang <strong>„Demokratie-Meister/in“</strong> erreicht. Die Deutschlandfahne weht für dich!</p>
-        <button id="closeVictory" type="button">Weiter im Dorf umsehen</button>
+        <p id="victoryText"></p>
+        <div class="vBtns">
+          <button id="goPokal" type="button">🏆 Zum Pokalraum</button>
+          <button id="closeVictory" type="button">Erst Merksatz abschreiben</button>
+        </div>
       </div>
     </div>
   </div>
@@ -197,7 +204,7 @@
 
 <script src="../assets/quest-intro.js"></script>
 <script src="../assets/quest-modes.js"></script>
-<script>QuestIntro({ key: "brdquest-j2", title: "BRD QUEST J2", pages: [["Willkommen im Demokratie-Dorf!", "", "Die 16 Länderwappen sind", "verschwunden. Sammle sie in", "den 5 Häusern wieder ein!"], ["DEINE MISSION:", "", "Besuche die 5 Häuser:", "Bundestag, Bundesrat,", "Gewaltenteilung und", "-verschränkung, Gesetzgebung", "und das Grenzhäuschen Wahlrecht."], ["SO GEHT'S:", "", "Im Haus: erst 📖 Infotafel lesen,", "dann 🧩 Aufgabe lösen: Rollenspiel,", "Abstimmung, Gesetzesweg, Fälle.", "Laufen: Haus antippen, Steuerkreuz", "oder Pfeile. Betreten: [E]", "", "Alle 16 Wappen = Sieg!","","📱 Tipp: Handy quer drehen","= größeres Bild"]] });</script>
+<script>QuestIntro({ key: "brdquest-j2", title: "BRD QUEST J2", pages: [["Willkommen im Demokratie-Dorf!", "", "Die 16 Länderwappen sind", "verschwunden. Sammle sie in", "den 5 Häusern wieder ein!"], ["STERNE UND POKAL:", "", "Jede Frage bringt einen Stern,", "aber nur, wenn sie beim", "ersten Versuch stimmt.", "", "Wer alle Häuser schafft,", "kommt in den Pokalraum."], ["DEINE MISSION:", "", "Besuche die 5 Häuser:", "Bundestag, Bundesrat,", "Gewaltenteilung und", "-verschränkung, Gesetzgebung", "und das Grenzhäuschen Wahlrecht."], ["SO GEHT'S:", "", "Im Haus: erst 📖 Infotafel lesen,", "dann 🧩 Aufgabe lösen: Rollenspiel,", "Abstimmung, Gesetzesweg, Fälle.", "Laufen: Haus antippen, Steuerkreuz", "oder Pfeile. Betreten: [E]", "", "Alle 16 Wappen = Pokalraum!","","📱 Tipp: Handy quer drehen","= größeres Bild"]] });</script>
 <script src="j2.js"></script>
 <script>
 // =====================================================================
@@ -552,6 +559,26 @@ const solved = {};
 const draftAnswers = {};
 const houseOptions = {};
 const STAR_STEPS = [0, 3, 6, 10, 13, 16];
+// Sterne: Jede Frage bringt einen Stern – aber nur, wenn sie beim ERSTEN Versuch richtig ist.
+// Wer sich verbessern muss, bekommt das Wappen trotzdem, aber für diese Frage keinen Stern.
+const firstTry = {};              // Haus-id -> { Frage-key: true/false (erster Versuch) }
+let sterneMax = 0;
+function questionCount(d) {
+  const g = d.game;
+  if (d.mode === "rollenspiel") return g.cases.length * 2;   // Handlung + Funktion
+  if (d.mode === "abstimmung") return g.rounds.filter(rd => rd.type !== "sammeln").length;
+  if (d.mode === "weg") return g.steps.length;
+  if (d.mode === "faelle") return g.cases.length;
+  return d.items.length;
+}
+function sterneVon(id) { return Object.values(firstTry[id] || {}).filter(Boolean).length; }
+function sterneGesamt() { return HOUSES.reduce((s, h) => s + sterneVon(h.id), 0); }
+function recordAnswer(id, key, ok) {
+  const m = firstTry[id] || (firstTry[id] = {});
+  if (key in m) return;           // nur der erste Versuch zählt
+  m[key] = !!ok;
+  updateStarsHud();
+}
 const particles = [];
 
 function spawnParticles(cx, cy, count) {
@@ -573,7 +600,7 @@ function updateStarsHud() {
   const solvedCount = HOUSES.filter(h => solved[h.id]).length;
   stars = STAR_STEPS[solvedCount] || 0;
   document.getElementById("stars").textContent =
-    "🛡️ Wappen: " + stars + " / 16 (" + solvedCount + "/5 Häuser)" + (stars >= 16 ? " 🎉" : "");
+    "🛡️ Wappen: " + stars + " / 16 · ⭐ " + sterneGesamt() + " / " + sterneMax + " (" + solvedCount + "/5 Häuser)" + (stars >= 16 ? " 🎉" : "");
   document.getElementById("rankBadge").textContent = "🏅 Rang: " + RANKS[solvedCount];
 }
 
@@ -692,7 +719,7 @@ function stationAtPoint(cx, cy) {
 }
 
 function tryMove(dx, dy) {
-  if (modalOpen) return;
+  if (modalOpen || scene === "pokal") return;
   stopAutoWalk();
   if (scene === "interior") {
     intPlayer.dir = dx > 0 ? "right" : dx < 0 ? "left" : dy > 0 ? "down" : "up";
@@ -731,6 +758,10 @@ function updatePrompt() {
     promptEl.style.display = "none";
     return;
   }
+  if (scene === "pokal") {          // Rückweg über „🚪 Raus ins Dorf“ oben oder [E]
+    promptEl.style.display = "none";
+    return;
+  }
   if (scene === "interior") {
     const st = nearInteriorStation();
     if (st) {
@@ -758,6 +789,7 @@ function enterHouse(h) {
   intPlayer.y = 455;
   intPlayer.dir = "left";
   roomTitleTxt.textContent = "🏛️ " + h.name + (solved[h.id] ? " 🛡️" : "");
+  roomHintEl.textContent = ROOM_HINT_DEFAULT;
   roomHudEl.style.display = "flex";
   updatePrompt();
 }
@@ -799,6 +831,7 @@ function triggerInteriorStation(st) {
 
 function interact() {
   if (modalOpen) return;
+  if (scene === "pokal") { leaveHouseToVillage(); return; }
   if (scene === "village") {
     const h = doorHere();
     if (h) enterHouse(h);
@@ -829,7 +862,7 @@ canvas.addEventListener("pointermove", e => {
 });
 
 canvas.addEventListener("pointerdown", e => {
-  if (modalOpen) return;
+  if (modalOpen || scene === "pokal") return;
   const rect = canvas.getBoundingClientRect();
   const cx = ((e.clientX - rect.left) / rect.width) * 1280;
   const cy = ((e.clientY - rect.top) / rect.height) * 760;
@@ -1048,9 +1081,11 @@ function markSolved(fb) {
   if (current) roomTitleTxt.textContent = "🏛️ " + current.name + " 🛡️";
   if (firstTime) spawnParticles(640, 392, 36);
   const neu = LAENDER.slice(before, stars);
-  const msg = stars >= 16
+  const hs = sterneVon(current.id), hm = questionCount(CONTENT[current.id]);
+  const sternMsg = " · ⭐ " + hs + " von " + hm + " Sternen in diesem Haus" + (hs < hm ? " (falsche erste Versuche bringen keinen Stern)" : "");
+  const msg = (stars >= 16
     ? "🎉 Alle 16 Länderwappen gesammelt! Herzlichen Glückwunsch – du bist super!"
-    : "🛡️ Neue Wappen: " + (neu.length ? neu.join(", ") : "–") + " (" + stars + " / 16 · Rang: " + RANKS[HOUSES.filter(h => solved[h.id]).length] + ")";
+    : "🛡️ Neue Wappen: " + (neu.length ? neu.join(", ") : "–") + " (" + stars + " / 16 · Rang: " + RANKS[HOUSES.filter(h => solved[h.id]).length] + ")") + sternMsg;
   if (fb) { fb.style.color = "#1e7a3a"; fb.textContent = "✔ Alles richtig! " + msg; }
   else {
     const host = board.querySelector(".qm-sum");
@@ -1058,6 +1093,10 @@ function markSolved(fb) {
   }
   if (stars >= 16 && !victoryShown) {
     victoryShown = true;
+    const S = sterneGesamt();
+    document.getElementById("victoryText").innerHTML = "<strong>Herzlichen Glückwunsch!</strong> Du hast alle 5 Häuser gemeistert und den Rang <strong>„Demokratie-Meister/in“</strong> erreicht.<br>⭐ Deine Sterne: <strong>" + S + " von " + sterneMax + "</strong>" +
+      (S < sterneMax ? " – für jede Frage, die beim ersten Versuch falsch war, gibt es keinen Stern." : " – alles beim ersten Versuch richtig!") + "<br>Im Pokalraum wartet dein Pokal.";
+    document.getElementById("btnPokal").style.display = "";
     setTimeout(() => { victoryEl.style.display = "flex"; QuestFlag(document.getElementById("victoryBox"), "de"); }, 700);
   }
 }
@@ -1071,6 +1110,7 @@ function checkAnswers() {
     const ok = s.value === d.items[i].a;
     s.className = ok ? "ok" : "bad";
     if (ok) right++;
+    if (s.value) recordAnswer(current.id, "i" + i, ok);
   });
   saveCurrentDrafts();
   if (right === sels.length) {
@@ -1085,6 +1125,27 @@ function checkAnswers() {
 document.getElementById("closeVictory").addEventListener("click", () => {
   victoryEl.style.display = "none";
 });
+document.getElementById("goPokal").addEventListener("click", enterPokalraum);
+document.getElementById("btnPokal").addEventListener("click", enterPokalraum);
+
+// ---------- Pokalraum (am Schluss) ----------
+const roomHintEl = document.getElementById("roomHint");
+const ROOM_HINT_DEFAULT = roomHintEl.textContent;
+function enterPokalraum() {
+  stopAutoWalk();
+  saveCurrentDrafts();
+  victoryEl.style.display = "none";
+  board.removeAttribute("style");
+  modal.style.display = "none";
+  modalOpen = false;
+  scene = "pokal";
+  current = null;
+  roomTitleTxt.textContent = "🏆 Pokalraum";
+  roomHintEl.textContent = "⭐ " + sterneGesamt() + " von " + sterneMax + " Sternen";
+  roomHudEl.style.display = "flex";
+  spawnParticles(640, 250, 60);
+  updatePrompt();
+}
 
 const DIRS = {
   ArrowUp: [0, -1], KeyW: [0, -1],
@@ -1100,7 +1161,7 @@ window.addEventListener("keydown", e => {
     }
     return;
   }
-  if (scene === "interior" && e.code === "Escape") {
+  if ((scene === "interior" || scene === "pokal") && e.code === "Escape") {
     e.preventDefault();
     leaveHouseToVillage();
     return;
@@ -2422,6 +2483,162 @@ function buildInteriorCache() {
   activeCtx = prev;
 }
 
+// ---------- Spielfigur: Agent KS001 aus Cold War Quest ----------
+// Spritesheet 4 × 4 (bilder/agent-ks001.png): Zeile 1 nach unten · 2 nach oben · 3 nach rechts (links gespiegelt)
+// · 4 Posen: stehen, Uhr, Dossier lesen, Jubel. Fehlt das Bild, zeichnet das Spiel die alte Pixelfigur.
+const KS_SHEET = new Image();
+KS_SHEET.src = "bilder/agent-ks001.png";
+let ksPose = null; // "read" (liest an der Tafel) oder "win" (Jubel im Pokalraum)
+function drawAgentKS(x, y, scale, dir, moving, t, flipFallback) {
+  if (!(KS_SHEET.complete && KS_SHEET.naturalWidth)) { bitmapP(MODEL1_SPRITE, x, y, scale, MODEL1_PAL, flipFallback); return; }
+  const fw = KS_SHEET.naturalWidth / 4, fh = KS_SHEET.naturalHeight / 4;
+  let row = 3, col = 0, flip = false;
+  const step = Math.floor(t / 120) % 4;
+  if (ksPose === "read") col = 2; else if (ksPose === "win") col = 3;
+  else if (dir === "up") { row = 1; col = moving ? step : 0; }
+  else if (dir === "left" || dir === "right") { row = 2; col = moving ? step : 0; flip = dir === "left"; }
+  else if (moving) { row = 0; col = step; }
+  const h = 52 * scale, w = h * fw / fh;
+  const dx = x + (38 * scale - w) / 2, dy = y + 48 * scale - h + 2 * scale;
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  if (flip) { ctx.translate(dx + w, dy); ctx.scale(-1, 1); ctx.drawImage(KS_SHEET, col * fw, row * fh, fw, fh, 0, 0, w, h); }
+  else ctx.drawImage(KS_SHEET, col * fw, row * fh, fw, fh, dx, dy, w, h);
+  ctx.restore();
+}
+
+// ---------- Pokalraum ----------
+function pokalBanner(x, y) {
+  P(x - 6, y - 10, 92, 10, "#6b4423");                       // Stange
+  P(x - 10, y - 14, 8, 18, "#c9a640"); P(x + 82, y - 14, 8, 18, "#c9a640");
+  [["#1c1c1c", 0], ["#c0272d", 1], ["#f2c230", 2]].forEach(([col, k]) => P(x, y + k * 90, 80, 90, col));
+  for (let i = 0; i < 40; i++) {                              // Schwalbenschwanz unten
+    P(x, y + 270 + i, 40 - i, 1, "#f2c230");
+    P(x + 40 + i, y + 270 + i, 40 - i, 1, "#f2c230");
+  }
+  P(x, y, 6, 270, "rgba(255,255,255,.12)");
+}
+function pokalText(txt, cx, cy, size, col, noStroke) {
+  ctx.save();
+  ctx.font = "bold " + size + "px 'Courier New', monospace";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.lineWidth = Math.max(4, size / 5);
+  ctx.strokeStyle = "rgba(10,8,20,.9)";
+  if (!noStroke) ctx.strokeText(txt, cx, cy);
+  ctx.fillStyle = col;
+  ctx.fillText(txt, cx, cy);
+  ctx.restore();
+}
+function drawPokal(cx, t) {
+  // Lichtschein
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  const r = 210 + (Math.floor(t / 300) % 2) * 12;
+  const g = ctx.createRadialGradient(cx, 250, 10, cx, 250, r);
+  g.addColorStop(0, "rgba(255,225,120,.55)");
+  g.addColorStop(1, "rgba(255,200,60,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(cx - r, 250 - r, r * 2, r * 2);
+  ctx.restore();
+  // Henkel
+  ctx.save();
+  ctx.lineWidth = 16;
+  ctx.strokeStyle = "#a8801f";
+  ctx.beginPath(); ctx.arc(cx - 98, 215, 40, Math.PI * 0.45, Math.PI * 1.55); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx + 98, 215, 40, -Math.PI * 0.55, Math.PI * 0.55); ctx.stroke();
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = "#f2d36b";
+  ctx.beginPath(); ctx.arc(cx - 98, 215, 40, Math.PI * 0.6, Math.PI * 1.4); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx + 98, 215, 40, -Math.PI * 0.4, Math.PI * 0.4); ctx.stroke();
+  ctx.restore();
+  // Schale
+  for (let yy = 0; yy < 140; yy += 2) {
+    const half = Math.round(16 + 86 * Math.sqrt(1 - Math.pow(yy / 140, 2)));
+    const y = 170 + yy;
+    P(cx - half, y, half * 2, 2, "#d4a83a");
+    P(cx - half + 10, y, Math.max(2, Math.round(half * 0.22)), 2, "#f7e08a");
+    P(cx + half - Math.round(half * 0.3), y, Math.round(half * 0.3), 2, "#a8801f");
+  }
+  P(cx - 108, 160, 216, 12, "#f2d36b");                        // Rand
+  P(cx - 108, 170, 216, 4, "#8a6618");
+  // Stern auf der Schale
+  ctx.save();
+  ctx.fillStyle = "#fff6c8";
+  ctx.beginPath();
+  for (let k = 0; k < 10; k++) {
+    const a = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? 13 : 32;
+    ctx.lineTo(cx + Math.cos(a) * rr, 225 + Math.sin(a) * rr);
+  }
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+  // Stiel und Fuss
+  P(cx - 14, 308, 28, 34, "#c99a30"); P(cx - 14, 308, 8, 34, "#f2d36b");
+  discP(cx, 322, 26, 9, "#e8c75a");
+  P(cx - 56, 342, 112, 16, "#b8902a"); P(cx - 56, 342, 112, 4, "#f2d36b");
+  P(cx - 76, 358, 152, 22, "#8a6d1f"); P(cx - 76, 358, 152, 5, "#d4a83a");
+  // Funkeln
+  const sp = [[cx - 60, 190], [cx + 70, 250], [cx - 20, 290], [cx + 40, 175], [cx - 85, 260]];
+  const k = Math.floor(t / 220) % sp.length, [sx, sy] = sp[k];
+  P(sx - 1, sy - 9, 3, 19, "#ffffff"); P(sx - 9, sy - 1, 19, 3, "#ffffff");
+}
+function drawPokalraum(t) {
+  activeCtx = ctx;
+  // Wand mit Paneelen
+  P(0, 0, 1280, 470, "#2a2340");
+  for (let x = 0; x < 1280; x += 160) {
+    P(x + 10, 150, 140, 270, "#332a4d");
+    P(x + 10, 150, 140, 4, "#4a3f6b");
+    P(x + 10, 416, 140, 4, "#1d1830");
+  }
+  P(0, 430, 1280, 16, "#8a5a32"); P(0, 446, 1280, 44, "#4a2f1a");
+  // Parkett
+  for (let y = 490; y < 760; y += 26) {
+    const off = (Math.floor((y - 490) / 26) % 2) * 60;
+    for (let x = -60 + off; x < 1280; x += 120) {
+      P(x, y, 118, 24, ((x / 120 + y / 26) & 1) ? "#8a5a32" : "#7c5030");
+      P(x, y + 24, 120, 2, "#5a3a20");
+    }
+  }
+  // Roter Teppich zum Sockel
+  for (let y = 470; y < 760; y += 2) {
+    const w = Math.round(230 + (y - 470) * 0.95);
+    P(640 - w / 2, y, w, 2, "#a3202a");
+    P(640 - w / 2, y, 7, 2, "#e0b13c"); P(640 + w / 2 - 7, y, 7, 2, "#e0b13c");
+  }
+  pokalBanner(170, 160); pokalBanner(1030, 160);
+  // Sterne an der Wand: jede Frage ein Stern, leuchtend nur bei richtig im ersten Versuch
+  const S = sterneGesamt(), N = Math.max(1, sterneMax);
+
+  const perRow = Math.ceil(N / 2), gap = Math.min(40, Math.floor(900 / perRow));
+  for (let i = 0; i < N; i++) {
+    const row = i < perRow ? 0 : 1, idx = row ? i - perRow : i;
+    const inRow = row ? N - perRow : perRow;
+    drawStarAt1280(640 + (idx - (inRow - 1) / 2) * gap, 128 + row * 38, i < S, t, i);
+  }
+  pokalText("DEIN ERGEBNIS: " + S + " VON " + sterneMax + " STERNEN", 640, 208, 28, "#fde047");
+  if (S < sterneMax) pokalText("Falsche erste Versuche bringen keinen Stern.", 640, 238, 17, "#e2e8f0");
+  // Sockel mit Plakette und Pokal (tiefer gesetzt, damit oben Platz für Sterne und Ergebnis bleibt)
+  ctx.save();
+  ctx.translate(0, 95);
+  P(500, 380, 280, 14, "#ece7da");
+  P(516, 394, 248, 116, "#d9d4c7"); P(516, 394, 248, 6, "#f2eee4"); P(756, 394, 8, 116, "#b5ae9e");
+  P(496, 508, 288, 22, "#bdb6a6"); P(496, 508, 288, 5, "#e5e0d3");
+  P(548, 418, 184, 66, "#8a6618"); P(554, 424, 172, 54, "#e8c75a");
+  pokalText("DEMOKRATIE-", 640, 441, 22, "#3a2a08", true);
+  pokalText("MEISTER/IN", 640, 463, 22, "#3a2a08", true);
+  drawPokal(640, t);
+  ctx.restore();
+  // Agent jubelt neben dem Pokal
+  discP(330, 660, 34, 10, "rgba(0,0,0,.45)");
+  ksPose = "win";
+  drawAgentKS(330 - 48, 660 - 122, 2.5, "down", false, t, false);
+  ksPose = null;
+  if (Math.floor(t / 1400) !== Math.floor((t - 17) / 1400)) spawnParticles(640, 300, 24);
+  drawParticles1280();
+}
+
 let lastStepC = player.c, lastStepR = player.r, lastStepTime = -1000;
 function drawPlayer1280(t) {
   if (player.c !== lastStepC || player.r !== lastStepR) {
@@ -2435,10 +2652,7 @@ function drawPlayer1280(t) {
   const flipLeft = player.dir === "left";
 
   discP(x + 18, player.r * TW + 34, 15, 5, "rgba(0,0,0,.38)");
-  const crookX = flipLeft ? (x + 7) : (x + 31);
-  discP(crookX, y + 7, 9, 9, "rgba(255,240,110,.28)");
-
-  bitmapP(MODEL1_SPRITE, x, y, 1, MODEL1_PAL, flipLeft);
+  drawAgentKS(x, y - stepBob, 1, player.dir, t - lastStepTime < 240, t, flipLeft);
 }
 
 function drawInteriorPlayer1280(t) {
@@ -2449,10 +2663,9 @@ function drawInteriorPlayer1280(t) {
   const flipLeft = intPlayer.dir === "left";
 
   discP(intPlayer.x, intPlayer.y + 4, 28, 9, "rgba(0,0,0,.42)");
-  const crookX = flipLeft ? (px + 14) : (px + 62);
-  discP(crookX, py + 16, 18, 18, "rgba(255,240,110,.26)");
-
-  bitmapP(MODEL1_SPRITE, px, py, 2, MODEL1_PAL, flipLeft);
+  ksPose = modalOpen ? "read" : null;
+  drawAgentKS(px, py - bob, 2, intPlayer.dir, moving, t, flipLeft);
+  ksPose = null;
 }
 
 function drawInteriorStations1280(t) {
@@ -2570,7 +2783,7 @@ function renderVillage(t) {
 
   for (let i = 0; i < 12; i++) {
     const a = -Math.PI / 2 + i * Math.PI / 6;
-    drawStarAt1280(640 + Math.round(Math.cos(a) * 102), 392 + Math.round(Math.sin(a) * 78), i < stars, t, i);
+    drawStarAt1280(640 + Math.round(Math.cos(a) * 102), 392 + Math.round(Math.sin(a) * 78), i < Math.floor(12 * sterneGesamt() / Math.max(1, sterneMax)), t, i);
   }
 
   HOUSES.forEach(h => {
@@ -2603,13 +2816,19 @@ function renderVillage(t) {
 
 function render(t) {
   activeCtx = ctx;
-  if (scene === "interior") drawInterior(t);
+  if (scene === "pokal") drawPokalraum(t);
+  else if (scene === "interior") drawInterior(t);
   else renderVillage(t);
 }
 
 function loop(t) { render(t); requestAnimationFrame(loop); }
 // J2: Inhalte und Spielarten aus j2.js
 if (window.J2) window.J2(CONTENT);
+HOUSES.forEach(h => {
+  const d = CONTENT[h.id];
+  d.onAnswer = (key, ok) => recordAnswer(h.id, key, ok);
+  sterneMax += questionCount(d);
+});
 selfTest();
 updateStarsHud();
 updatePrompt();

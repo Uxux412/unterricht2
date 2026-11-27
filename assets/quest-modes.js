@@ -63,6 +63,9 @@
     el(s, "h4", "✍️ Ergebnis fürs Arbeitsblatt");
     el(s, "div", d.summary);
   }
+  // Meldet jede Antwort an das Spiel (falls es zuhört): key = Frage, ok = richtig?
+  // BRD Quest J2 zählt damit Sterne nur für Fragen, die beim ersten Versuch stimmen.
+  function frage(d, key, ok) { if (d && typeof d.onAnswer === "function") d.onAnswer(key, !!ok); }
   function finish(root, d, onSolved, text) {
     root.innerHTML = "";
     el(root, "div", text || "✔ Geschafft!", "qm-fb ok");
@@ -89,6 +92,7 @@
         var b = btn(opts, o.t);
         b.addEventListener("click", function () {
           if (b.disabled) return;
+          frage(d, "c" + i, o.ok);
           fb.innerHTML = o.fb;
           if (!o.ok) { b.className = "bad"; fb.className = "qm-fb bad"; return; }
           b.className = "ok"; fb.className = "qm-fb ok";
@@ -101,6 +105,8 @@
           g.fns.forEach(function (f) {
             var fbn = btn(fo, f);
             fbn.addEventListener("click", function () {
+              if (fbn.disabled) return;
+              frage(d, "f" + i, f === c.fn);
               if (f !== c.fn) { fbn.className = "bad"; fb2.className = "qm-fb bad"; fb2.textContent = "Nicht ganz – überleg, was du gerade getan hast."; return; }
               fbn.className = "ok"; fb2.className = "qm-fb ok"; fb2.textContent = "✔ Richtig: " + f + ".";
               [].forEach.call(fo.children, function (x) { x.disabled = true; });
@@ -166,6 +172,8 @@
         rd.options.forEach(function (o) {
           var b = btn(opts, o.t);
           b.addEventListener("click", function () {
+            if (b.disabled) return;
+            frage(d, "r" + r, o.ok);
             fb.innerHTML = o.fb;
             if (!o.ok) { b.className = "bad"; fb.className = "qm-fb bad"; return; }
             b.className = "ok"; fb.className = "qm-fb ok";
@@ -201,6 +209,8 @@
       var b = btn(gr, g.stations[id]);
       b.addEventListener("click", function () {
         var st = g.steps[i];
+        if (!st) return;
+        frage(d, "s" + i, id === st.id);
         if (id !== st.id) {
           fb.className = "qm-fb bad";
           fb.innerHTML = "✘ " + (g.wrong[id] || ("Noch nicht. " + (st.hint || "Wo muss der Entwurf jetzt hin?")));
@@ -238,6 +248,8 @@
       g.choices.forEach(function (ch) {
         var b = btn(opts, ch);
         b.addEventListener("click", function () {
+          if (b.disabled) return;
+          frage(d, "c" + i, c.a.indexOf(ch) >= 0);
           if (c.a.indexOf(ch) < 0) { fehler++; b.className = "bad"; fb.className = "qm-fb bad"; fb.textContent = c.miss || "Nicht ganz – lies den Fall noch einmal genau."; return; }
           b.className = "ok"; fb.className = "qm-fb ok"; fb.innerHTML = "✔ " + c.fb;
           [].forEach.call(opts.children, function (x) { x.disabled = true; });
